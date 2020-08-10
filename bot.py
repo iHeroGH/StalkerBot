@@ -27,6 +27,11 @@ async def getprefix(bot, message):
 bot = commands.Bot(command_prefix=getprefix)
 bot.database_auth = database_auth
 
+@bot.event
+async def on_ready():
+    game = discord.Game("s.help")
+    await bot.change_presence(status=discord.Status.idle, activity=game)
+
 bot.load_extension("cogs.BotCommands")
 bot.load_extension("cogs.PrefixCommands")
 bot.load_extension("jishaku")
