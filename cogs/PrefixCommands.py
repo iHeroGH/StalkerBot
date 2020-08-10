@@ -23,11 +23,13 @@ class PrefixCommands(commands.Cog, name = "Prefix Commands"):
             
 
         if ctx.author.guild_permissions.manage_guild:
-            if len(prefix) > 0 and len(prefix) < 50:
+            if len(prefix) > 0 and len(prefix) <= 50:
                 connection = await asyncpg.connect(**self.bot.database_auth)
                 await connection.fetch("INSERT into prefix (guildid, prefix) VALUES ($1, $2) on conflict (guildid) do update set prefix = $2", ctx.guild.id, prefix)
                 await connection.close()
                 await ctx.send(f"Set prefix to `{prefix}`")
+            if len(prefix) > 50:
+                await ctx.send("Could not set that as a prefix as it is longer than 50 characters.")
         
 
 def setup(bot):
