@@ -15,7 +15,7 @@ async def getprefix(bot, message):
         return commands.when_mentioned_or("s.")(bot,message)
 
     connection = await asyncpg.connect(**database_auth)
-    prefixRows = await connection.fetch("SELECT from prefix where guildid = $1", message.guild.id)
+    prefixRows = await connection.fetch("SELECT * from prefix where guildid = $1", message.guild.id)
     await connection.close()
 
     try:
