@@ -12,7 +12,7 @@ database_auth = config["database"]
 
 bot = commands.Bot(command_prefix=commands.when_mentioned_or("s."))
 
-class BotCommands(commands.Cog):
+class BotCommands(commands.Cog, name = "Bot Commands"):
     
     def __init__(self, bot):
         self.bot = bot
