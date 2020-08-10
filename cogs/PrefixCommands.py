@@ -16,7 +16,7 @@ class PrefixCommands(commands.Cog, name = "Prefix Commands"):
 
         if prefix is None:
             connection = await asyncpg.connect(**self.bot.database_auth)
-            prefixRows = await connection.fetch("SELECT from prefix where guildid = $1", ctx.guild.id)
+            prefixRows = await connection.fetch("SELECT * from prefix where guildid = $1", ctx.guild.id)
             await connection.close()
             await ctx.send(f"The prefix for this server is `{prefixRows[0]['prefix']}`")
             return
