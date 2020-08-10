@@ -4,7 +4,7 @@ import asyncpg
 import aiohttp
 
 
-bot_token = "Secret!"
+bot_token = "Secret??"
 bot = commands.Bot(command_prefix=commands.when_mentioned_or("s."))
 auth = {
     # Secret!
@@ -12,6 +12,8 @@ auth = {
 
 bot.load_extension("jishaku")
 
+# Shit gets submitted. Can be seen by local machine and things on local machine. ONce ya fuckin' push that, everyone can see it
+# A commit is a group of changes- a series of changes you've made to your code.
 
 @bot.command()
 async def invite(ctx):
