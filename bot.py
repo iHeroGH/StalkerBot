@@ -12,5 +12,6 @@ bot = commands.Bot(command_prefix=commands.when_mentioned_or("s."))
 bot.database_auth = database_auth
 
 bot.load_extension("cogs.BotCommands")
+bot.load_extension("cogs.PrefixCommands")
 bot.load_extension("jishaku")
 bot.run(bot_token)

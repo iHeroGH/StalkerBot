@@ -4,6 +4,6 @@ create TABLE keywords(
 );
 
 create TABLE prefix(
-    guildID bigint,
+    guildID bigint primary key,
     prefix VARCHAR(50)
 );
