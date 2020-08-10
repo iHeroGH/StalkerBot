@@ -31,6 +31,7 @@ bot.database_auth = database_auth
 async def on_ready():
     game = discord.Game("s.help")
     await bot.change_presence(status=discord.Status.idle, activity=game)
+    print("Changed whatever")
 
 bot.load_extension("cogs.BotCommands")
 bot.load_extension("cogs.PrefixCommands")
