@@ -12,7 +12,7 @@ class PrefixCommands(commands.Cog, name = "Prefix Commands"):
 
     @commands.command()
     async def prefix(self, ctx, prefix = None):
-        """Changes the prefix of the server (or gives you the prefix set on the server)"""
+        """Changes the prefix of the server (or gives you set prefix)"""
 
         if prefix is None:
             connection = await asyncpg.connect(**self.bot.database_auth)
@@ -28,6 +28,7 @@ class PrefixCommands(commands.Cog, name = "Prefix Commands"):
                 await connection.fetch("INSERT into prefix (guildid, prefix) VALUES ($1, $2) on conflict (guildid) do update set prefix = $2", ctx.guild.id, prefix)
                 await connection.close()
                 await ctx.send(f"Set prefix to `{prefix}`")
+        
 
 def setup(bot):
     bot.add_cog(PrefixCommands(bot))
