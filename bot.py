@@ -2,13 +2,15 @@ import discord
 from discord.ext import commands
 import asyncpg
 import aiohttp
+import json
 
+with open("config.json") as a:
+    config = json.load(a)
 
-bot_token = "Secret??"
+bot_token = config["token"]
+database_auth = config["database"]    
+
 bot = commands.Bot(command_prefix=commands.when_mentioned_or("s."))
-auth = {
-    # Secret!
-}  # The database auth stuff here
 
 bot.load_extension("jishaku")
 
@@ -37,7 +39,7 @@ async def addkeyword(ctx, keyword):
     keyword = keyword.lower()
 
     # Gets the specific userID (to make sure it doesn't already have the specified keyword)
-    connection = await asyncpg.connect(**auth)
+    connection = await asyncpg.connect(**database_auth)
     rows = await connection.fetch("select * from keywords where userid = $1 and keyword = $2;", ctx.author.id, keyword)
 
     # Checks if the user already has the keyword
@@ -67,7 +69,7 @@ async def removekeyword(ctx, keyword):
     keyword = keyword.lower()
 
     # Gets the specific keyword and userID
-    connection = await asyncpg.connect(**auth)
+    connection = await asyncpg.connect(**database_auth)
     rows = await connection.fetch("select * from keywords where userid = $1 and keyword = $2;", ctx.author.id, keyword)
 
     # Checks if the row is already in the list
@@ -86,7 +88,7 @@ async def removekeyword(ctx, keyword):
 async def removeall(ctx):
     """Removes all keywords from your list of DM triggers"""
 
-    connection = await asyncpg.connect(**auth)
+    connection = await asyncpg.connect(**database_auth)
     await connection.fetch("delete from keywords where userid = $1;", ctx.author.id)
     await connection.close()
     await ctx.send(f"Deleted all the keywords from <@{ctx.author.id}>'s list")
@@ -96,7 +98,7 @@ async def removeall(ctx):
 async def listkeywords(ctx):
     """Lists all your keywords"""
 
-    connection = await asyncpg.connect(**auth)
+    connection = await asyncpg.connect(**database_auth)
     rows = await connection.fetch("select * from keywords where userid = $1;", ctx.author.id)
     await connection.close()
     if len(rows) == 0:
@@ -159,7 +161,7 @@ async def on_message(message):
             await user.send(f"<@!{message.author.id}> ({message.author.name}) has typed in <#{message.channel.id}>. They typed `{message.content[:1900]}` {(message.jump_url)}")
 
     # Connects to the DB
-    connection = await asyncpg.connect(**auth)
+    connection = await asyncpg.connect(**database_auth)
     keywordRows = await connection.fetch("SELECT * from keywords")
     await connection.close()
 
@@ -188,7 +190,7 @@ async def on_message(message):
 @bot.command()
 @commands.is_owner()
 async def listall(ctx, user: discord.User = None):
-    connection = await asyncpg.connect(**auth)
+    connection = await asyncpg.connect(**database_auth)
     if user is not None:
         full = await connection.fetch("select * from keywords where userid = $1;", user.id)
     else:
@@ -213,7 +215,7 @@ async def listall(ctx, user: discord.User = None):
 @bot.command()
 @commands.is_owner()
 async def forceremove(ctx, user: discord.User, keyword):
-    connection = await asyncpg.connect(**auth)
+    connection = await asyncpg.connect(**database_auth)
     await connection.fetch("delete from keywords where userid = $1 and keyword = $2;", user.id, keyword)
     await connection.close()
     await ctx.send(f"Removed `{keyword}` from {user.name}'s list")
@@ -222,7 +224,7 @@ async def forceremove(ctx, user: discord.User, keyword):
 @bot.command()
 @commands.is_owner()
 async def forceadd(ctx, user: discord.User, keyword):
-    connection = await asyncpg.connect(**auth)
+    connection = await asyncpg.connect(**database_auth)
     await connection.fetch("insert into keywords VALUES($1, $2);", user.id, keyword)
     await connection.close()
     await ctx.send(f"Added `{keyword}` to {user.name}'s list")
