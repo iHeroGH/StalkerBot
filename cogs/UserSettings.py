@@ -62,6 +62,7 @@ class UserSettings(commands.Cog, name = "User Setting Commands"):
                 await ctx.send(f"Gets DMed from quotes? {not quotetrigger}")
             elif reaction.emoji == validEmoji[2]:
                 x = False
+                await ctx.send("Done!")
         
 
         
