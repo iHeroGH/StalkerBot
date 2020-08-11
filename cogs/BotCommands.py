@@ -161,6 +161,7 @@ class BotCommands(commands.Cog, name = "Bot Commands"):
 
         settingDict = {}
 
+
         for row in settingRows:
             settingDict[row['userid']] = row
 
@@ -178,20 +179,28 @@ class BotCommands(commands.Cog, name = "Bot Commands"):
                 continue
             
             # Checks if the author of the message is the member and checks if the member's settings allow for owntrigger
-            if message.author == member and settingDict[member.id]['owntrigger'] is False:
-                continue
-            
+            try:
+                if message.author == member and settingDict[member.id]['owntrigger'] is False:
+                    continue
+            except KeyError: 
+                pass
+
+
             # Creates a list "lines" that splits the message content by new line. It then checks if the quote trigger setting is
             # turned on. If it isn't, it appends the item from the lines list to a list "nonQuoted". If the setting is enabled, it
             # just keeps nonQuoted as the original message. This prevents users from recieving the section of text that is quoted.
             lines = message.content.split('\n')
             nonQuoted = []
-            if settingDict[member.id]['quotetrigger'] is False:
-                for i in lines:
-                    if not i.startswith("> "):
-                        nonQuoted.append(i)
-            else:
+            try:
+                if settingDict[member.id]['quotetrigger'] is False:
+                    for i in lines:
+                        if not i.startswith("> "):
+                            nonQuoted.append(i)
+                else:
+                    nonQuoted = lines
+            except KeyError:
                 nonQuoted = lines
+                pass
             content = '\n'.join(nonQuoted)
 
             # Sends a message to a user if their keyword is said
