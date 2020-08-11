@@ -156,10 +156,16 @@ class BotCommands(commands.Cog, name = "Bot Commands"):
         # Connects to the DB
         connection = await asyncpg.connect(**self.bot.database_auth)
         keywordRows = await connection.fetch("SELECT * from keywords")
+        settingRows = await connection.fetch("SELECT * from usersettings")
         await connection.close()
 
-        # Gets the users and the keywords for those users
-        memberList = []
+        settingDict = {}
+
+        for row in settingRows:
+            settingDict[row['userid']] = row
+
+        # Gets the users and keywords for those users
+        alreadySent = []
         for row in keywordRows:
             userID = row["userid"]
             keyword = row["keyword"]
@@ -168,14 +174,31 @@ class BotCommands(commands.Cog, name = "Bot Commands"):
                 continue
 
             # Checks if the user has already been sent a message
-            if userID in memberList:
+            if userID in alreadySent:
                 continue
+            
+            # Checks if the author of the message is the member and checks if the member's settings allow for owntrigger
+            if message.author == member and settingDict[member.id]['owntrigger'] is False:
+                continue
+            
+            # Creates a list "lines" that splits the message content by new line. It then checks if the quote trigger setting is
+            # turned on. If it isn't, it appends the item from the lines list to a list "nonQuoted". If the setting is enabled, it
+            # just keeps nonQuoted as the original message. This prevents users from recieving the section of text that is quoted.
+            lines = message.content.split('\n')
+            nonQuoted = []
+            if settingDict[member.id]['quotetrigger'] is False:
+                for i in lines:
+                    if not i.startswith("> "):
+                        nonQuoted.append(i)
+            else:
+                nonQuoted = lines
+            content = '\n'.join(nonQuoted)
 
             # Sends a message to a user if their keyword is said
-            if (keyword in message.content.lower()):
+            if (keyword in content.lower()):
                 if channel.permissions_for(member).read_messages:
                     await member.send(f"<@!{message.author.id}> ({message.author.name}) has typed the keyword (`{keyword}`) in <#{message.channel.id}>. They typed `{message.content[:1900]}` {(message.jump_url)}")
-                    memberList.append(member.id)
+                    alreadySent.append(member.id)
 
 
     @commands.command()
