@@ -76,7 +76,7 @@ class UserSettings(commands.Cog, name = "User Setting Commands"):
             #Ends the loop
             elif reaction.emoji == validEmoji[2]:
                 await ctx.send("Done!")
-                await message.delete(delay=3.0)
+                await message.delete(delay=1.0)
                 break
             newOptions = [
                 f"1\N{COMBINING ENCLOSING KEYCAP} Would you like to trigger your own keywords? (currently {owntrigger})",
