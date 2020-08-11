@@ -69,11 +69,13 @@ class UserSettings(commands.Cog, name = "User Setting Commands"):
                 await connection.fetch("INSERT into usersettings (userid, owntrigger) VALUES ($1, $2) on conflict (userid) do update set owntrigger = $2", ctx.author.id, not owntrigger)
                 await connection.close()
                 await ctx.send(f"Can trigger own keywords? {not owntrigger}")
+                owntrigger = not owntrigger
             elif reaction.emoji == validEmoji[1]:
                 connection = await asyncpg.connect(**self.bot.database_auth)
                 await connection.fetch("INSERT into usersettings (userid, quotetrigger) VALUES ($1, $2) on conflict (userid) do update set quotetrigger = $2", ctx.author.id, not quotetrigger)
                 await connection.close()
                 await ctx.send(f"Gets DMed from quotes? {not quotetrigger}")
+                quotetrigger = not quotetrigger
             #Ends the loop
             elif reaction.emoji == validEmoji[2]:
                 x = False
