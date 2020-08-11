@@ -10,6 +10,6 @@ create TABLE prefix(
 
 create TABLE usersettings(
     userid bigint primary key,
-    owntrigger boolean,
-    quotetrigger boolean
+    owntrigger boolean default true,
+    quotetrigger boolean default true
 );
