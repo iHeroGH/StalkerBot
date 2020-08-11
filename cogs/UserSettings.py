@@ -75,8 +75,8 @@ class UserSettings(commands.Cog, name = "User Setting Commands"):
                 quotetrigger = not quotetrigger
             #Ends the loop
             elif reaction.emoji == validEmoji[2]:
-                break
                 await ctx.send("Done!")
+                break
             message.edit(content=("\n".join(options)))
         
 
