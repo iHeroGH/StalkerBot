@@ -81,7 +81,7 @@ class UserSettings(commands.Cog, name = "User Setting Commands"):
                 f"1\N{COMBINING ENCLOSING KEYCAP}. Would you like to trigger your own keywords? (currently {owntrigger})",
                 f"2\N{COMBINING ENCLOSING KEYCAP}. Would you like to be DMed if your keyword is said in a quote (> Message)? (currently {quotetrigger})"
             ]
-            await message.edit(content=("\n".join(newOptions)))
+            await message.edit(content=("\n".join(newOptions)), delete_after=3.0)
         
 
         
