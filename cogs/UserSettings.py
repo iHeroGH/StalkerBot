@@ -30,8 +30,8 @@ class UserSettings(commands.Cog, name = "User Setting Commands"):
 
         # Options list so it looks good in the message
         options = [
-            f"1\N{COMBINING ENCLOSING KEYCAP}. Would you like to trigger your own keywords? (currently {owntrigger})",
-            f"2\N{COMBINING ENCLOSING KEYCAP}. Would you like to be DMed if your keyword is said in a quote (> Message)? (currently {quotetrigger})"
+            f"1\N{COMBINING ENCLOSING KEYCAP} Would you like to trigger your own keywords? (currently {owntrigger})",
+            f"2\N{COMBINING ENCLOSING KEYCAP} Would you like to be DMed if your keyword is said in a quote? (currently {quotetrigger})"
         ]
 
         # Sends the initial message
@@ -76,6 +76,7 @@ class UserSettings(commands.Cog, name = "User Setting Commands"):
             #Ends the loop
             elif reaction.emoji == validEmoji[2]:
                 await ctx.send("Done!")
+                await message.delete(delay=3.0)
                 break
             newOptions = [
                 f"1\N{COMBINING ENCLOSING KEYCAP}. Would you like to trigger your own keywords? (currently {owntrigger})",
