@@ -79,8 +79,8 @@ class UserSettings(commands.Cog, name = "User Setting Commands"):
                 await message.delete(delay=3.0)
                 break
             newOptions = [
-                f"1\N{COMBINING ENCLOSING KEYCAP}. Would you like to trigger your own keywords? (currently {owntrigger})",
-                f"2\N{COMBINING ENCLOSING KEYCAP}. Would you like to be DMed if your keyword is said in a quote (> Message)? (currently {quotetrigger})"
+                f"1\N{COMBINING ENCLOSING KEYCAP} Would you like to trigger your own keywords? (currently {owntrigger})",
+                f"2\N{COMBINING ENCLOSING KEYCAP} Would you like to be DMed if your keyword is said in a quote? (currently {quotetrigger})"
             ]
             await message.edit(content=("\n".join(newOptions)), delete_after=3.0)
         
