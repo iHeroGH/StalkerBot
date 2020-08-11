@@ -77,7 +77,11 @@ class UserSettings(commands.Cog, name = "User Setting Commands"):
             elif reaction.emoji == validEmoji[2]:
                 await ctx.send("Done!")
                 break
-            message.edit(content=("\n".join(options)))
+            newOptions = [
+                f"1\N{COMBINING ENCLOSING KEYCAP}. Would you like to trigger your own keywords? (currently {owntrigger})",
+                f"2\N{COMBINING ENCLOSING KEYCAP}. Would you like to be DMed if your keyword is said in a quote (> Message)? (currently {quotetrigger})"
+            ]
+            await message.edit(content=("\n".join(newOptions)))
         
 
         
