@@ -47,15 +47,12 @@ class FilterCommands(commands.Cog, name = "Filter Commands"):
                     return
 
                 row = rows[0]
-                textFilters = []
-                channelFilters = []
-                if len(row['textfilter']) != 0:
-                    for i in row['textfilter']:
-                        textFilters.append(i)
-
-                if len(row['channelfilter']) != 0:
-                    for i in row['channelfilter']:
-                        channelFilters.append(i)
+                textFilters = [""]
+                channelFilters = [""]
+                for i in row['textfilter']:
+                    textFilters.append(textFilters)
+                for i in row['channelfilter']:
+                    channelFilters.append(i)
 
                 await ctx.send(f"Text Filters: `{textFilters}` \n Channel Filters: `{channelFilters}`")
 
