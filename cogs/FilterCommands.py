@@ -51,7 +51,7 @@ class FilterCommands(commands.Cog, name = "Filter Commands"):
                 channelFilters = []
                 try:
                     for i in row['textfilter']:
-                        textFilters.append(textFilters)
+                        textFilters.append(i)
                 except TypeError:
                     textFilters = [""]
                 try: 
