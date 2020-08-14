@@ -49,16 +49,14 @@ class FilterCommands(commands.Cog, name = "Filter Commands"):
                 row = rows[0]
                 textFilters = []
                 channelFilters = []
-                try:
+                
+                if row['textfilter'] is not None:
                     for i in row['textfilter']:
                         textFilters.append(i)
-                except TypeError:
-                    textFilters = [""]
-                try: 
+                if row['channelfilter'] is not None:
                     for i in row['channelfilter']:
                         channelFilters.append(i)
-                except TypeError:
-                    textFilters = [""]
+
 
                 await ctx.send(f"Text Filters: `{textFilters}` \n Channel Filters: `{channelFilters}`")
 
