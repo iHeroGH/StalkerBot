@@ -46,7 +46,15 @@ class FilterCommands(commands.Cog, name = "Filter Commands"):
                     await ctx.send(f"You don't have any keywords. Set some up by running the `{ctx.prefix}addkeyword` command")
                     return
 
-                print(rows)
+                row = rows[0]
+                textFilters = []
+                channelFilters = []
+                for i in row['textfilter']:
+                    i.append(textFilters)
+                for i in row['channelfilters']:
+                    i.append(channelFilters)
+
+                await ctx.send(f"Text Filters: `{textFilters}` \n Channel Filters: `{channelFilters}`")
 
         else:
             await ctx.send(f"You didn't provide an acceptable filter type (`{ctx.prefix} filter (text, channnel, list) (filter)`)")
