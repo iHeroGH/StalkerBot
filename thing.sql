@@ -13,3 +13,9 @@ create TABLE usersettings(
     owntrigger boolean default true,
     quotetrigger boolean default true
 );
+
+create TABLE filters(
+    userid bigint,
+    textfilter text,
+    channelfilter text
+);

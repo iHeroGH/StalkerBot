@@ -34,5 +34,6 @@ async def on_ready():
 
 bot.load_extension("cogs.BotCommands")
 bot.load_extension("cogs.PrefixCommands")
+bot.load_extension("cogs.FilterCommands")
 bot.load_extension("jishaku")
 bot.run(bot_token)
