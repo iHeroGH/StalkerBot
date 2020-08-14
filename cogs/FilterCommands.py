@@ -49,10 +49,13 @@ class FilterCommands(commands.Cog, name = "Filter Commands"):
                 row = rows[0]
                 textFilters = []
                 channelFilters = []
-                for i in row['textfilter']:
-                    textFilters.append(i)
-                for i in row['channelfilters']:
-                    channelFilters.append(i)
+                if len(row['textfilter']) != 0:
+                    for i in row['textfilter']:
+                        textFilters.append(i)
+
+                if len(row['channelfilter']) != 0:
+                    for i in row['channelfilter']:
+                        channelFilters.append(i)
 
                 await ctx.send(f"Text Filters: `{textFilters}` \n Channel Filters: `{channelFilters}`")
 
