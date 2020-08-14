@@ -50,8 +50,12 @@ class FilterCommands(commands.Cog, name = "Filter Commands"):
                 channelFilters = []
                 
                 for row in rows:
-                    textFilters.append(row['textfilter'])
-                    channelFilters.append(row['channelfilter'])
+                    if row != None:
+                        textFilters.append(row['textfilter'])
+                        channelFilters.append(row['channelfilter'])
+
+                textFilters = ', '.join(textFilters)
+                channelFilters = ', '.join(channelFilters)
 
                 await ctx.send(f"Text Filters: `{[textFilters]}` \n Channel Filters: `{channelFilters}`")
 
