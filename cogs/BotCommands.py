@@ -223,14 +223,16 @@ class BotCommands(commands.Cog, name="Bot Commands"):
                         embed = discord.Embed()
                         color = random.randint(0, 0xffffff)
                         embed.color = color  
-                        embed.set_author(name=f"{message.author.name}", url=f"{(message.jump_url)}", icon_url=f"{message.author.avatar_url}")
+                        embed.set_author(name=f"{message.author.name}#{message.author.discriminator}", icon_url=f"{message.author.avatar_url}")
                         embed.title = "Message Content"  # Title
                         embed.description = f"{content}"  # Description
+                        embed.add_field(name="Message Link", value=f"{message.jump_url}", inline=True)
                         embed.set_footer(text=f"Keyword: {keyword}")
+                        embed.timestamp = message.created_at    
                 
                         await member.send(embed=embed)
                         continue
-                    
+
                     await member.send(f"<@!{message.author.id}> ({message.author.name}) has typed the keyword (`{keyword}`) in <#{message.channel.id}>. They typed `{content[:1900]}` {(message.jump_url)}")
                     alreadySent.append(member.id)
 
