@@ -9,7 +9,7 @@ class FilterCommands(commands.Cog, name = "Filter Commands"):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.group()
+    @commands.group(invoke_without_command = True)
     async def filter(self, ctx, filterType, filter = None):
         """Sets a filter provided a type (can be "list" which lists all your filters)"""
 
@@ -66,7 +66,7 @@ class FilterCommands(commands.Cog, name = "Filter Commands"):
         await ctx.send(f"Text Filters: `{textFilters}` \n Channel Filters: `{channelFilters}`")
 
 
-    @filter.group()
+    @filter.group(invoke_without_command = True)
     async def remove(self, ctx):
         """Removes a filter (text or channel)"""
         pass
