@@ -226,6 +226,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
                         embed.set_author(name=f"{message.author.name}#{message.author.discriminator}", icon_url=f"{message.author.avatar_url}")
                         embed.title = "Message Content"  # Title
                         embed.description = f"{content}"  # Description
+                        embed.add_field(name="Message Channel", value=f"<#{message.channel.id}>", inline=True)
                         embed.add_field(name="Message Link", value=f"{message.jump_url}", inline=True)
                         embed.set_footer(text=f"Keyword: {keyword}")
                         embed.timestamp = message.created_at    
