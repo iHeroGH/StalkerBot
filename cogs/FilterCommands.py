@@ -109,7 +109,7 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
 
         # Opens a connection and inerts the text filter into the serverfilters database
         async with self.bot.database() as db:
-            await db("DELETE FROM serverfilters WHERE userid=$1 AND serverfilter=$2);", ctx.author.id, filter)
+            await db("DELETE FROM serverfilters WHERE userid=$1 AND serverfilter=$2;", ctx.author.id, filter)
         
         await ctx.send("Done.")
 
