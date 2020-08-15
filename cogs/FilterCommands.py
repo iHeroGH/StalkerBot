@@ -29,7 +29,7 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
     async def filter_channel(self, ctx, filter:discord.TextChannel):
         """Adds a channel filter"""
 
-        async with self.bot.datbabase() as db:
+        async with self.bot.database() as db:
             await db("INSERT INTO channelfilters (userid, channelfilter) VALUES ($1, $2);", ctx.author.id, filter.id)
         await ctx.send(f"Added {filter.mention} to your channel filter list")
 
