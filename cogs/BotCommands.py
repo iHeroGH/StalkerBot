@@ -207,7 +207,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
                 if i['channelfilter'] == message.channel.id:
                     content = ""
             for i in serverFilters:
-                print(i['serverfilter'] + "extra debug")
+                print(f"{i['serverfilter']} extra debug")
                 if message.guild.id == i['serverfilter']:
                     print(message.guild.id)
                     content = ""
