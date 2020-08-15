@@ -90,7 +90,7 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
         """Removes a channel filter"""
 
         async with self.bot.database() as db:
-            await db("DELETE FROM channelfilters WHERE userid=$1 AND channelfilter=$2;", ctx.author.id, filter)
+            await db("DELETE FROM channelfilters WHERE userid=$1 AND channelfilter=$2;", ctx.author.id, filter.id)
         return await ctx.send("Done.")
 
     @filter_remove.command(name="server")
