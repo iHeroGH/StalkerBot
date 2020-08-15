@@ -22,7 +22,7 @@ class DatabaseConnection(object):
         self.conn = await asyncpg.connect(**database_auth)
 
     async def disconnect(self):
-        await self.conn.disconnect()
+        await self.conn.close()
 
     async def __aenter__(self):
         await self.connect()
