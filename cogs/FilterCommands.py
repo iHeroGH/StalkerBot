@@ -30,7 +30,7 @@ class FilterCommands(commands.Cog, name = "Filter Commands"):
         """Adds a channel filter"""
 
         connection = await asyncpg.connect(**self.bot.database_auth)
-        await connection.fetch("INSERT INTO channelfilters (userid, channelfilter) VALUES($1, $2);", ctx.author.id, filter)
+        await connection.fetch("INSERT INTO channelfilters (userid, channelfilter) VALUES($1, $2);", ctx.author.id, filter.id)
         await connection.close()
         await ctx.send(f"Added {filter.mention} to your channel filter list")
                 
@@ -50,19 +50,16 @@ class FilterCommands(commands.Cog, name = "Filter Commands"):
         textFilters = []
         channelFilters = []
         
-        x = 0
-        while x != len(textRows):
-            if textRows[x]['textfilter'] is not None:
-                textFilters.append(textRows[x]['textfilter'])
-            x = x + 1
+
+        for i in textRows:
+            textFilters.append(i['textfilter'])
         textFilters = ', '.join(textFilters)
 
-        x = 0
-        while x != len(channelRows):
-            if channelRows[x]['channelfilter'] is not None:
-                channelFilters.append(channelRows[x]['channelfilter'])
-            x = x + 1
+        for i in channelRows:
+            if ctx.guild.get_channel(i['channelfilter']) is not None:
+                channelFilters.append(i['channelfilter'])
         channelFilters = ', '.join(channelFilters)
+
 
         await ctx.send(f"Text Filters: `{textFilters}` \n Channel Filters: {channelFilters}")
 
