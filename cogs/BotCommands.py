@@ -1,4 +1,5 @@
 import aiohttp
+import io
 
 import discord
 from discord.ext import commands
@@ -218,14 +219,8 @@ class BotCommands(commands.Cog, name="Bot Commands"):
         for x in full:
             user = self.bot.get_user(x['userid']) or await self.bot.fetch_user(x['userid'])
             text.append(f"User: {user.name}({user.id}) - Keyword: {x['keyword']}")
-        text.sort()
-        text = "\n".join(text)
-
-        async with aiohttp.ClientSession() as session:
-            async with session.post('https://hastebin.com/documents', data=text) as req:
-                key = await req.json()
-
-        await ctx.send(f"https://hastebin.com/raw/{key['key']}")
+        text = "\n".join(sorted(text)) + "\n"
+        await ctx.send(file=discord.File(io.StringIIO(text), filename="AllUsers.txt"))
 
     @commands.command()
     @commands.is_owner()
