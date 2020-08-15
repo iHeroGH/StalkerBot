@@ -19,7 +19,7 @@ class DatabaseConnection(object):
         self.conn = conn
 
     async def __aenter__(self):
-        self.conn = await asyncpg.connect(**self.bot.database_auth)
+        self.conn = await asyncpg.connect(**database_auth)
 
     async def __aexit__(self, *args):
         await self.conn.disconnect()
