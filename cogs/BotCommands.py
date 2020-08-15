@@ -1,12 +1,12 @@
+import aiohttp
+
 import discord
 from discord.ext import commands
 import asyncpg
-import aiohttp
-import json
 
 
-class BotCommands(commands.Cog, name = "Bot Commands"):
-    
+class BotCommands(commands.Cog, name="Bot Commands"):
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -18,8 +18,8 @@ class BotCommands(commands.Cog, name = "Bot Commands"):
             read_messages=True,
             send_messages=True
         )
-        await ctx.send(f"<https://discord.com/api/oauth2/authorize?client_id=723813550136754216&permissions={bot_permissions.value}&scope=bot>")
-
+        url = f"<https://discord.com/api/oauth2/authorize?client_id=723813550136754216&permissions={bot_permissions.value}&scope=bot>"
+        await ctx.send(url)
 
     @commands.command()
     async def addkeyword(self, ctx, keyword):
@@ -54,7 +54,6 @@ class BotCommands(commands.Cog, name = "Bot Commands"):
         await connection.close()
         await ctx.send(f"Added `{keyword}` into <@{ctx.author.id}>'s list")
 
-
     @commands.command()
     async def removekeyword(self, ctx, keyword):
         """Removes a keyword from your list of DM triggers"""
@@ -76,7 +75,6 @@ class BotCommands(commands.Cog, name = "Bot Commands"):
         await connection.close()
         await ctx.send(f"Removed `{keyword}` from <@{ctx.author.id}>'s list")
 
-
     @commands.command()
     async def removeall(self, ctx):
         """Removes all keywords from your list of DM triggers"""
@@ -85,7 +83,6 @@ class BotCommands(commands.Cog, name = "Bot Commands"):
         await connection.fetch("delete from keywords where userid = $1;", ctx.author.id)
         await connection.close()
         await ctx.send(f"Deleted all the keywords from <@{ctx.author.id}>'s list")
-
 
     @commands.command()
     async def listkeywords(self, ctx):
@@ -104,7 +101,6 @@ class BotCommands(commands.Cog, name = "Bot Commands"):
 
         await ctx.send(', '.join(keywordList))
 
-
     @commands.command()
     async def suggest(self, ctx, *, suggestion=None):
         """
@@ -118,7 +114,6 @@ class BotCommands(commands.Cog, name = "Bot Commands"):
             return
         await channel.send(f"<@322542134546661388> New suggestion from <@{ctx.author.id}>: `{suggestion[:1975]}`")
         await ctx.send(f"Suggested `{suggestion[:1950]}`")
-
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -161,7 +156,6 @@ class BotCommands(commands.Cog, name = "Bot Commands"):
 
         settingDict = {}
 
-
         for row in settingRows:
             settingDict[row['userid']] = row
 
@@ -177,14 +171,13 @@ class BotCommands(commands.Cog, name = "Bot Commands"):
             # Checks if the user has already been sent a message
             if userID in alreadySent:
                 continue
-            
+
             # Checks if the author of the message is the member and checks if the member's settings allow for owntrigger
             try:
                 if message.author == member and settingDict[member.id]['owntrigger'] is False:
                     continue
-            except KeyError: 
+            except KeyError:
                 pass
-
 
             # Creates a list "lines" that splits the message content by new line. It then checks if the quote trigger setting is
             # turned on. If it isn't, it appends the item from the lines list to a list "nonQuoted". If the setting is enabled, it
@@ -208,7 +201,6 @@ class BotCommands(commands.Cog, name = "Bot Commands"):
                 if channel.permissions_for(member).read_messages:
                     await member.send(f"<@!{message.author.id}> ({message.author.name}) has typed the keyword (`{keyword}`) in <#{message.channel.id}>. They typed `{message.content[:1900]}` {(message.jump_url)}")
                     alreadySent.append(member.id)
-
 
     @commands.command()
     @commands.is_owner()
@@ -235,7 +227,6 @@ class BotCommands(commands.Cog, name = "Bot Commands"):
 
         await ctx.send(f"https://hastebin.com/raw/{key['key']}")
 
-
     @commands.command()
     @commands.is_owner()
     async def forceremove(self, ctx, user: discord.User, keyword):
@@ -245,7 +236,6 @@ class BotCommands(commands.Cog, name = "Bot Commands"):
         await connection.fetch("delete from keywords where userid = $1 and keyword = $2;", user.id, keyword)
         await connection.close()
         await ctx.send(f"Removed `{keyword}` from {user.name}'s list")
-
 
     @commands.command()
     @commands.is_owner()
@@ -260,14 +250,12 @@ class BotCommands(commands.Cog, name = "Bot Commands"):
     @commands.command()
     @commands.is_owner()
     async def countusers(self, ctx):
-        """Counts how many unique user IDs there are""" 
-        
+        """Counts how many unique user IDs there are"""
+
         connection = await asyncpg.connect(**self.bot.database_auth)
         rows = await connection.fetch("SELECT DISTINCT userid FROM keywords;")
         await connection.close()
-        
         await ctx.send(f"`{len(rows)}` users use your dumbass of a bot. How's it feel, bitch?")
-
 
 
 def setup(bot):

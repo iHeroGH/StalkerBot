@@ -1,13 +1,11 @@
-import discord
+import asyncio
+
 from discord.ext import commands
 import asyncpg
-import asyncio
-import aiohttp
-import json
 
 
-class UserSettings(commands.Cog, name = "User Setting Commands"):
-    
+class UserSettings(commands.Cog, name="User Setting Commands"):
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -41,7 +39,7 @@ class UserSettings(commands.Cog, name = "User Setting Commands"):
         await message.add_reaction("2\N{COMBINING ENCLOSING KEYCAP}")
         await message.add_reaction("\N{WHITE HEAVY CHECK MARK}")
 
-        # List of valid emojis the user can react with 
+        # List of valid emojis the user can react with
         validEmoji = [
             "1\N{COMBINING ENCLOSING KEYCAP}",
             "2\N{COMBINING ENCLOSING KEYCAP}",
@@ -61,7 +59,7 @@ class UserSettings(commands.Cog, name = "User Setting Commands"):
             except asyncio.TimeoutError:
                 await ctx.send("Timed out!")
                 return
-            
+
             # Checks which emoji was reacted and does the stuff
             if reaction.emoji == validEmoji[0]:
                 connection = await asyncpg.connect(**self.bot.database_auth)
@@ -73,19 +71,18 @@ class UserSettings(commands.Cog, name = "User Setting Commands"):
                 await connection.fetch("INSERT into usersettings (userid, quotetrigger) VALUES ($1, $2) on conflict (userid) do update set quotetrigger = $2", ctx.author.id, not quotetrigger)
                 await connection.close()
                 quotetrigger = not quotetrigger
-            #Ends the loop
             elif reaction.emoji == validEmoji[2]:
-                await ctx.send("Done!")
-                await message.delete(delay=1.0)
                 break
+
             newOptions = [
                 f"1\N{COMBINING ENCLOSING KEYCAP} Would you like to trigger your own keywords? (currently {owntrigger})",
                 f"2\N{COMBINING ENCLOSING KEYCAP} Would you like to be DMed if your keyword is said in a quote? (currently {quotetrigger})"
             ]
             await message.edit(content=("\n".join(newOptions)))
-        
 
-        
+        await ctx.send("Done!")
+        await message.delete(delay=1.0)
+
 
 def setup(bot):
     bot.add_cog(UserSettings(bot))

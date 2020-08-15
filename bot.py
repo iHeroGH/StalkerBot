@@ -1,15 +1,34 @@
+import json
+import glob
+import os
+
 import discord
 from discord.ext import commands
-import json
 import asyncpg
 
 with open("config.json") as a:
     config = json.load(a)
 
 bot_token = config["token"]
-database_auth = config["database"]    
+database_auth = config["database"]
 
-async def getprefix(bot, message):
+
+class DatabaseConnection(object):
+
+    def __init__(self, conn=None):
+        self.conn = conn
+
+    async def __aenter__(self):
+        self.conn = await asyncpg.connect(**self.bot.database_auth)
+
+    async def __aexit__(self, *args):
+        await self.conn.disconnect()
+
+    async def __call__(self, sql, *args):
+        return await self.conn.fetch(sql, *args)
+
+
+async def get_prefix(bot, message):
     """Actually changes the prefix it looks for"""
     if message.guild is None:
         return commands.when_mentioned_or("s.")(bot,message)
@@ -24,16 +43,18 @@ async def getprefix(bot, message):
         prefix = "s."
     return commands.when_mentioned_or(prefix)(bot,message)
 
-bot = commands.Bot(command_prefix=getprefix)
+
+bot = commands.Bot(command_prefix=get_prefix)
 bot.database_auth = database_auth
+bot.database = DatabaseConnection
+
 
 @bot.event
 async def on_ready():
     game = discord.Game("s.help")
     await bot.change_presence(status=discord.Status.online, activity=game)
 
-bot.load_extension("cogs.BotCommands")
-bot.load_extension("cogs.PrefixCommands")
-bot.load_extension("cogs.FilterCommands")
+
+[bot.load_extension(i[:-3].replace(os.sep, ".")) for i in glob.glob("cogs/*.py")]
 bot.load_extension("jishaku")
 bot.run(bot_token)
