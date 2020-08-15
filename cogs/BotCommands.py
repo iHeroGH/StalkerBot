@@ -32,26 +32,24 @@ class BotCommands(commands.Cog, name="Bot Commands"):
         keyword = keyword.lower()
 
         # Gets the specific userID (to make sure it doesn't already have the specified keyword)
-        connection = await asyncpg.connect(**self.bot.database_auth)
-        rows = await connection.fetch("select * from keywords where userid = $1 and keyword = $2;", ctx.author.id, keyword)
+        async with self.bot.database() as db:
+            rows = await db("select * from keywords where userid = $1 and keyword = $2;", ctx.author.id, keyword)
 
-        # Checks if the user already has the keyword
-        if len(rows) > 0:
-            await ctx.send("You already have that as a keyword")
-            await connection.close()
-            return
+            # Checks if the user already has the keyword
+            if len(rows) > 0:
+                await ctx.send("You already have that as a keyword")
+                return
 
-        # Checks if the user has the maxiumum amount of keywords (5)
-        rows = await connection.fetch("select * from keywords where userid = $1;", ctx.author.id)
-        if len(rows) >= 5:
-            await ctx.send("You already have the maximum amount of keywords (5)")
-            await connection.close()
-            return
+            # Checks if the user has the maxiumum amount of keywords (5)
+            rows = await db("select * from keywords where userid = $1;", ctx.author.id)
+            if len(rows) >= 5:
+                await ctx.send("You already have the maximum amount of keywords (5)")
+                return
 
-        # Adds the keyword into the list
-        else:
-            await connection.fetch("insert into keywords VALUES($1, $2);", ctx.author.id, keyword)
-        await connection.close()
+            # Adds the keyword into the list
+            else:
+                await db("insert into keywords VALUES($1, $2);", ctx.author.id, keyword)
+
         await ctx.send(f"Added `{keyword}` into <@{ctx.author.id}>'s list")
 
     @commands.command()
@@ -61,36 +59,34 @@ class BotCommands(commands.Cog, name="Bot Commands"):
         keyword = keyword.lower()
 
         # Gets the specific keyword and userID
-        connection = await asyncpg.connect(**self.bot.database_auth)
-        rows = await connection.fetch("select * from keywords where userid = $1 and keyword = $2;", ctx.author.id, keyword)
+        async with self.bot.database() as db:
+            rows = await db("select * from keywords where userid = $1 and keyword = $2;", ctx.author.id, keyword)
 
-        # Checks if the row is already in the list
-        if len(rows) == 0:
-            await ctx.send("That wasn't an existing keyword")
-            await connection.close()
-            return
+            # Checks if the row is already in the list
+            if len(rows) == 0:
+                await ctx.send("That wasn't an existing keyword")
+                return
 
-        # Deletes the keyword
-        await connection.fetch("delete from keywords where userid = $1 and keyword = $2;", ctx.author.id, keyword)
-        await connection.close()
+            # Deletes the keyword
+            await db("delete from keywords where userid = $1 and keyword = $2;", ctx.author.id, keyword)
+
         await ctx.send(f"Removed `{keyword}` from <@{ctx.author.id}>'s list")
 
     @commands.command()
     async def removeall(self, ctx):
         """Removes all keywords from your list of DM triggers"""
 
-        connection = await asyncpg.connect(**self.bot.database_auth)
-        await connection.fetch("delete from keywords where userid = $1;", ctx.author.id)
-        await connection.close()
+        async with self.bot.database() as db:
+            await db("delete from keywords where userid = $1;", ctx.author.id)
+
         await ctx.send(f"Deleted all the keywords from <@{ctx.author.id}>'s list")
 
     @commands.command()
     async def listkeywords(self, ctx):
         """Lists all your keywords"""
 
-        connection = await asyncpg.connect(**self.bot.database_auth)
-        rows = await connection.fetch("select * from keywords where userid = $1;", ctx.author.id)
-        await connection.close()
+        async with self.bot.database() as db:
+            rows = await db("select * from keywords where userid = $1;", ctx.author.id)
         if len(rows) == 0:
             await ctx.send(f"You don't have any keywords. Set some up by running the `{ctx.prefix}addkeyword` command")
             return
@@ -149,10 +145,10 @@ class BotCommands(commands.Cog, name="Bot Commands"):
                 await user.send(f"<@!{message.author.id}> ({message.author.name}) has typed in <#{message.channel.id}>. They typed `{message.content[:1900]}` {(message.jump_url)}")
 
         # Connects to the DB
-        connection = await asyncpg.connect(**self.bot.database_auth)
-        keywordRows = await connection.fetch("SELECT * from keywords")
-        settingRows = await connection.fetch("SELECT * from usersettings")
-        await connection.close()
+        async with self.bot.database() as db:
+            keywordRows = await db("SELECT * from keywords")
+            settingRows = await db("SELECT * from usersettings")
+
 
         settingDict = {}
 
@@ -207,12 +203,11 @@ class BotCommands(commands.Cog, name="Bot Commands"):
     async def listall(self, ctx, user: discord.User = None):
         """Lists either a user's entire list of keywords or the entire database"""
 
-        connection = await asyncpg.connect(**self.bot.database_auth)
-        if user is not None:
-            full = await connection.fetch("select * from keywords where userid = $1;", user.id)
-        else:
-            full = await connection.fetch("select * from keywords;")
-        await connection.close()
+        async with self.bot.database() as db:
+            if user is not None:
+                full = await db("select * from keywords where userid = $1;", user.id)
+            else:
+                full = await db("select * from keywords;")
 
         text = list()
         for x in full:
@@ -232,9 +227,9 @@ class BotCommands(commands.Cog, name="Bot Commands"):
     async def forceremove(self, ctx, user: discord.User, keyword):
         """Forcibly removes a keyword from a user"""
 
-        connection = await asyncpg.connect(**self.bot.database_auth)
-        await connection.fetch("delete from keywords where userid = $1 and keyword = $2;", user.id, keyword)
-        await connection.close()
+        async with self.bot.database() as db:
+            await db("delete from keywords where userid = $1 and keyword = $2;", user.id, keyword)
+
         await ctx.send(f"Removed `{keyword}` from {user.name}'s list")
 
     @commands.command()
@@ -242,9 +237,9 @@ class BotCommands(commands.Cog, name="Bot Commands"):
     async def forceadd(self, ctx, user: discord.User, keyword):
         """Forcibly adds a keyword to a user"""
 
-        connection = await asyncpg.connect(**self.bot.database_auth)
-        await connection.fetch("insert into keywords VALUES($1, $2);", user.id, keyword)
-        await connection.close()
+        async with self.bot.database() as db:
+            await db("insert into keywords VALUES($1, $2);", user.id, keyword)
+
         await ctx.send(f"Added `{keyword}` to {user.name}'s list")
 
     @commands.command()
@@ -252,9 +247,9 @@ class BotCommands(commands.Cog, name="Bot Commands"):
     async def countusers(self, ctx):
         """Counts how many unique user IDs there are"""
 
-        connection = await asyncpg.connect(**self.bot.database_auth)
-        rows = await connection.fetch("SELECT DISTINCT userid FROM keywords;")
-        await connection.close()
+        async with self.bot.database() as db:
+            rows = await db("SELECT DISTINCT userid FROM keywords;")
+            
         await ctx.send(f"`{len(rows)}` users use your dumbass of a bot. How's it feel, bitch?")
 
 

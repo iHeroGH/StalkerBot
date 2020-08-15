@@ -14,9 +14,8 @@ class UserSettings(commands.Cog, name="User Setting Commands"):
         """Allows users to change settings (such as OwnTrigger and QuoteTrigger"""
 
         # Get the current settings for a user
-        connection = await asyncpg.connect(**self.bot.database_auth)
-        existingSettings = await connection.fetch("select * from usersettings where userid = $1;", ctx.author.id)
-        await connection.close()
+        async with self.bot.database() as db:
+            existingSettings = await db("select * from usersettings where userid = $1;", ctx.author.id)
 
         # Checks to see if existing settings for the user actually exist. If not, defaults to True
         if existingSettings:
@@ -62,14 +61,12 @@ class UserSettings(commands.Cog, name="User Setting Commands"):
 
             # Checks which emoji was reacted and does the stuff
             if reaction.emoji == validEmoji[0]:
-                connection = await asyncpg.connect(**self.bot.database_auth)
-                await connection.fetch("INSERT into usersettings (userid, owntrigger) VALUES ($1, $2) on conflict (userid) do update set owntrigger = $2", ctx.author.id, not owntrigger)
-                await connection.close()
+                async with self.bot.database() as db:
+                    await db("INSERT into usersettings (userid, owntrigger) VALUES ($1, $2) on conflict (userid) do update set owntrigger = $2", ctx.author.id, not owntrigger)
                 owntrigger = not owntrigger
             elif reaction.emoji == validEmoji[1]:
-                connection = await asyncpg.connect(**self.bot.database_auth)
-                await connection.fetch("INSERT into usersettings (userid, quotetrigger) VALUES ($1, $2) on conflict (userid) do update set quotetrigger = $2", ctx.author.id, not quotetrigger)
-                await connection.close()
+                async with self.bot.database() as db:
+                    await db("INSERT into usersettings (userid, quotetrigger) VALUES ($1, $2) on conflict (userid) do update set quotetrigger = $2", ctx.author.id, not quotetrigger)  
                 quotetrigger = not quotetrigger
             elif reaction.emoji == validEmoji[2]:
                 break

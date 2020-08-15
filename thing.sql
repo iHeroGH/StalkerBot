@@ -25,3 +25,10 @@ create TABLE channelfilters(
     PRIMARY KEY (userid, channelfilter)
 );
 
+create TABLE serverfilters(
+    userid bigint,
+    serverfilter BIGINT,
+    PRIMARY KEY (userid, userfilter)
+);
+
+

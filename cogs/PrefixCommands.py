@@ -15,9 +15,9 @@ class PrefixCommands(commands.Cog, name="Prefix Commands"):
             await ctx.send("This command does not work in DMs. Use the command on a server you have the `manage server` permission on.")
 
         if prefix is None:
-            connection = await asyncpg.connect(**self.bot.database_auth)
-            prefixRows = await connection.fetch("SELECT * from prefix where guildid = $1", ctx.guild.id)
-            await connection.close()
+            async with self.bot.database() as db:
+                prefixRows = await db("SELECT * from prefix where guildid = $1", ctx.guild.id)
+            
             await ctx.send(f"The prefix for this server is `{prefixRows[0]['prefix']}`")
             return
 
@@ -32,9 +32,9 @@ class PrefixCommands(commands.Cog, name="Prefix Commands"):
             await ctx.send("You don't have permission to run this command (You need the `manage server` permission)")
             return
 
-        connection = await asyncpg.connect(**self.bot.database_auth)
-        await connection.fetch("INSERT into prefix (guildid, prefix) VALUES ($1, $2) on conflict (guildid) do update set prefix = $2", ctx.guild.id, prefix)
-        await connection.close()
+        async with self.bot.database() as db:
+            await db("INSERT into prefix (guildid, prefix) VALUES ($1, $2) on conflict (guildid) do update set prefix = $2", ctx.guild.id, prefix)
+
         await ctx.send(f"Set prefix to `{prefix}`")
 
 

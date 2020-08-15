@@ -14,13 +14,14 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
 
         await ctx.send_help(ctx.command)
 
-    @filter.command()
-    async def text(self, ctx, filter:str):
+    @filter.command(name="text")
+    async def filter_text(self, ctx, filter:str):
         """Adds a text filter"""
 
-        connection = await asyncpg.connect(**self.bot.database_auth)
-        await connection.fetch("INSERT INTO textfilters (userid, textfilter) VALUES ($1, $2);", ctx.author.id, filter)
-        await connection.close()
+        # Opens a connection and inerts the text filter into the textfilters database
+        async with self.bot.database() as db:
+            await db("INSERT INTO textfilters (userid, textfilter) VALUES ($1, $2);", ctx.author.id, filter)
+        
         await ctx.send(f"Added `{filter}` to your text filter list")
 
     @filter.command(name="channel")
@@ -32,23 +33,42 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
             await db("INSERT INTO channelfilters (userid, channelfilter) VALUES ($1, $2);", ctx.author.id, filter.id)
         await ctx.send(f"Added {filter.mention} to your channel filter list")
 
+    @filter.command(name="server")
+    async def filter_server(self, ctx, filter:int=None):
+        """Adds a server filter"""
+
+        if filter is None:
+            server = ctx.guild
+        else:
+            server = self.bot.get_guild(filter)
+
+        if server is None:
+            await ctx.send("You didn't provide a valid server ID")
+
+        # Opens a connection and inerts the text filter into the serverfilters database
+        async with self.bot.database() as db:
+            await db("INSERT INTO serverfilters (userid, serverfilter) VALUES ($1, $2);", ctx.author.id, filter)
+        
+        await ctx.send(f"Added `{filter}` to your server filter list")
+
     @filter.command(name="list")
     async def filter_list(self, ctx):
         """Lists all your filters"""
 
-        connection = await asyncpg.connect(**self.bot.database_auth)
-        textRows = await connection.fetch("SELECT * FROM textfilters WHERE userid=$1;", ctx.author.id)
-        channelRows = await connection.fetch("SELECT * FROM channelfilters WHERE userid=$1;", ctx.author.id)
-        await connection.close()
+        async with self.bot.database() as db:
+            textRows = await db("SELECT * FROM textfilters WHERE userid=$1;", ctx.author.id)
+            channelRows = await db("SELECT * FROM channelfilters WHERE userid=$1;", ctx.author.id)
+            serverRows = await db("SELECT * FROM serverfilters WHERE userid=$1;", ctx.author.id)
 
-        if len(textRows + channelRows) == 0:
+        if len(textRows + channelRows + serverRows) == 0:
             await ctx.send(f"You don't have any keywords. Set some up by running the `{ctx.prefix}addkeyword` command")
             return
 
         textFilters = [i['textfilter'] for i in textRows]
         channelFilters = [o.mention for o in [ctx.guild.get_channel(i['channelfilter']) for i in channelRows] if o is not None]
+        serverFilters = [i['serverfilter'] for i in serverRows]
 
-        await ctx.send(f"Text Filters: `{', '.join(textFilters)}` \n Channel Filters: {', '.join(channelFilters)}")
+        await ctx.send(f"Text Filters: `{', '.join(textFilters)}` \n Channel Filters: {', '.join(channelFilters)} \n Server Filters: {', '.join(serverFilters)}")
 
     @filter.group(name="remove", invoke_without_command=True)
     async def filter_remove(self, ctx):
@@ -60,9 +80,8 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
     async def filter_remove_text(self, ctx, filter:str):
         """Removes a text filter"""
 
-        connection = await asyncpg.connect(**self.bot.database_auth)
-        await connection.fetch("DELETE FROM textfilters WHERE userid=$1 and textfilter=$2;", ctx.author.id, filter)
-        await connection.close()
+        async with self.bot.database() as db:
+            await db("DELETE FROM textfilters WHERE userid=$1 and textfilter=$2;", ctx.author.id, filter)
         return await ctx.send("Done.")
 
     @filter_remove.command(name="channel")
@@ -70,10 +89,27 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
     async def filter_remove_channel(self, ctx, filter:discord.TextChannel):
         """Removes a channel filter"""
 
-        connection = await asyncpg.connect(**self.bot.database_auth)
-        await connection.fetch("DELETE FROM channelfilters WHERE userid=$1 and textfilter=$2;", ctx.author.id, filter)
-        await connection.close()
+        async with self.bot.database() as db:
+            await db("DELETE FROM channelfilters WHERE userid=$1 and textfilter=$2;", ctx.author.id, filter)
         return await ctx.send("Done.")
+
+    @filter_remove.command(name="server")
+    async def filter_remove_server(self, ctx, filter:int=None):
+        """Adds a server filter"""
+
+        if filter is None:
+            server = ctx.guild
+        else:
+            server = self.bot.get_guild(filter)
+
+        if server is None:
+            await ctx.send("You didn't provide a valid server ID")
+
+        # Opens a connection and inerts the text filter into the serverfilters database
+        async with self.bot.database() as db:
+            await db("DELETE FROM serverfilters WHERE userid=$1 AND serverfilter=$2);", ctx.author.id, filter)
+        
+        await ctx.send("Done.")
 
 
 
