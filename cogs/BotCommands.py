@@ -201,12 +201,12 @@ class BotCommands(commands.Cog, name="Bot Commands"):
                 serverFilters = await db("SELECT * FROM serverfilters WHERE userid=$1", member.id)
 
             for i in textFilters:
-                content = content.replace(textFilters[i]['textfilters'], "")
+                content = content.replace(i['textfilters'], "")
             for i in channelFilters:
-                if message.channel == channelFilters[i]['channelfilters']:
+                if message.channel == i['channelfilters']:
                     continue
             for i in serverFilters:
-                if message.guild == serverFilters[i]['serverfilters']:
+                if message.guild == i['serverfilters']:
                     continue
 
 
