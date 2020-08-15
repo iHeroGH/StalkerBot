@@ -207,7 +207,9 @@ class BotCommands(commands.Cog, name="Bot Commands"):
                 if i['channelfilter'] == message.channel.id:
                     content = ""
             for i in serverFilters:
-                if message.guild == i['serverfilter']:
+                print(i['serverfilter'])
+                if message.guild.id == i['serverfilter']:
+                    print(message.guild.id)
                     content = ""
 
             if content == "":
