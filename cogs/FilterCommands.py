@@ -54,12 +54,15 @@ class FilterCommands(commands.Cog, name = "Filter Commands"):
                     if rows[x] is not None:
                         textFilters.append(rows[x]['textfilter'])
                         channelFilters.append(rows[x]['channelfilter'])
+
+                    if textFilters is not None:
+                        textFilters = ', '.join(textFilters)
+                    if channelFilters is not None:
+                        channelFilters = ', '.join(channelFilters)
+
                     x = x + 1
 
-                textFilters = ', '.join(textFilters)
-                channelFilters = ', '.join(channelFilters)
-
-                await ctx.send(f"Text Filters: `{[textFilters]}` \n Channel Filters: `{channelFilters}`")
+                await ctx.send(f"Text Filters: `{textFilters}` \n Channel Filters: `{channelFilters}`")
 
         else:
             await ctx.send(f"You didn't provide an acceptable filter type (`{ctx.prefix} filter (text, channnel, list) (filter)`)")
