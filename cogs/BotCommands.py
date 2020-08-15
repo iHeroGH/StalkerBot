@@ -23,7 +23,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
         await ctx.send(url)
 
     @commands.command()
-    async def addkeyword(self, ctx, keyword):
+    async def addkeyword(self, ctx, keyword:str):
         """Adds a keyword to your list of DM triggers"""
 
         # Checks if the keyword is too short
@@ -54,7 +54,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
         await ctx.send(f"Added `{keyword}` into <@{ctx.author.id}>'s list")
 
     @commands.command()
-    async def removekeyword(self, ctx, keyword):
+    async def removekeyword(self, ctx, keyword:str):
         """Removes a keyword from your list of DM triggers"""
 
         keyword = keyword.lower()
@@ -99,7 +99,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
         await ctx.send(', '.join(keywordList))
 
     @commands.command()
-    async def suggest(self, ctx, *, suggestion=None):
+    async def suggest(self, ctx, *, suggestion:str=None):
         """
         Sends a suggestion message to the bot creator (@Hero#2313)
         """
@@ -201,7 +201,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
 
     @commands.command()
     @commands.is_owner()
-    async def listall(self, ctx, user: discord.User = None):
+    async def listall(self, ctx, user:discord.User=None):
         """Lists either a user's entire list of keywords or the entire database"""
 
         async with self.bot.database() as db:
@@ -219,7 +219,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
 
     @commands.command()
     @commands.is_owner()
-    async def forceremove(self, ctx, user: discord.User, keyword):
+    async def forceremove(self, ctx, user:discord.User, keyword:str):
         """Forcibly removes a keyword from a user"""
 
         async with self.bot.database() as db:
@@ -229,7 +229,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
 
     @commands.command()
     @commands.is_owner()
-    async def forceadd(self, ctx, user: discord.User, keyword):
+    async def forceadd(self, ctx, user:discord.User, keyword:str):
         """Forcibly adds a keyword to a user"""
 
         async with self.bot.database() as db:
