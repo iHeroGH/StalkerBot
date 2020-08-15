@@ -53,8 +53,8 @@ class FilterCommands(commands.Cog, name = "Filter Commands"):
                 while x != len(rows):
                     if rows[x]['textfilter'] is not None:
                         textFilters.append(rows[x]['textfilter'])
-                        textFilters = ', '.join(textFilters)
                     x = x + 1
+                textFilters = ', '.join(textFilters)
 
                 await ctx.send(f"Text Filters: `{textFilters}`")
 
