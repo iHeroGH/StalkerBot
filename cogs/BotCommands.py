@@ -201,19 +201,22 @@ class BotCommands(commands.Cog, name="Bot Commands"):
                 serverFilters = await db("SELECT * FROM serverfilters WHERE userid=$1", member.id)
 
             for i in textFilters:
-                content = content.replace(i['textfilter'], "")
+                if i['textfilter'] == message.content:
+                    content = ""
             for i in channelFilters:
                 if message.channel == i['channelfilter']:
-                    continue
+                    content = ""
             for i in serverFilters:
                 if message.guild == i['serverfilter']:
-                    continue
+                    content = ""
 
+            if content == "":
+                continue
 
             # Sends a message to a user if their keyword is said
             if (keyword in content.lower()):
                 if channel.permissions_for(member).read_messages:
-                    await member.send(f"<@!{message.author.id}> ({message.author.name}) has typed the keyword (`{keyword}`) in <#{message.channel.id}>. They typed `{message.content[:1900]}` {(message.jump_url)}")
+                    await member.send(f"<@!{message.author.id}> ({message.author.name}) has typed the keyword (`{keyword}`) in <#{message.channel.id}>. They typed `{content[:1900]}` {(message.jump_url)}")
                     alreadySent.append(member.id)
 
     @commands.command()
