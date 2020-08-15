@@ -37,7 +37,8 @@ class FilterCommands(commands.Cog, name = "Filter Commands"):
                 await connection.close()
 
             if filterType == acceptableFilterTypes[2]:
-
+                
+                print(filter)
                 connection = await asyncpg.connect(**self.bot.database_auth)
                 rows = await connection.fetch("select * from filters where userid = $1;", ctx.author.id)
                 await connection.close()
@@ -56,7 +57,14 @@ class FilterCommands(commands.Cog, name = "Filter Commands"):
                     x = x + 1
                 textFilters = ', '.join(textFilters)
 
-                await ctx.send(f"Text Filters: `{textFilters}`")
+                x = 0
+                while x != len(rows):
+                    if rows[x]['channelfilter'] is not None:
+                        channelFilters.append(rows[x]['channelfilter'])
+                    x = x + 1
+                channelFilters = ', '.join(channelFilters)
+
+                await ctx.send(f"Text Filters: `{textFilters}` \n Channel Filters: `{channelFilters}`")
 
         else:
             await ctx.send(f"You didn't provide an acceptable filter type (`{ctx.prefix} filter (text, channnel, list) (filter)`)")
