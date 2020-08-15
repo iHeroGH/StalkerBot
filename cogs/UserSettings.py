@@ -21,14 +21,17 @@ class UserSettings(commands.Cog, name="User Setting Commands"):
         if existingSettings:
             owntrigger = existingSettings[0]['owntrigger']
             quotetrigger = existingSettings[0]['quotetrigger']
+            embedmessage = existingSettings[0]['embedmessage']
         else:
             owntrigger = True
             quotetrigger = True
+            embedmessage = False
 
         # Options list so it looks good in the message
         options = [
             f"1\N{COMBINING ENCLOSING KEYCAP} Would you like to trigger your own keywords? (currently {owntrigger})",
-            f"2\N{COMBINING ENCLOSING KEYCAP} Would you like to be DMed if your keyword is said in a quote? (currently {quotetrigger})"
+            f"2\N{COMBINING ENCLOSING KEYCAP} Would you like to be DMed if your keyword is said in a quote? (currently {quotetrigger})",
+            f"3\N{COMBINING ENCLOSING KEYCAP} Would you like the DMs to be embedded? (currently {embedmessage})"
         ]
 
         # Sends the initial message
@@ -36,12 +39,14 @@ class UserSettings(commands.Cog, name="User Setting Commands"):
         # Reacts to the initial message with 1, 2, and check mark
         await message.add_reaction("1\N{COMBINING ENCLOSING KEYCAP}")
         await message.add_reaction("2\N{COMBINING ENCLOSING KEYCAP}")
+        await message.add_reaction("3\N{COMBINING ENCLOSING KEYCAP}")
         await message.add_reaction("\N{WHITE HEAVY CHECK MARK}")
 
         # List of valid emojis the user can react with
         validEmoji = [
             "1\N{COMBINING ENCLOSING KEYCAP}",
             "2\N{COMBINING ENCLOSING KEYCAP}",
+            "3\N{COMBINING ENCLOSING KEYCAP}",
             "\N{WHITE HEAVY CHECK MARK}"
         ]
 
@@ -69,11 +74,16 @@ class UserSettings(commands.Cog, name="User Setting Commands"):
                     await db("INSERT into usersettings (userid, quotetrigger) VALUES ($1, $2) on conflict (userid) do update set quotetrigger = $2", ctx.author.id, not quotetrigger)  
                 quotetrigger = not quotetrigger
             elif reaction.emoji == validEmoji[2]:
+                async with self.bot.database() as db:
+                    await db("INSERT into usersettings (userid, embedmessage) VALUES ($1, $2) on conflict (userid) do update set embedmessage = $2", ctx.author.id, not embedmessage)
+                embedmessage = not embedmessage
+            elif reaction.emoji == validEmoji[3]:
                 break
 
             newOptions = [
                 f"1\N{COMBINING ENCLOSING KEYCAP} Would you like to trigger your own keywords? (currently {owntrigger})",
-                f"2\N{COMBINING ENCLOSING KEYCAP} Would you like to be DMed if your keyword is said in a quote? (currently {quotetrigger})"
+                f"2\N{COMBINING ENCLOSING KEYCAP} Would you like to be DMed if your keyword is said in a quote? (currently {quotetrigger})",
+                f"3\N{COMBINING ENCLOSING KEYCAP} Would you like the DMs to be embedded? (currently {embedmessage})"
             ]
             await message.edit(content=("\n".join(newOptions)))
 

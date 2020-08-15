@@ -11,7 +11,8 @@ create TABLE prefix(
 create TABLE usersettings(
     userid bigint primary key,
     owntrigger boolean default true,
-    quotetrigger boolean default true
+    quotetrigger boolean default true,
+    embedmessage boolean default false
 );
 
 create TABLE textfilters(
