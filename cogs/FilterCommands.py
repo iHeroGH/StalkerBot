@@ -28,7 +28,7 @@ class FilterCommands(commands.Cog, name = "Filter Commands"):
             if filterType == acceptableFilterTypes[1]:
 
                 try: 
-                    self.bot.get_channel(filter.id)
+                    self.bot.get_channel(filter)
                 except AttributeError:
                     return await ctx.send("That isn't an existing channel")
 
@@ -51,18 +51,12 @@ class FilterCommands(commands.Cog, name = "Filter Commands"):
                 
                 x = 0
                 while x != len(rows):
-                    if rows[x] is not None:
+                    if rows[x]['textfilter'] is not None:
                         textFilters.append(rows[x]['textfilter'])
-                        channelFilters.append(rows[x]['channelfilter'])
-
-                    if textFilters is not None:
                         textFilters = ', '.join(textFilters)
-                    if channelFilters is not None:
-                        channelFilters = ', '.join(channelFilters)
-
                     x = x + 1
 
-                await ctx.send(f"Text Filters: `{textFilters}` \n Channel Filters: `{channelFilters}`")
+                await ctx.send(f"Text Filters: `{textFilters}`")
 
         else:
             await ctx.send(f"You didn't provide an acceptable filter type (`{ctx.prefix} filter (text, channnel, list) (filter)`)")
