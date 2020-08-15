@@ -9,68 +9,87 @@ class FilterCommands(commands.Cog, name = "Filter Commands"):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
+    @commands.group()
     async def filter(self, ctx, filterType, filter = None):
         """Sets a filter provided a type (can be "list" which lists all your filters)"""
-        
-        acceptableFilterTypes = ["text", "channel", "list"]
 
-        if filterType in acceptableFilterTypes:
-            
-            if filterType == acceptableFilterTypes[0]:
+        pass
 
-                connection = await asyncpg.connect(**self.bot.database_auth)
-                await connection.fetch("INSERT INTO filters (userid, textfilter) VALUES($1, $2);", ctx.author.id, filter)
-                await connection.close()
-                await ctx.send(f"Added `{filter}` to your filter list")
-                return
+    @filter.command()
+    async def text(self, ctx, filter):
+        """Adds a text filter"""
 
-            if filterType == acceptableFilterTypes[1]:
+        connection = await asyncpg.connect(**self.bot.database_auth)
+        await connection.fetch("INSERT INTO filters (userid, textfilter) VALUES($1, $2);", ctx.author.id, filter)
+        await connection.close()
+        await ctx.send(f"Added `{filter}` to your text filter list")
 
-                try: 
-                    self.bot.get_channel(filter)
-                except AttributeError:
-                    return await ctx.send("That isn't an existing channel")
+    @filter.command()
+    @commands.guild_only()
+    async def channel(self, ctx, filter:discord.TextChannel):
+        """Adds a channel filter"""
 
-                connection = await asyncpg.connect(**self.bot.database_auth)
-                await connection.fetch("INSERT INTO filters (userid, channelfilter) VALUES($1, $2);", ctx.author.id, filter)
-                await connection.close()
-
-            if filterType == acceptableFilterTypes[2]:
+        connection = await asyncpg.connect(**self.bot.database_auth)
+        await connection.fetch("INSERT INTO filters (userid, channelfilter) VALUES($1, $2);", ctx.author.id, filter)
+        await connection.close()
+        await ctx.send(f"Added {filter.mention} to your channel filter list")
                 
-                print(filter)
-                connection = await asyncpg.connect(**self.bot.database_auth)
-                rows = await connection.fetch("select * from filters where userid = $1;", ctx.author.id)
-                await connection.close()
+    @filter.command(name="list")
+    async def _list(self, ctx):
+        """Lists all your filters"""
 
-                if len(rows) == 0:
-                    await ctx.send(f"You don't have any keywords. Set some up by running the `{ctx.prefix}addkeyword` command")
-                    return
+        connection = await asyncpg.connect(**self.bot.database_auth)
+        rows = await connection.fetch("select * from filters where userid = $1;", ctx.author.id)
+        await connection.close()
 
-                textFilters = []
-                channelFilters = []
-                
-                x = 0
-                while x != len(rows):
-                    if rows[x]['textfilter'] is not None:
-                        textFilters.append(rows[x]['textfilter'])
-                    x = x + 1
-                textFilters = ', '.join(textFilters)
+        if len(rows) == 0:
+            await ctx.send(f"You don't have any keywords. Set some up by running the `{ctx.prefix}addkeyword` command")
+            return
 
-                x = 0
-                while x != len(rows):
-                    if rows[x]['channelfilter'] is not None:
-                        channelFilters.append(rows[x]['channelfilter'])
-                    x = x + 1
-                channelFilters = ', '.join(channelFilters)
+        textFilters = []
+        channelFilters = []
+        
+        x = 0
+        while x != len(rows):
+            if rows[x]['textfilter'] is not None:
+                textFilters.append(rows[x]['textfilter'])
+            x = x + 1
+        textFilters = ', '.join(textFilters)
 
-                await ctx.send(f"Text Filters: `{textFilters}` \n Channel Filters: `{channelFilters}`")
+        x = 0
+        while x != len(rows):
+            if rows[x]['channelfilter'] is not None:
+                channelFilters.append(rows[x]['channelfilter'])
+            x = x + 1
+        channelFilters = ', '.join(channelFilters)
 
-        else:
-            await ctx.send(f"You didn't provide an acceptable filter type (`{ctx.prefix} filter (text, channnel, list) (filter)`)")
+        await ctx.send(f"Text Filters: `{textFilters}` \n Channel Filters: `{channelFilters}`")
 
+
+    @filter.group()
+    async def remove(self, ctx):
+        """Removes a filter (text or channel)"""
+        pass
+
+    @remove.command(name="text")
+    async def _text(self, ctx, filter):
+        """Removes a text filter"""
 
         
+        connection = await asyncpg.connect(**self.bot.database_auth)
+        await connection.fetch("DELETE FROM filters WHERE userid=$1 and textfilter=$2;", ctx.author.id, filter)
+        await connection.close()
+
+    @remove.command(name="channel")
+    @commands.guild_only()
+    async def _channel(self, ctx, filter:discord.TextChannel):
+        """Removes a channel filter"""
+
+        connection = await asyncpg.connect(**self.bot.database_auth)
+        await connection.fetch("DELETE FROM filters WHERE userid=$1 and textfilter=$2;", ctx.author.id, filter)
+        await connection.close()
+
+
 
 def setup(bot):
     bot.add_cog(FilterCommands(bot))
