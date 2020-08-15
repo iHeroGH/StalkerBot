@@ -1,5 +1,6 @@
 import aiohttp
 import io
+import random
 
 import discord
 from discord.ext import commands
@@ -194,7 +195,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
                 pass
             content = '\n'.join(nonQuoted)
 
-            # Filter things yay
+            # Filters
             async with self.bot.database() as db:
                 textFilters = await db("SELECT * FROM textfilters WHERE userid=$1", member.id)
                 channelFilters = await db("SELECT * FROM channelfilters WHERE userid=$1", member.id)
@@ -213,9 +214,23 @@ class BotCommands(commands.Cog, name="Bot Commands"):
             if content == "":
                 continue
 
+
             # Sends a message to a user if their keyword is said
             if (keyword in content.lower()):
                 if channel.permissions_for(member).read_messages:
+                    # Embed message
+                    if settingDict[member.id]['embedmessage']:
+                        embed = discord.Embed()
+                        color = random.randint(0, 0xffffff)
+                        embed.color = color  
+                        embed.set_author(name=f"{message.author.name}", url=f"{(message.jump_url)}", icon_url=f"{message.author.avatar_url}")
+                        embed.title = "Message Content"  # Title
+                        embed.description = f"{content}"  # Description
+                        embed.set_footer(text=f"Keyword: {keyword}")
+                
+                        await member.send(embed=embed)
+                        continue
+                    
                     await member.send(f"<@!{message.author.id}> ({message.author.name}) has typed the keyword (`{keyword}`) in <#{message.channel.id}>. They typed `{content[:1900]}` {(message.jump_url)}")
                     alreadySent.append(member.id)
 
