@@ -215,7 +215,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
             user = self.bot.get_user(x['userid']) or await self.bot.fetch_user(x['userid'])
             text.append(f"User: {user.name}({user.id}) - Keyword: {x['keyword']}")
         text = "\n".join(sorted(text)) + "\n"
-        await ctx.send(file=discord.File(io.StringIIO(text), filename="AllUsers.txt"))
+        await ctx.send(file=discord.File(io.StringIO(text), filename="AllUsers.txt"))
 
     @commands.command()
     @commands.is_owner()
