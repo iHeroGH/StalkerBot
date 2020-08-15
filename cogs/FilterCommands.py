@@ -56,8 +56,9 @@ class FilterCommands(commands.Cog, name = "Filter Commands"):
         textFilters = ', '.join(textFilters)
 
         for i in channelRows:
-            if ctx.guild.get_channel(i['channelfilter']) is not None:
-                channelFilters.append(i['channelfilter'])
+            channel = ctx.guild.get_channel(i['channelfilter'])
+            if channel is not None:
+                channelFilters.append(channel.mention)
         channelFilters = ', '.join(channelFilters)
 
 
