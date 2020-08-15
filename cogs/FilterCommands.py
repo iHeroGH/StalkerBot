@@ -68,7 +68,7 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
         channelFilters = [o.mention for o in [ctx.guild.get_channel(i['channelfilter']) for i in channelRows] if o is not None]
         serverFilters = [i['serverfilter'] for i in serverRows]
         serverObjects = [self.bot.get_guild(o) for o in serverFilters]
-        serverNames = [serverObjects.name for i in serverObjects]
+        serverNames = [i.name for i in serverObjects]
 
         await ctx.send(f"Text Filters: `{', '.join(textFilters)}` \n Channel Filters: {', '.join(channelFilters)} \n Server Filters: {', '.join(serverNames)}")
 
