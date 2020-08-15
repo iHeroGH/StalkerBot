@@ -194,6 +194,22 @@ class BotCommands(commands.Cog, name="Bot Commands"):
                 pass
             content = '\n'.join(nonQuoted)
 
+            # Filter things yay
+            async with self.bot.database() as db:
+                textFilters = await db("SELECT * FROM textfilters WHERE userid=$1", member.id)
+                channelFilters = await db("SELECT * FROM channelfilters WHERE userid=$1", member.id)
+                serverFilters = await db("SELECT * FROM serverfilters WHERE userid=$1", member.id)
+
+            for i in textFilters:
+                content = content.replace(textFilters[i]['textfilters'], "")
+            for i in channelFilters:
+                if message.channel == channelFilters[i]['channelfilters']:
+                    continue
+            for i in serverFilters:
+                if message.guild == serverFilters[i]['serverfilters']:
+                    continue
+
+
             # Sends a message to a user if their keyword is said
             if (keyword in content.lower()):
                 if channel.permissions_for(member).read_messages:
