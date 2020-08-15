@@ -70,7 +70,7 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
         serverObjects = [self.bot.get_guild(o) for o in serverFilters]
         serverNames = [i.name for i in serverObjects]
 
-        await ctx.send(f"Text Filters: `{', '.join(textFilters)}` \n Channel Filters: {', '.join(channelFilters)} \n Server Filters: {', '.join(serverNames)}")
+        await ctx.send(f"Text Filters: `{', '.join(textFilters)}` \n Channel Filters: {', '.join(channelFilters)} \n Server Filters: `{', '.join(serverNames)}`")
 
     @filter.group(name="remove", invoke_without_command=True)
     async def filter_remove(self, ctx):
