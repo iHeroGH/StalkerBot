@@ -213,6 +213,8 @@ class BotCommands(commands.Cog, name = "Bot Commands"):
     @commands.command()
     @commands.is_owner()
     async def listall(self, ctx, user: discord.User = None):
+        """Lists either a user's entire list of keywords or the entire database"""
+
         connection = await asyncpg.connect(**self.bot.database_auth)
         if user is not None:
             full = await connection.fetch("select * from keywords where userid = $1;", user.id)
@@ -237,6 +239,8 @@ class BotCommands(commands.Cog, name = "Bot Commands"):
     @commands.command()
     @commands.is_owner()
     async def forceremove(self, ctx, user: discord.User, keyword):
+        """Forcibly removes a keyword from a user"""
+
         connection = await asyncpg.connect(**self.bot.database_auth)
         await connection.fetch("delete from keywords where userid = $1 and keyword = $2;", user.id, keyword)
         await connection.close()
@@ -246,10 +250,24 @@ class BotCommands(commands.Cog, name = "Bot Commands"):
     @commands.command()
     @commands.is_owner()
     async def forceadd(self, ctx, user: discord.User, keyword):
+        """Forcibly adds a keyword to a user"""
+
         connection = await asyncpg.connect(**self.bot.database_auth)
         await connection.fetch("insert into keywords VALUES($1, $2);", user.id, keyword)
         await connection.close()
         await ctx.send(f"Added `{keyword}` to {user.name}'s list")
+
+    @commands.command()
+    @commands.is_owner()
+    async def countusers(self, ctx):
+        """Counts how many unique user IDs there are""" 
+        
+        connection = await asyncpg.connect(**self.bot.database_auth)
+        rows = await connection.fetch("SELECT DISTINCT userid FROM keywords;")
+        await connection.close()
+        
+        await ctx.send(f"`{len(rows)}` users use your dumbass of a bot. How's it feel, bitch?")
+
 
 
 def setup(bot):
