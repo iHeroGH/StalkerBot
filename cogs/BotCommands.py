@@ -7,7 +7,8 @@ import asyncpg
 
 
 class BotCommands(commands.Cog, name="Bot Commands"):
-
+    MAXIMUM_ALLOWED_KEYWORDS = 10
+    MINIMUM_KEYWORD_LENGTH = 2
     def __init__(self, bot):
         self.bot = bot
 
@@ -27,8 +28,8 @@ class BotCommands(commands.Cog, name="Bot Commands"):
         """Adds a keyword to your list of DM triggers"""
 
         # Checks if the keyword is too short
-        if len(keyword) < 3:
-            return await ctx.send("That keyword is too short. It must be at least 3 characters")
+        if len(keyword) < self.MINIMUM_KEYWORD_LENGTH:
+            return await ctx.send(f"That keyword is too short. It must be at least {self.MINIMUM_KEYWORD_LENGTH} characters")
 
         keyword = keyword.lower()
 
@@ -41,10 +42,10 @@ class BotCommands(commands.Cog, name="Bot Commands"):
                 await ctx.send("You already have that as a keyword")
                 return
 
-            # Checks if the user has the maxiumum amount of keywords (5)
+            # Checks if the user has the maxiumum amount of keywords (10)
             rows = await db("select * from keywords where userid = $1;", ctx.author.id)
-            if len(rows) >= 5:
-                await ctx.send("You already have the maximum amount of keywords (5)")
+            if len(rows) >= self.MAXIMUM_ALLOWED_KEYWORDS:
+                await ctx.send(f"You already have the maximum amount of keywords ({self.MAXIMUM_ALLOWED_KEYWORDS})")
                 return
 
             # Adds the keyword into the list
