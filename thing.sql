@@ -14,8 +14,14 @@ create TABLE usersettings(
     quotetrigger boolean default true
 );
 
-create TABLE filters(
+create TABLE textfilters(
     userid bigint,
-    textfilter text,
-    channelfilter text
+    textfilter text
 );
+
+create TABLE channelfilters(
+    userid bigint,
+    channelfilter BIGINT,
+    PRIMARY KEY (userid, channelfilter)
+);
+

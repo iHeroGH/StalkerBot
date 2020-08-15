@@ -20,7 +20,7 @@ class FilterCommands(commands.Cog, name = "Filter Commands"):
         """Adds a text filter"""
 
         connection = await asyncpg.connect(**self.bot.database_auth)
-        await connection.fetch("INSERT INTO filters (userid, textfilter) VALUES($1, $2);", ctx.author.id, filter)
+        await connection.fetch("INSERT INTO textfilters (userid, textfilter) VALUES($1, $2);", ctx.author.id, filter)
         await connection.close()
         await ctx.send(f"Added `{filter}` to your text filter list")
 
@@ -30,7 +30,7 @@ class FilterCommands(commands.Cog, name = "Filter Commands"):
         """Adds a channel filter"""
 
         connection = await asyncpg.connect(**self.bot.database_auth)
-        await connection.fetch("INSERT INTO filters (userid, channelfilter) VALUES($1, $2);", ctx.author.id, filter)
+        await connection.fetch("INSERT INTO channelfilters (userid, channelfilter) VALUES($1, $2);", ctx.author.id, filter)
         await connection.close()
         await ctx.send(f"Added {filter.mention} to your channel filter list")
                 
@@ -39,10 +39,11 @@ class FilterCommands(commands.Cog, name = "Filter Commands"):
         """Lists all your filters"""
 
         connection = await asyncpg.connect(**self.bot.database_auth)
-        rows = await connection.fetch("select * from filters where userid = $1;", ctx.author.id)
+        textRows = await connection.fetch("select * from textfilters where userid = $1;", ctx.author.id)
+        channelRows = await connection.fetch("select * from channelfilters where userid = $1;", ctx.author.id)
         await connection.close()
 
-        if len(rows) == 0:
+        if len(textRows) == 0 and len(channelRows) == 0:
             await ctx.send(f"You don't have any keywords. Set some up by running the `{ctx.prefix}addkeyword` command")
             return
 
@@ -50,20 +51,20 @@ class FilterCommands(commands.Cog, name = "Filter Commands"):
         channelFilters = []
         
         x = 0
-        while x != len(rows):
-            if rows[x]['textfilter'] is not None:
-                textFilters.append(rows[x]['textfilter'])
+        while x != len(textRows):
+            if textRows[x]['textfilter'] is not None:
+                textFilters.append(textRows[x]['textfilter'])
             x = x + 1
         textFilters = ', '.join(textFilters)
 
         x = 0
-        while x != len(rows):
-            if rows[x]['channelfilter'] is not None:
-                channelFilters.append(rows[x]['channelfilter'])
+        while x != len(channelRows):
+            if channelRows[x]['channelfilter'] is not None:
+                channelFilters.append(channelRows[x]['channelfilter'])
             x = x + 1
         channelFilters = ', '.join(channelFilters)
 
-        await ctx.send(f"Text Filters: `{textFilters}` \n Channel Filters: `{channelFilters}`")
+        await ctx.send(f"Text Filters: `{textFilters}` \n Channel Filters: {channelFilters}")
 
 
     @filter.group(invoke_without_command = True)
@@ -77,7 +78,7 @@ class FilterCommands(commands.Cog, name = "Filter Commands"):
 
         
         connection = await asyncpg.connect(**self.bot.database_auth)
-        await connection.fetch("DELETE FROM filters WHERE userid=$1 and textfilter=$2;", ctx.author.id, filter)
+        await connection.fetch("DELETE FROM textfilters WHERE userid=$1 and textfilter=$2;", ctx.author.id, filter)
         await connection.close()
 
     @remove.command(name="channel")
@@ -86,7 +87,7 @@ class FilterCommands(commands.Cog, name = "Filter Commands"):
         """Removes a channel filter"""
 
         connection = await asyncpg.connect(**self.bot.database_auth)
-        await connection.fetch("DELETE FROM filters WHERE userid=$1 and textfilter=$2;", ctx.author.id, filter)
+        await connection.fetch("DELETE FROM channelfilters WHERE userid=$1 and textfilter=$2;", ctx.author.id, filter)
         await connection.close()
 
 
