@@ -30,7 +30,7 @@ class LoggerAndHandler(commands.Cog, name="Logger And Handler"):
     async def countguilds(self, ctx):
         """Counts how many guilds have the bot"""
 
-        await ctx.send(f"The bot is in {len(self.bot.guilds)} guilds.")
+        await ctx.send(f"The bot is in `{len(self.bot.guilds)}` guilds.")
 
 
 
