@@ -208,7 +208,9 @@ class BotCommands(commands.Cog, name="Bot Commands"):
                     if i['textfilter'] == textItem:
                         textItem = ""
                         newListContent.append(textItem)
-                        print(newListContent)
+                    else:
+                        newListContent.append(textItem)
+            print(newListContent)
             content = " ".join(newListContent)
             for i in channelFilters:
                 if i['channelfilter'] == message.channel.id:
