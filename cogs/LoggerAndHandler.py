@@ -14,6 +14,7 @@ class LoggerAndHandler(commands.Cog, name="Logger And Handler"):
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
+        """Sends the name and membercount of every server the bot joins"""
 
         async with aiohttp.ClientSession() as session:
             webhook = discord.Webhook.from_url('https://discordapp.com/api/webhooks/744353242322043001/V3WMdShI8L8LZLStNUBaqG2WI-qZrdofCQFM1QkW4oLTIcRA4TMC5ffKFpS2JyIXp96w', adapter=discord.AsyncWebhookAdapter(session))
@@ -22,6 +23,7 @@ class LoggerAndHandler(commands.Cog, name="Logger And Handler"):
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
+        """Sends the name and membercount of every server the bot leaves"""
 
         async with aiohttp.ClientSession() as session:
             webhook = discord.Webhook.from_url('https://discordapp.com/api/webhooks/744353242322043001/V3WMdShI8L8LZLStNUBaqG2WI-qZrdofCQFM1QkW4oLTIcRA4TMC5ffKFpS2JyIXp96w', adapter=discord.AsyncWebhookAdapter(session))
@@ -35,21 +37,18 @@ class LoggerAndHandler(commands.Cog, name="Logger And Handler"):
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
-
+        """Sends all errors to a logging channel with a webhook"""
 
         error = str(error)
-        if len(error) > 1970:
-            data = io.StringIO(error)
-            data.seek(0)
-            file = discord.File(data, filename="error.py")
-            fileSend = file
-        else:
-            fileSend = f"```py\n{error}```"
 
         async with aiohttp.ClientSession() as session:
             webhook = discord.Webhook.from_url('https://discordapp.com/api/webhooks/744353242322043001/V3WMdShI8L8LZLStNUBaqG2WI-qZrdofCQFM1QkW4oLTIcRA4TMC5ffKFpS2JyIXp96w', adapter=discord.AsyncWebhookAdapter(session))
-            
-            await webhook.send(fileSend)
+            if len(error) >= 1970:
+                data = io.StringIO(error)
+                data.seek(0)
+                await webhook.send(file=discord.File(data, filename="error.py"))
+            else:
+                await webhook.send(f"```py\n{error}```")
 
 
 
