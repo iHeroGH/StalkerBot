@@ -157,20 +157,20 @@ class BotCommands(commands.Cog, name="Bot Commands"):
             "keywords": [],
             "settings": {},
             "filters": {
-                "textfilter": [],
-                "channelfilter": [],
-                "serverfilter": [],
+                "textfilters": [],
+                "channelfilters": [],
+                "serverfilters": [],
             }
         }
         settingDict = collections.defaultdict(lambda: copy.deepcopy(base_user_settings))
         for row in settingRows:
             settingDict[row['userid']]['settings'] = dict(row)  # Just straight copy this row from the database
         for row in textFilters:
-            settingDict[row['userid']]['filters']['textfilter'].append(row['textfilter'])  # Add the item to a list
+            settingDict[row['userid']]['filters']['textfilters'].append(row['textfilter'])  # Add the item to a list
         for row in channelFilters:
-            settingDict[row['userid']]['filters']['channelfilter'].append(row['channelfilter'])  # Add the item to a list
+            settingDict[row['userid']]['filters']['channelfilters'].append(row['channelfilter'])  # Add the item to a list
         for row in serverFilters:
-            settingDict[row['userid']]['filters']['serverfilter'].append(row['serverfilter'])  # Add the item to a list
+            settingDict[row['userid']]['filters']['serverfilters'].append(row['serverfilter'])  # Add the item to a list
 
         # Gets the users and keywords for those users
         alreadySent = []
