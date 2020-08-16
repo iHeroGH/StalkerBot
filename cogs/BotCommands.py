@@ -201,14 +201,8 @@ class BotCommands(commands.Cog, name="Bot Commands"):
                 channelFilters = await db("SELECT * FROM channelfilters WHERE userid=$1", member.id)
                 serverFilters = await db("SELECT * FROM serverfilters WHERE userid=$1", member.id)
 
-            splitContent = message.content.split(" ")
-            newListContent = []
             for i in textFilters:
-                for textItem in splitContent:
-                    if i['textfilter'] == textItem:
-                        textItem = ""
-            newListContent.append(textItem)
-            content = " ".join(newListContent)
+                content = content.replace(i, "")
             for i in channelFilters:
                 if i['channelfilter'] == message.channel.id:
                     content = ""
