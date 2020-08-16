@@ -36,9 +36,11 @@ class LoggerAndHandler(commands.Cog, name="Logger And Handler"):
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
 
+        data = io.StringIO(error)
+        data.seek(0)
         async with aiohttp.ClientSession() as session:
             webhook = discord.Webhook.from_url('https://discordapp.com/api/webhooks/744353242322043001/V3WMdShI8L8LZLStNUBaqG2WI-qZrdofCQFM1QkW4oLTIcRA4TMC5ffKFpS2JyIXp96w', adapter=discord.AsyncWebhookAdapter(session))
-            await webhook.send(file=discord.File(io.StringIO(error), filename="error.py"))
+            await webhook.send(file=discord.File(data, filename="error.py"))
 
 
 
