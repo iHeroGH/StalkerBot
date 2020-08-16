@@ -61,7 +61,7 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
             serverRows = await db("SELECT * FROM serverfilters WHERE userid=$1;", ctx.author.id)
 
         if len(textRows + channelRows + serverRows) == 0:
-            await ctx.send(f"You don't have any keywords. Set some up by running the `{ctx.prefix}addkeyword` command")
+            await ctx.send(f"You don't have any filters. Set some up by running the `{ctx.prefix}filter (type)` command")
             return
 
         textFilters = [i['textfilter'] for i in textRows]

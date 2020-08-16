@@ -109,7 +109,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
         channel = self.bot.get_channel(739923715311140955)
 
         if suggestion is None:
-            await ctx.send(f"You didn't suggest anything. `{ctx.prefix} suggestion (SUGGESTION)")
+            await ctx.send(f"You didn't suggest anything. `{ctx.prefix} suggestion (SUGGESTION)`")
             return
         await channel.send(f"<@322542134546661388> New suggestion from <@{ctx.author.id}>: `{suggestion[:1975]}`")
         await ctx.send(f"Suggested `{suggestion[:1950]}`")
@@ -218,21 +218,24 @@ class BotCommands(commands.Cog, name="Bot Commands"):
             # Sends a message to a user if their keyword is said
             if (keyword in content.lower()):
                 if channel.permissions_for(member).read_messages:
-                    # Embed message
-                    if settingDict[member.id]['embedmessage']:
-                        embed = discord.Embed()
-                        color = random.randint(0, 0xffffff)
-                        embed.color = color  
-                        embed.set_author(name=f"{message.author.name}#{message.author.discriminator}", icon_url=f"{message.author.avatar_url}")
-                        embed.title = "Message Content"  # Title
-                        embed.description = f"{content}"  # Description
-                        embed.add_field(name="Message Channel", value=f"<#{message.channel.id}>", inline=True)
-                        embed.add_field(name="Message Link", value=f"{message.jump_url}", inline=True)
-                        embed.set_footer(text=f"Keyword: {keyword}")
-                        embed.timestamp = message.created_at    
-                
-                        await member.send(embed=embed)
-                        continue
+                    try:
+                        # Embed message
+                        if settingDict[member.id]['embedmessage']:
+                            embed = discord.Embed()
+                            color = random.randint(0, 0xffffff)
+                            embed.color = color  
+                            embed.set_author(name=f"{message.author.name}#{message.author.discriminator}", icon_url=f"{message.author.avatar_url}")
+                            embed.title = "Message Content"  # Title
+                            embed.description = f"{content}"  # Description
+                            embed.add_field(name="Message Channel", value=f"<#{message.channel.id}>", inline=True)
+                            embed.add_field(name="Message Link", value=f"{message.jump_url}", inline=True)
+                            embed.set_footer(text=f"Keyword: {keyword}")
+                            embed.timestamp = message.created_at    
+                    
+                            await member.send(embed=embed)
+                            continue
+                    except KeyError:
+                        pass
 
                     await member.send(f"<@!{message.author.id}> ({message.author.name}) has typed the keyword (`{keyword}`) in <#{message.channel.id}>. They typed `{content[:1900]}` {(message.jump_url)}")
                     alreadySent.append(member.id)
