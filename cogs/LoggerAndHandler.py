@@ -36,7 +36,7 @@ class LoggerAndHandler(commands.Cog, name="Logger And Handler"):
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
 
-        error.read().decode('utf-8')
+        error = str(error)
         data = io.StringIO(error)
         data.seek(0)
         async with aiohttp.ClientSession() as session:
