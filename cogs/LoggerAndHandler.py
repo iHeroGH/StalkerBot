@@ -16,7 +16,7 @@ class LoggerAndHandler(commands.Cog, name="Logger And Handler"):
 
         async with aiohttp.ClientSession() as session:
             webhook = discord.Webhook.from_url('https://discordapp.com/api/webhooks/744353242322043001/V3WMdShI8L8LZLStNUBaqG2WI-qZrdofCQFM1QkW4oLTIcRA4TMC5ffKFpS2JyIXp96w', adapter=discord.AsyncWebhookAdapter(session))
-            await webhook.send(f'StalkerBot was added to `{guild.name}` (`{guild.id}`). `{len(guild.members)}` members.', username='On Guild Join Event')
+            await webhook.send(f'StalkerBot was added to `{guild.name}` (`{guild.id}`). `{len([i for i in guild.members if not i.bot])}` members.', username='On Guild Join Event')
 
 
     @commands.Cog.listener()
@@ -24,7 +24,7 @@ class LoggerAndHandler(commands.Cog, name="Logger And Handler"):
 
         async with aiohttp.ClientSession() as session:
             webhook = discord.Webhook.from_url('https://discordapp.com/api/webhooks/744353242322043001/V3WMdShI8L8LZLStNUBaqG2WI-qZrdofCQFM1QkW4oLTIcRA4TMC5ffKFpS2JyIXp96w', adapter=discord.AsyncWebhookAdapter(session))
-            await webhook.send(f'StalkerBot was removed from `{guild.name}` (`{guild.id}`). `{len(guild.members)}` members.', username='On Guild Leave Event')
+            await webhook.send(f'StalkerBot was removed from `{guild.name}` (`{guild.id}`). `{len([i for i in guild.members if not i.bot])}` members.', username='On Guild Leave Event')
 
 
 
