@@ -72,4 +72,5 @@ async def change_presence_loop():
 
 [bot.load_extension(i[:-3].replace(os.sep, ".")) for i in glob.glob("cogs/*.py")]
 bot.load_extension("jishaku")
+bot.load_extension("pynacl")
 bot.run(bot_token)
