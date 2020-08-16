@@ -203,13 +203,13 @@ class BotCommands(commands.Cog, name="Bot Commands"):
             content = '\n'.join(nonQuoted)
 
             # Filters
-            for i in settingDict[member.id]['serverfilters']:
+            for i in settingDict[member.id]['filters']['serverfilters']:
                 if i == message.guild.id:
                     content = None
-            for i in settingDict[member.id]['channelfilters']:
+            for i in settingDict[member.id]['filters']['channelfilters']:
                 if i == message.channel.id:
                     content = None
-            for i in settingDict[member.id]['textfilters']:
+            for i in settingDict[member.id]['filters']['textfilters']:
                 if i == message.content:
                     content = None
 
