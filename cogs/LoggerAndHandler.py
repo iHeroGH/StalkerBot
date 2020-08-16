@@ -30,6 +30,7 @@ class LoggerAndHandler(commands.Cog, name="Logger And Handler"):
             await webhook.send(f'StalkerBot was removed from `{guild.name}` (`{guild.id}`). `{len([i for i in guild.members if not i.bot])}` members.', username='On Guild Leave Event')
 
     @commands.command()
+    @commands.is_owner()
     async def countguilds(self, ctx):
         """Counts how many guilds have the bot"""
 
