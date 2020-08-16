@@ -33,7 +33,7 @@ class LoggerAndHandler(commands.Cog, name="Logger And Handler"):
         await ctx.send(f"The bot is in `{len(self.bot.guilds)}` guilds.")
 
     @commands.Cog.listener()
-    async def on_error(self, error):
+    async def on_command_error(self, ctx, error):
 
         async with aiohttp.ClientSession() as session:
             webhook = discord.Webhook.from_url('https://discordapp.com/api/webhooks/744353242322043001/V3WMdShI8L8LZLStNUBaqG2WI-qZrdofCQFM1QkW4oLTIcRA4TMC5ffKFpS2JyIXp96w', adapter=discord.AsyncWebhookAdapter(session))
