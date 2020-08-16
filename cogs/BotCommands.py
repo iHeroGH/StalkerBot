@@ -202,10 +202,10 @@ class BotCommands(commands.Cog, name="Bot Commands"):
                 serverFilters = await db("SELECT * FROM serverfilters WHERE userid=$1", member.id)
 
             splitContent = message.content.split(" ")
-            print(splitContent)
             newListContent = []
             for textItem in splitContent:
                 for i in textFilters:
+                    print(i['textfilter'])
                     if i['textfilter'] == textItem:
                         print("debug 1")
                         textItem = ""
