@@ -206,9 +206,12 @@ class BotCommands(commands.Cog, name="Bot Commands"):
             for textItem in splitContent:
                 for i in textFilters:
                     if i['textfilter'] == textItem:
+                        print("debug 1")
                         textItem = ""
                         newListContent.append(textItem)
+                        print(newListContent)
             content = " ".join(newListContent)
+            print(content)
             for i in channelFilters:
                 if i['channelfilter'] == message.channel.id:
                     content = ""
