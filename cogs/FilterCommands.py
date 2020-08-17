@@ -52,13 +52,10 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
         await ctx.send(f"Added `{filter}` to your server filter list")
 
     @filter.command(name="user")
-    async def filter_user(self, ctx, filter:int=None):
+    async def filter_user(self, ctx, filter:discord.User):
         """Adds a server filter"""
 
-        if filter is not None:
-            user = self.bot.get_user(filter)
-
-        if user is None:
+        if filter is None:
             await ctx.send("You didn't provide a valid user ID")
 
         # Opens a connection and inerts the user filter into the serverfilters database
@@ -90,8 +87,17 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
         serverNames = [i.name for i in serverObjects]
 
         userFilters = [i['userfilter'] for i in userRows]
-        userObjects = [self.bot.get_user(o) for o in userFilters]
-        userNames = [i.mention for i in userObjects]
+        userNames = [i.mention for i in userFilters]
+
+        # Empty Checks
+        if len(textFilters) < 1:
+            textFilters = ["No text filters have been set up"]
+        if len(channelFilters) < 1:
+            channelFilters = ["No channel filters have been set up"]
+        if len(serverNames) < 1:
+            serverNames = ["No server filters have been set up"]
+        if len(userNames) < 1:
+            userNames = ["No user filters have been set up"]
 
         await ctx.send(f"Text Filters: `{', '.join(textFilters)}` \n Channel Filters: {', '.join(channelFilters)} \n Server Filters: `{', '.join(serverNames)}` \n User Filters: `{', '.join(userNames)}`")
 
@@ -137,13 +143,10 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
         await ctx.send("Done.")
 
     @filter_remove.command(name="user")
-    async def filter_remove_user(self, ctx, filter:int=None):
+    async def filter_remove_user(self, ctx, filter:discord.User):
         """Adds a server filter"""
 
-        if filter is not None:
-            user = self.bot.get_user(filter)
-
-        if user is None:
+        if filter is None:
             await ctx.send("You didn't provide a valid user ID")
 
         # Opens a connection and inerts the user filter into the userfilters database
