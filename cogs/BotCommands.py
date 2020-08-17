@@ -152,6 +152,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
             textFilters = await db("SELECT * FROM textfilters")
             channelFilters = await db("SELECT * FROM channelfilters")
             serverFilters = await db("SELECT * FROM serverfilters")
+            userFilters = await db("SELECT * FROM userfilters")
 
         # Split the database rows down into easily-worable dictionaries
         base_user_settings = {
@@ -161,6 +162,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
                 "textfilters": [],
                 "channelfilters": [],
                 "serverfilters": [],
+                "userfilters": [],
             }
         }
         settingDict = collections.defaultdict(lambda: copy.deepcopy(base_user_settings))
@@ -172,6 +174,8 @@ class BotCommands(commands.Cog, name="Bot Commands"):
             settingDict[row['userid']]['filters']['channelfilters'].append(row['channelfilter'])  # Add the item to a list
         for row in serverFilters:
             settingDict[row['userid']]['filters']['serverfilters'].append(row['serverfilter'])  # Add the item to a list
+        for row in userFilters:
+            settingDict[row['userid']]['filters']['userfilters'].append(row['userfilter'])  # Add the item to a list
 
         # Gets the users and keywords for those users
         alreadySent = []
@@ -209,6 +213,9 @@ class BotCommands(commands.Cog, name="Bot Commands"):
                     content = None
             for i in settingDict[member.id]['filters']['channelfilters']:
                 if i == message.channel.id:
+                    content = None
+            for i in settingDict[member.id]['filters']['userfilters']:
+                if i == message.author.id:
                     content = None
             for i in settingDict[member.id]['filters']['textfilters']:
                 if i == message.content and content is not None:
