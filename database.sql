@@ -32,4 +32,8 @@ create TABLE serverfilters(
     PRIMARY KEY (userid, serverfilter)
 );
 
-
+create TABLE userfilters(
+    userid bigint,
+    userfilter BIGINT,
+    PRIMARY KEY (userid, userfilter)
+);
