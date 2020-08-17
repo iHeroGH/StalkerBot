@@ -56,7 +56,7 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
         """Adds a server filter"""
 
         if filter is not None:
-            user = self.bot.get_member(filter)
+            user = self.bot.get_user(filter)
 
         if user is None:
             await ctx.send("You didn't provide a valid user ID")
@@ -141,7 +141,7 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
         """Adds a server filter"""
 
         if filter is not None:
-            user = self.bot.get_guild(filter)
+            user = self.bot.get_user(filter)
 
         if user is None:
             await ctx.send("You didn't provide a valid user ID")
