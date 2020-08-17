@@ -288,14 +288,6 @@ class BotCommands(commands.Cog, name="Bot Commands"):
             await db("INSERT INTO keywords VALUES ($1, $2);", user.id, keyword)
         await ctx.send(f"Added `{keyword}` to {user.name}'s list")
 
-    @commands.command()
-    @commands.is_owner()
-    async def countusers(self, ctx):
-        """Counts how many unique user IDs there are"""
-
-        async with self.bot.database() as db:
-            rows = await db("SELECT DISTINCT userid FROM keywords;")
-        await ctx.send(f"`{len(rows)}` users use your dumbass of a bot. How's it feel, bitch?")
 
 
 def setup(bot):
