@@ -109,7 +109,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
         if suggestion is None:
             await ctx.send_help(ctx.command)
             return
-        await channel.send(f"<@322542134546661388> New suggestion from <@{ctx.author.id}> (`{ctx.author.id}`): `{suggestion[:1975]}`")
+        await channel.send(f"<@322542134546661388> New suggestion from <@{ctx.author.id}> (`{ctx.author.id}`): `{suggestion[:1950]}`")
         await ctx.send(f"Suggested `{suggestion[:1950]}`")
 
     @commands.Cog.listener()
