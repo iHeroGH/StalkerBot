@@ -55,7 +55,7 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
     async def filter_user(self, ctx, filter:int=None):
         """Adds a server filter"""
 
-        if user is not None:
+        if filter is not None:
             user = self.bot.get_member(filter)
 
         if user is None:
@@ -140,7 +140,7 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
     async def filter_remove_user(self, ctx, filter:int=None):
         """Adds a server filter"""
 
-        if user is not None:
+        if filter is not None:
             user = self.bot.get_guild(filter)
 
         if user is None:
