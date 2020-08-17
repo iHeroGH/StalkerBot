@@ -87,6 +87,7 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
         serverNames = [i.name for i in serverObjects]
 
         userFilters = [i['userfilter'] for i in userRows]
+        print(userFilters)
         userNames = [i.mention for i in userFilters]
 
         # Empty Checks
