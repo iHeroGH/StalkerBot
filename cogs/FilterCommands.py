@@ -60,6 +60,7 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
 
         if user is None:
             await ctx.send("You didn't provide a valid user ID")
+            return
 
         # Opens a connection and inerts the user filter into the serverfilters database
         async with self.bot.database() as db:
@@ -155,6 +156,7 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
 
         if user is None:
             await ctx.send("You didn't provide a valid user ID")
+            return
 
         # Opens a connection and inerts the user filter into the userfilters database
         async with self.bot.database() as db:
