@@ -88,7 +88,7 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
 
         userFilters = [i['userfilter'] for i in userRows]
         print(userFilters)
-        userNames = [i.mention for i in userFilters]
+        # userNames = [i.mention for i in userFilters]
 
         # Empty Checks
         if len(textFilters) < 1:
