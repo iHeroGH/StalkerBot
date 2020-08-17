@@ -90,7 +90,7 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
         serverNames = [i.name for i in serverObjects]
 
         userFilters = [i['userfilter'] for i in userRows]
-        userObjects = [self.bot.get_member(o) for o in userFilters]
+        userObjects = [self.bot.get_user(o) for o in userFilters]
         userNames = [i.mention for i in userObjects]
 
         await ctx.send(f"Text Filters: `{', '.join(textFilters)}` \n Channel Filters: {', '.join(channelFilters)} \n Server Filters: `{', '.join(serverNames)}` \n User Filters: `{', '.join(userNames)}`")
