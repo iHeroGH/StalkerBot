@@ -59,7 +59,7 @@ class LoggerAndHandler(commands.Cog, name="Logger And Handler"):
 
         async with self.bot.database() as db:
             distinctRows = await db("SELECT DISTINCT userid FROM keywords;")
-            rows = await db("SELECT * userid FROM keywords;")
+            rows = await db("SELECT * FROM keywords;")
             
         await ctx.send(f"`{len(distinctRows)}` unique users have set up keywords and there are `{len(rows)}` keywords in total.")
 
