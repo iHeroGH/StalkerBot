@@ -1,15 +1,17 @@
-import aiohttp
 import io
 import random
+import collections
+import copy
 
 import discord
 from discord.ext import commands
-import asyncpg
 
 
 class BotCommands(commands.Cog, name="Bot Commands"):
+
     MAXIMUM_ALLOWED_KEYWORDS = 10
     MINIMUM_KEYWORD_LENGTH = 2
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -44,14 +46,13 @@ class BotCommands(commands.Cog, name="Bot Commands"):
                 return
 
             # Checks if the user has the maxiumum amount of keywords (10)
-            rows = await db("select * from keywords where userid = $1;", ctx.author.id)
+            rows = await db("SELECT * FROM keywords WHERE userid = $1;", ctx.author.id)
             if len(rows) >= self.MAXIMUM_ALLOWED_KEYWORDS:
                 await ctx.send(f"You already have the maximum amount of keywords ({self.MAXIMUM_ALLOWED_KEYWORDS})")
                 return
 
             # Adds the keyword into the list
-            else:
-                await db("insert into keywords VALUES($1, $2);", ctx.author.id, keyword)
+            await db("INSERT INTO keywords VALUES ($1, $2);", ctx.author.id, keyword)
 
         await ctx.send(f"Added `{keyword}` into <@{ctx.author.id}>'s list")
 
@@ -63,7 +64,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
 
         # Gets the specific keyword and userID
         async with self.bot.database() as db:
-            rows = await db("select * from keywords where userid = $1 and keyword = $2;", ctx.author.id, keyword)
+            rows = await db("SELECT * FROM keywords WHERE userid = $1 AND keyword = $2;", ctx.author.id, keyword)
 
             # Checks if the row is already in the list
             if len(rows) == 0:
@@ -71,7 +72,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
                 return
 
             # Deletes the keyword
-            await db("delete from keywords where userid = $1 and keyword = $2;", ctx.author.id, keyword)
+            await db("DELETE FROM keywords WHERE userid = $1 AND keyword = $2;", ctx.author.id, keyword)
 
         await ctx.send(f"Removed `{keyword}` from <@{ctx.author.id}>'s list")
 
@@ -80,8 +81,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
         """Removes all keywords from your list of DM triggers"""
 
         async with self.bot.database() as db:
-            await db("delete from keywords where userid = $1;", ctx.author.id)
-
+            await db("DELETE FROM keywords WHERE userid = $1;", ctx.author.id)
         await ctx.send(f"Deleted all the keywords from <@{ctx.author.id}>'s list")
 
     @commands.command()
@@ -102,14 +102,12 @@ class BotCommands(commands.Cog, name="Bot Commands"):
 
     @commands.command()
     async def suggest(self, ctx, *, suggestion:str=None):
-        """
-        Sends a suggestion message to the bot creator (@Hero#2313)
-        """
+        """Sends a suggestion message to the bot creator (@Hero#2313)"""
 
         channel = self.bot.get_channel(739923715311140955)
 
         if suggestion is None:
-            await ctx.send(f"You didn't suggest anything. `{ctx.prefix} suggestion (SUGGESTION)`")
+            await ctx.send_help(ctx.command)
             return
         await channel.send(f"<@322542134546661388> New suggestion from <@{ctx.author.id}>: `{suggestion[:1975]}`")
         await ctx.send(f"Suggested `{suggestion[:1950]}`")
@@ -147,16 +145,33 @@ class BotCommands(commands.Cog, name="Bot Commands"):
             if channel.permissions_for(user).read_messages:
                 await user.send(f"<@!{message.author.id}> ({message.author.name}) has typed in <#{message.channel.id}>. They typed `{message.content[:1900]}` {(message.jump_url)}")
 
-        # Connects to the DB
+        # Get settings, filters, and keywords from the datbase
         async with self.bot.database() as db:
             keywordRows = await db("SELECT * from keywords")
             settingRows = await db("SELECT * from usersettings")
+            textFilters = await db("SELECT * FROM textfilters")
+            channelFilters = await db("SELECT * FROM channelfilters")
+            serverFilters = await db("SELECT * FROM serverfilters")
 
-
-        settingDict = {}
-
+        # Split the database rows down into easily-worable dictionaries
+        base_user_settings = {
+            "keywords": [],
+            "settings": {},
+            "filters": {
+                "textfilters": [],
+                "channelfilters": [],
+                "serverfilters": [],
+            }
+        }
+        settingDict = collections.defaultdict(lambda: copy.deepcopy(base_user_settings))
         for row in settingRows:
-            settingDict[row['userid']] = row
+            settingDict[row['userid']]['settings'] = dict(row)  # Just straight copy this row from the database
+        for row in textFilters:
+            settingDict[row['userid']]['filters']['textfilters'].append(row['textfilter'])  # Add the item to a list
+        for row in channelFilters:
+            settingDict[row['userid']]['filters']['channelfilters'].append(row['channelfilter'])  # Add the item to a list
+        for row in serverFilters:
+            settingDict[row['userid']]['filters']['serverfilters'].append(row['serverfilter'])  # Add the item to a list
 
         # Gets the users and keywords for those users
         alreadySent = []
@@ -172,72 +187,69 @@ class BotCommands(commands.Cog, name="Bot Commands"):
                 continue
 
             # Checks if the author of the message is the member and checks if the member's settings allow for owntrigger
-            try:
-                if message.author == member and settingDict[member.id]['owntrigger'] is False:
-                    continue
-            except KeyError:
-                pass
+            if message.author == member and settingDict[member.id]['settings'].get('owntrigger', True) is False:
+                continue
 
             # Creates a list "lines" that splits the message content by new line. It then checks if the quote trigger setting is
             # turned on. If it isn't, it appends the item from the lines list to a list "nonQuoted". If the setting is enabled, it
             # just keeps nonQuoted as the original message. This prevents users from recieving the section of text that is quoted.
             lines = message.content.split('\n')
             nonQuoted = []
-            try:
-                if settingDict[member.id]['quotetrigger'] is False:
-                    for i in lines:
-                        if not i.startswith("> "):
-                            nonQuoted.append(i)
-                else:
-                    nonQuoted = lines
-            except KeyError:
+            if settingDict[member.id]['settings'].get('quotetrigger', True) is False:
+                for i in lines:
+                    if not i.startswith("> "):
+                        nonQuoted.append(i)
+            else:
                 nonQuoted = lines
-                pass
             content = '\n'.join(nonQuoted)
 
             # Filters
-            async with self.bot.database() as db:
-                textFilters = await db("SELECT * FROM textfilters WHERE userid=$1", member.id)
-                channelFilters = await db("SELECT * FROM channelfilters WHERE userid=$1", member.id)
-                serverFilters = await db("SELECT * FROM serverfilters WHERE userid=$1", member.id)
+            for i in settingDict[member.id]['filters']['serverfilters']:
+                if i == message.guild.id:
+                    content = None
+            for i in settingDict[member.id]['filters']['channelfilters']:
+                if i == message.channel.id:
+                    content = None
+            for i in settingDict[member.id]['filters']['textfilters']:
+                if i == message.content and content is not None:
+                    content = content.replace(i, " ")
 
-            for i in textFilters:
-                content = content.replace(i['textfilter'], "")
-            for i in channelFilters:
-                if i['channelfilter'] == message.channel.id:
-                    content = ""
-            for i in serverFilters:
-                if message.guild.id == i['serverfilter']:
-                    content = ""
-
-            if content == "":
+            # If there's no content to be examined, let's just skip the message
+            if content is None or content.strip() == "":
                 continue
 
+            # See if we should send them a message
+            if keyword not in content.lower():
+                continue
+            if channel.permissions_for(member).read_messages is False:
+                continue
 
             # Sends a message to a user if their keyword is said
-            if (keyword in content.lower()):
-                if channel.permissions_for(member).read_messages:
-                    try:
-                        # Embed message
-                        if settingDict[member.id]['embedmessage']:
-                            embed = discord.Embed()
-                            color = random.randint(0, 0xffffff)
-                            embed.color = color  
-                            embed.set_author(name=f"{message.author.name}#{message.author.discriminator}", icon_url=f"{message.author.avatar_url}")
-                            embed.title = "Message Content"  # Title
-                            embed.description = f"{content}"  # Description
-                            embed.add_field(name="Message Channel", value=f"<#{message.channel.id}>", inline=True)
-                            embed.add_field(name="Message Link", value=f"{message.jump_url}", inline=True)
-                            embed.set_footer(text=f"Keyword: {keyword}")
-                            embed.timestamp = message.created_at    
-                    
-                            await member.send(embed=embed)
-                            continue
-                    except KeyError:
-                        pass
+            if settingDict[member.id]['settings'].get('embedmessage', False):
+                sendable_content = {'embed': self.create_message_embed(message, keyword)}
+            else:
+                sendable_content = {'content': f"<@!{message.author.id}> ({message.author.name}) has typed the keyword (`{keyword}`) in <#{message.channel.id}>. They typed `{message.content[:1900]}` {(message.jump_url)}"}
+            try:
+                await member.send(**sendable_content)
+            except discord.Forbidden:
+                pass
+            alreadySent.append(member.id)
 
-                    await member.send(f"<@!{message.author.id}> ({message.author.name}) has typed the keyword (`{keyword}`) in <#{message.channel.id}>. They typed `{content[:1900]}` {(message.jump_url)}")
-                    alreadySent.append(member.id)
+    def create_message_embed(self, message:discord.Message, keyword:str=None) -> discord.Embed:
+        """Creates a message embed that can be DMd to a user"""
+
+        embed = discord.Embed()
+        color = random.randint(0, 0xffffff)
+        embed.color = color
+        embed.set_author(name=str(message.author), icon_url=message.author.avatar_url)
+        embed.title = "Message Content"
+        embed.description = message.content
+        embed.add_field(name="Message Channel", value=message.channel.mention, inline=True)
+        embed.add_field(name="Message Link", value=f"[Click here]({message.jump_url})", inline=True)
+        if keyword:
+            embed.set_footer(text=f"Keyword: {keyword}")
+        embed.timestamp = message.created_at
+        return embed
 
     @commands.command()
     @commands.is_owner()
@@ -246,9 +258,9 @@ class BotCommands(commands.Cog, name="Bot Commands"):
 
         async with self.bot.database() as db:
             if user is not None:
-                full = await db("select * from keywords where userid = $1;", user.id)
+                full = await db("SELECT * FROM keywords WHERE userid = $1;", user.id)
             else:
-                full = await db("select * from keywords;")
+                full = await db("SELECT * FROM keywords;")
 
         text = list()
         for x in full:
@@ -263,7 +275,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
         """Forcibly removes a keyword from a user"""
 
         async with self.bot.database() as db:
-            await db("delete from keywords where userid = $1 and keyword = $2;", user.id, keyword)
+            await db("DELETE FROM keywords WHERE userid = $1 AND keyword = $2;", user.id, keyword)
 
         await ctx.send(f"Removed `{keyword}` from {user.name}'s list")
 
@@ -273,9 +285,17 @@ class BotCommands(commands.Cog, name="Bot Commands"):
         """Forcibly adds a keyword to a user"""
 
         async with self.bot.database() as db:
-            await db("insert into keywords VALUES($1, $2);", user.id, keyword)
-
+            await db("INSERT INTO keywords VALUES ($1, $2);", user.id, keyword)
         await ctx.send(f"Added `{keyword}` to {user.name}'s list")
+
+    @commands.command()
+    @commands.is_owner()
+    async def countusers(self, ctx):
+        """Counts how many unique user IDs there are"""
+
+        async with self.bot.database() as db:
+            rows = await db("SELECT DISTINCT userid FROM keywords;")
+        await ctx.send(f"`{len(rows)}` users use your dumbass of a bot. How's it feel, bitch?")
 
 
 def setup(bot):
