@@ -55,10 +55,10 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
     async def filter_user(self, ctx, filter:discord.User):
         """Adds a server filter"""
 
-        if filter is not None:
-            user = self.bot.get_user(filter)
+        # if filter is not None:
+        #     user = self.bot.get_user(filter)
 
-        if user is None:
+        if filter is None:
             await ctx.send("You didn't provide a valid user ID")
 
         # Opens a connection and inerts the user filter into the serverfilters database
@@ -150,10 +150,10 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
     async def filter_remove_user(self, ctx, filter:discord.User):
         """Adds a server filter"""
 
-        if filter is not None:
-            user = self.bot.get_user(filter)
+        # if filter is not None:
+        #     user = self.bot.get_user(filter)
 
-        if user is None:
+        if filter is None:
             await ctx.send("You didn't provide a valid user ID")
 
         # Opens a connection and inerts the user filter into the userfilters database
