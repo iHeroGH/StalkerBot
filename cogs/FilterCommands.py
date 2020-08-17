@@ -55,7 +55,10 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
     async def filter_user(self, ctx, filter:discord.User):
         """Adds a server filter"""
 
-        if filter is None:
+        if filter is not None:
+            user = self.bot.get_user(filter)
+
+        if user is None:
             await ctx.send("You didn't provide a valid user ID")
 
         # Opens a connection and inerts the user filter into the serverfilters database
@@ -87,8 +90,8 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
         serverNames = [i.name for i in serverObjects]
 
         userFilters = [i['userfilter'] for i in userRows]
-        print(userFilters)
-        # userNames = [i.mention for i in userFilters]
+        userObjects = [self.bot.get_user(o) for o in userFilters]
+        userNames = [i.mention for i in userObjects]
 
         # Empty Checks
         if len(textFilters) < 1:
@@ -147,7 +150,10 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
     async def filter_remove_user(self, ctx, filter:discord.User):
         """Adds a server filter"""
 
-        if filter is None:
+        if filter is not None:
+            user = self.bot.get_user(filter)
+
+        if user is None:
             await ctx.send("You didn't provide a valid user ID")
 
         # Opens a connection and inerts the user filter into the userfilters database
