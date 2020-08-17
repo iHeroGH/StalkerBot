@@ -29,13 +29,6 @@ class LoggerAndHandler(commands.Cog, name="Logger And Handler"):
             webhook = discord.Webhook.from_url('https://discordapp.com/api/webhooks/744353242322043001/V3WMdShI8L8LZLStNUBaqG2WI-qZrdofCQFM1QkW4oLTIcRA4TMC5ffKFpS2JyIXp96w', adapter=discord.AsyncWebhookAdapter(session))
             await webhook.send(f'StalkerBot was removed from `{guild.name}` (`{guild.id}`). `{len([i for i in guild.members if not i.bot])}` members.', username='On Guild Leave Event')
 
-    @commands.command()
-    @commands.is_owner()
-    async def countguilds(self, ctx):
-        """Counts how many guilds have the bot"""
-
-        await ctx.send(f"The bot is in `{len(self.bot.guilds)}` guilds.")
-
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
         """Sends all errors to a logging channel with a webhook"""
@@ -50,6 +43,26 @@ class LoggerAndHandler(commands.Cog, name="Logger And Handler"):
                 await webhook.send(file=discord.File(data, filename="error.py"))
             else:
                 await webhook.send(f"```py\n{error}```")
+
+    # Owner Only Commands
+    @commands.command()
+    @commands.is_owner()
+    async def countguilds(self, ctx):
+        """Counts how many guilds have the bot"""
+
+        await ctx.send(f"The bot is in `{len(self.bot.guilds)}` guilds.")
+
+    @commands.command()
+    @commands.is_owner()
+    async def countusers(self, ctx):
+        """Counts how many unique user IDs there are"""
+
+        async with self.bot.database() as db:
+            distinctRows = await db("SELECT DISTINCT userid FROM keywords;")
+            rows = await db("SELECT * userid FROM keywords;")
+            
+        await ctx.send(f"`{len(distinctRows)}` unique users have set up keywords and there are `{len(rows)}` keywords in total.")
+
 
 
 
