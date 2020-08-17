@@ -52,11 +52,11 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
         await ctx.send(f"Added `{filter}` to your server filter list")
 
     @filter.command(name="user")
-    async def filter_user(self, ctx, filter:discord.User):
+    async def filter_user(self, ctx, filter:int=None):
         """Adds a server filter"""
 
-        # if filter is not None:
-        #     user = self.bot.get_user(filter)
+        if filter is not None:
+            user = self.bot.get_user(filter)
 
         if filter is None:
             await ctx.send("You didn't provide a valid user ID")
@@ -97,7 +97,7 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
         if len(textFilters) < 1:
             textFilters = ["No text filters have been set up"]
         if len(channelFilters) < 1:
-            channelFilters = ["No channel filters have been set up"]
+            channelFilters = ["`No channel filters have been set up`"]
         if len(serverNames) < 1:
             serverNames = ["No server filters have been set up"]
         if len(userNames) < 1:
@@ -147,11 +147,11 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
         await ctx.send("Done.")
 
     @filter_remove.command(name="user")
-    async def filter_remove_user(self, ctx, filter:discord.User):
+    async def filter_remove_user(self, ctx, filter:int=None):
         """Adds a server filter"""
 
-        # if filter is not None:
-        #     user = self.bot.get_user(filter)
+        if filter is not None:
+            user = self.bot.get_user(filter)
 
         if filter is None:
             await ctx.send("You didn't provide a valid user ID")
