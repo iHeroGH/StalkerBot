@@ -75,7 +75,7 @@ async def reloadall(ctx):
     """Reloads all the cogs"""
 
     [bot.reload_extension(i[:-3].replace(os.sep, ".")) for i in glob.glob("cogs/*.py")]
-    await ctx.send("Reloaded all cogs")
+    await ctx.send("🔁Reloaded all cogs.")
     
 
 
