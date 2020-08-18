@@ -69,11 +69,11 @@ async def change_presence_loop():
     game = discord.Game(f"s.help || Stalking {len(bot.guilds)} guilds.")
     await bot.change_presence(status=discord.Status.online, activity=game)
 
-@commands.command()
+@bot.command()
 @commands.is_owner()
-async def reloadall():
+async def reloadall(ctx):
     """Reloads all the cogs"""
-    
+
     [bot.reload_extension(i[:-3].replace(os.sep, ".")) for i in glob.glob("cogs/*.py")]
     await ctx.send("Reloaded all cogs")
     
