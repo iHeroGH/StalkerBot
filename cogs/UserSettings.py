@@ -9,7 +9,7 @@ class UserSettings(commands.Cog, name="User Setting Commands"):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
+    @commands.command(aliases=['setup'])
     async def settings(self, ctx):
         """Allows users to change settings (such as OwnTrigger and QuoteTrigger"""
 

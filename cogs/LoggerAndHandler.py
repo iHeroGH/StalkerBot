@@ -45,7 +45,7 @@ class LoggerAndHandler(commands.Cog, name="Logger And Handler"):
                 await webhook.send(f"```py\n{error}```")
 
     # Owner Only Commands
-    @commands.command()
+    @commands.command(aliases=['countservers'])
     @commands.is_owner()
     async def countguilds(self, ctx):
         """Counts how many guilds have the bot"""

@@ -7,7 +7,7 @@ class PrefixCommands(commands.Cog, name="Prefix Commands"):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
+    @commands.command(aliases=['changeprefix'])
     async def prefix(self, ctx, prefix:str=None):
         """Changes the prefix of the server (or gives you set prefix)"""
 

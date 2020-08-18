@@ -26,7 +26,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
         url = f"<https://discord.com/api/oauth2/authorize?client_id=723813550136754216&permissions={bot_permissions.value}&scope=bot>"
         await ctx.send(url)
 
-    @commands.command()
+    @commands.command(aliases=['keyword'])
     async def addkeyword(self, ctx, keyword:str):
         """Adds a keyword to your list of DM triggers"""
 
@@ -56,7 +56,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
 
         await ctx.send(f"Added `{keyword}` into <@{ctx.author.id}>'s list")
 
-    @commands.command()
+    @commands.command(aliases=['keywordremove'])
     async def removekeyword(self, ctx, keyword:str):
         """Removes a keyword from your list of DM triggers"""
 
@@ -84,7 +84,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
             await db("DELETE FROM keywords WHERE userid = $1;", ctx.author.id)
         await ctx.send(f"Deleted all the keywords from <@{ctx.author.id}>'s list")
 
-    @commands.command()
+    @commands.command(aliases=['keywords', 'keywordlist', 'keywordslist'])
     async def listkeywords(self, ctx):
         """Lists all your keywords"""
 
