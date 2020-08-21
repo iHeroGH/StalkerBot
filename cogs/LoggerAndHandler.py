@@ -33,7 +33,6 @@ class LoggerAndHandler(commands.Cog, name="Logger And Handler"):
     async def on_command_error(self, ctx, error):
         """Sends all errors to a logging channel with a webhook"""
 
-        error = str(error)
 
         # Channel Sending
         if isinstance(error, commands.CommandNotFound):
@@ -56,6 +55,7 @@ class LoggerAndHandler(commands.Cog, name="Logger And Handler"):
         # Webhook Sending
         async with aiohttp.ClientSession() as session:
             webhook = discord.Webhook.from_url('https://discordapp.com/api/webhooks/744353242322043001/V3WMdShI8L8LZLStNUBaqG2WI-qZrdofCQFM1QkW4oLTIcRA4TMC5ffKFpS2JyIXp96w', adapter=discord.AsyncWebhookAdapter(session))
+            error = str(error)
             if len(error) >= 1970:
                 data = io.StringIO(error)
                 data.seek(0)
