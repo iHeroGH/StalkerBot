@@ -36,20 +36,20 @@ class LoggerAndHandler(commands.Cog, name="Logger And Handler"):
 
         # Channel Sending
         if isinstance(error, commands.CommandNotFound):
-            print("debug 1")
             await ctx.send(f"```py\n{error}```")
+            return
         if isinstance(error, commands.TooManyArguments):
-            print("debug 2")
             await ctx.send(f"```py\n{error}```")
+            return
         if isinstance(error, commands.MissingRequiredArgument):
-            print("debug 3")
             await ctx.send(f"```py\n{error}```")
+            return
         if isinstance(error, commands.BotMissingPermissions):
-            print("debug 4")
             await ctx.author.send(f"```py\n{error}```")
+            return
         if isinstance(error, commands.MissingPermissions):
-            print("debug 5")
             await ctx.author.send(f"```py\n{error}```")
+            return
 
 
         # Webhook Sending
