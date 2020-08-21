@@ -35,6 +35,7 @@ class LoggerAndHandler(commands.Cog, name="Logger And Handler"):
 
         error = str(error)
 
+        # Webhook Sending
         async with aiohttp.ClientSession() as session:
             webhook = discord.Webhook.from_url('https://discordapp.com/api/webhooks/744353242322043001/V3WMdShI8L8LZLStNUBaqG2WI-qZrdofCQFM1QkW4oLTIcRA4TMC5ffKFpS2JyIXp96w', adapter=discord.AsyncWebhookAdapter(session))
             if len(error) >= 1970:
@@ -43,6 +44,20 @@ class LoggerAndHandler(commands.Cog, name="Logger And Handler"):
                 await webhook.send(file=discord.File(data, filename="error.py"))
             else:
                 await webhook.send(f"```py\n{error}```")
+
+        # Channel Sending
+        if isinstance(error, commands.CommandNotFound):
+            await ctx.send(f"```py\n{error}```")
+        if isinstance(error, commands.TooManyArguments):
+            await ctx.send(f"```py\n{error}```")
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f"```py\n{error}```")
+        if isinstance(error, commands.BotMissingPermissions):
+            await ctx.author.send(f"```py\n{error}```")
+        if isinstance(error, commands.MissingPermissions):
+            await ctx.author.send(f"```py\n{error}```")
+        
+
 
     # Owner Only Commands
     @commands.command(aliases=['countservers'])
