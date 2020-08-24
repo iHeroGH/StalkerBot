@@ -222,6 +222,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
                     print(f"i {i.lower()}")
                     print(f"con {message.content.lower()}")
                     content = content.replace(i, "")
+                    print(f"newcon {content}")
 
             # If there's no content to be examined, let's just skip the message
             if content is None or content.strip() == "":
