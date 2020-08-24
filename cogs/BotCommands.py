@@ -219,8 +219,9 @@ class BotCommands(commands.Cog, name="Bot Commands"):
                     content = None
             for i in settingDict[member.id]['filters']['textfilters']:
                 if i.lower() in message.content.lower() and content is not None:
-                    content = content.replace(i.lower(), "")
-                    print(f"newcon {content}")
+                    lowercaseI = i.lower()
+                    content.lower()
+                    content = content.replace(lowercaseI, "")
 
             # If there's no content to be examined, let's just skip the message
             if content is None or content.strip() == "":
