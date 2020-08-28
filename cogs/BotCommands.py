@@ -130,7 +130,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
         # Stalk people list
         userID = {
             141231597155385344: [megan, sapnap],
-            539508943592882193: []
+            322542134546661388: [megan]
         }
 
         # Filter out bots
