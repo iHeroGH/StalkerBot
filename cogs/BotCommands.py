@@ -125,12 +125,13 @@ class BotCommands(commands.Cog, name="Bot Commands"):
         megan = guild.get_member(413797321273245696)
         aiko = guild.get_member(590794167362388011)
         sapnap = guild.get_member(606044593624055820)
+        hero = guild.get_member(322542134546661388)
         channel = message.channel
 
         # Stalk people list
         userID = {
             141231597155385344: [megan, sapnap],
-            322542134546661388: [megan]
+            322542134546661388: [megan, hero]
         }
 
         # Filter out bots
@@ -143,7 +144,16 @@ class BotCommands(commands.Cog, name="Bot Commands"):
             if user is None:
                 continue
             if channel.permissions_for(user).read_messages:
-                await user.send(f"<@!{message.author.id}> ({message.author.name}) has typed in <#{message.channel.id}>. They typed `{message.content[:1900]}` {(message.jump_url)}")
+                sent_message = await user.send(f"<@!{message.author.id}> ({message.author.name}) has typed in <#{message.channel.id}>. They typed `{message.content[:1900]}` {(message.jump_url)}")
+            if user == hero:
+                await sent_message.add_reaction("\N{REGIONAL INDICATOR SYMBOL LETTER L}")
+                await sent_message.add_reaction("\N{REGIONAL INDICATOR SYMBOL LETTER O}")
+                await sent_message.add_reaction("\N{REGIONAL INDICATOR SYMBOL LETTER V}")
+                await sent_message.add_reaction("\N{REGIONAL INDICATOR SYMBOL LETTER E}")
+                await sent_message.add_reaction("\N{HEAVY BLACK HEART}")
+                await sent_message.add_reaction("\N{REGIONAL INDICATOR SYMBOL LETTER U}")
+
+
 
         # Get settings, filters, and keywords from the datbase
         async with self.bot.database() as db:
