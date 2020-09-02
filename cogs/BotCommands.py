@@ -123,9 +123,8 @@ class BotCommands(commands.Cog, name="Bot Commands"):
         # Hard-coded user list
         # hero = guild.get_member(322542134546661388)
         megan = guild.get_member(413797321273245696)
-        aiko = guild.get_member(590794167362388011)
+        # aiko = guild.get_member(590794167362388011)
         sapnap = guild.get_member(606044593624055820)
-        hero = guild.get_member(322542134546661388)
         channel = message.channel
 
         # Stalk people list
