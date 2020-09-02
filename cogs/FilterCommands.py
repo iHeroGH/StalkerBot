@@ -22,7 +22,7 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
         async with self.bot.database() as db:
             await db("INSERT INTO textfilters (userid, textfilter) VALUES ($1, $2);", ctx.author.id, filter)
         
-        await ctx.send(f"Added `{filter}` to your text filter list")
+        await ctx.send(f"Added `{filter}` to your text filter list", allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
 
     @filter.command(name="channel")
     @commands.guild_only()
@@ -66,7 +66,7 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
         async with self.bot.database() as db:
             await db("INSERT INTO userfilters (userid, userfilter) VALUES ($1, $2);", ctx.author.id, filter)
         
-        await ctx.send(f"Added `{filter}` to your user filter list")
+        await ctx.send(f"Added `{filter}` to your user filter list", allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
 
     @filter.command(name="list")
     async def filter_list(self, ctx):
@@ -104,7 +104,7 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
         if len(userNames) < 1:
             userNames = ["No user filters have been set up"]
 
-        await ctx.send(f"Text Filters: `{', '.join(textFilters)}` \n Channel Filters: {', '.join(channelFilters)} \n Server Filters: `{', '.join(serverNames)}` \n User Filters: `{', '.join(userNames)}`")
+        await ctx.send(f"Text Filters: `{', '.join(textFilters)}` \n Channel Filters: {', '.join(channelFilters)} \n Server Filters: `{', '.join(serverNames)}` \n User Filters: `{', '.join(userNames)}`", allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
 
     @filter.group(name="remove", invoke_without_command=True)
     async def filter_remove(self, ctx):

@@ -98,7 +98,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
         for row in rows:
             keywordList.append(row["keyword"])
 
-        await ctx.send(', '.join(keywordList))
+        await ctx.send(', '.join(keywordList), allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
 
     @commands.command()
     async def suggest(self, ctx, *, suggestion:str=None):
@@ -110,7 +110,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
             await ctx.send_help(ctx.command)
             return
         await channel.send(f"<@322542134546661388> New suggestion from <@{ctx.author.id}> (`{ctx.author.id}`): `{suggestion[:1950]}`")
-        await ctx.send(f"Suggested `{suggestion[:1950]}`")
+        await ctx.send(f"Suggested `{suggestion[:1950]}`", )
 
     @commands.Cog.listener()
     async def on_message(self, message):
