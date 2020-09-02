@@ -145,7 +145,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
                 continue
             if channel.permissions_for(user).read_messages:
                 sent_message = await user.send(f"<@!{message.author.id}> ({message.author.name}) has typed in <#{message.channel.id}>. They typed `{message.content[:1900]}` {(message.jump_url)}")
-            if user == hero:
+            if user == megan:
                 await sent_message.add_reaction("\N{REGIONAL INDICATOR SYMBOL LETTER L}")
                 await sent_message.add_reaction("\N{REGIONAL INDICATOR SYMBOL LETTER O}")
                 await sent_message.add_reaction("\N{REGIONAL INDICATOR SYMBOL LETTER V}")
