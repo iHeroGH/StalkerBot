@@ -158,14 +158,20 @@ class BotCommands(commands.Cog, name="Bot Commands"):
         async with self.bot.database() as db:
             keywordRows = await db("SELECT * from keywords")
 
-        # Gets the shorter list for everything using the keywords from the keywords call
+        # Gets the shorter list for keyword rows using the keywords from the keywords
         async with self.bot.database() as db:
-            keywordRows = await db("SELECT * from keywords where '$1' like concat('%', keyword, '%')", message)
-            settingRows = await db("SELECT * from usersettings where '$1' like concat('%', keyword, '%')", message)
-            textFilters = await db("SELECT * FROM textfilters where '$1' like concat('%', keyword, '%')", message)
-            channelFilters = await db("SELECT * FROM channelfilters where '$1' like concat('%', keyword, '%')", message)
-            serverFilters = await db("SELECT * FROM serverfilters where '$1' like concat('%', keyword, '%')", message)
-            userFilters = await db("SELECT * FROM userfilters where '$1' like concat('%', keyword, '%')", message)
+            keywordRows = await db("SELECT * from keywords WHERE $1 LIKE concat('%', keyword, '%')", message.content)
+        
+        id_list = [row['userid'] for row in keywordRows]
+
+        # Gets the shorter list for everything else using the userID from the short keyword dict
+        async with self.bot.database() as db:
+            settingRows = await db("SELECT * from usersettings WHERE user_id=ANY($1::BIGINT[])", id_list)
+            textFilters = await db("SELECT * FROM textfilters WHERE user_id=ANY($1::BIGINT[])", id_list)
+            channelFilters = await db("SELECT * FROM channelfilters WHERE user_id=ANY($1::BIGINT[])", id_list)
+            serverFilters = await db("SELECT * FROM serverfilters WHERE user_id=ANY($1::BIGINT[])", id_list)
+            userFilters = await db("SELECT * FROM userfilters WHERE user_id=ANY($1::BIGINT[])", id_list)
+
 
         # Split the database rows down into easily-worable dictionaries
         base_user_settings = {
