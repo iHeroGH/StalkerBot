@@ -154,18 +154,10 @@ class BotCommands(commands.Cog, name="Bot Commands"):
 
 
 
-        # Get keywords from the datbase
-        async with self.bot.database() as db:
-            keywordRows = await db("SELECT * from keywords")
-
-        # Gets the shorter list for keyword rows using the keywords from the keywords
+        # Get everything (from the users who have had a keyword triggered) from the datbase
         async with self.bot.database() as db:
             keywordRows = await db("SELECT * from keywords WHERE $1 LIKE concat('%', keyword, '%')", message.content)
-        
-        id_list = [row['userid'] for row in keywordRows]
-
-        # Gets the shorter list for everything else using the userID from the short keyword dict
-        async with self.bot.database() as db:
+            id_list = [row['userid'] for row in keywordRows]
             settingRows = await db("SELECT * from usersettings WHERE userid=ANY($1::BIGINT[])", id_list)
             textFilters = await db("SELECT * FROM textfilters WHERE userid=ANY($1::BIGINT[])", id_list)
             channelFilters = await db("SELECT * FROM channelfilters WHERE userid=ANY($1::BIGINT[])", id_list)
