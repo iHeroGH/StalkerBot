@@ -154,14 +154,18 @@ class BotCommands(commands.Cog, name="Bot Commands"):
 
 
 
-        # Get settings, filters, and keywords from the datbase
+        # Get keywords from the datbase
         async with self.bot.database() as db:
             keywordRows = await db("SELECT * from keywords")
-            settingRows = await db("SELECT * from usersettings")
-            textFilters = await db("SELECT * FROM textfilters")
-            channelFilters = await db("SELECT * FROM channelfilters")
-            serverFilters = await db("SELECT * FROM serverfilters")
-            userFilters = await db("SELECT * FROM userfilters")
+
+        # Gets the shorter list for everything using the keywords from the keywords call
+        async with self.bot.database() as db:
+            keywordRows = await db("SELECT * from keywords where '$1' like concat('%', keyword, '%')", message)
+            settingRows = await db("SELECT * from usersettings where '$1' like concat('%', keyword, '%')", message)
+            textFilters = await db("SELECT * FROM textfilters where '$1' like concat('%', keyword, '%')", message)
+            channelFilters = await db("SELECT * FROM channelfilters where '$1' like concat('%', keyword, '%')", message)
+            serverFilters = await db("SELECT * FROM serverfilters where '$1' like concat('%', keyword, '%')", message)
+            userFilters = await db("SELECT * FROM userfilters where '$1' like concat('%', keyword, '%')", message)
 
         # Split the database rows down into easily-worable dictionaries
         base_user_settings = {
