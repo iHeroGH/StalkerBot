@@ -151,7 +151,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
 
         # Get everything (from the users who have had a keyword triggered) from the datbase
         async with self.bot.database() as db:
-            keywordRows = await db("SELECT * from keywords WHERE $1 LIKE concat('%', keyword, '%')", message.content)
+            keywordRows = await db("SELECT * from keywords WHERE $1 LIKE concat('%', keyword, '%')", message.content.lower())
             id_list = [row['userid'] for row in keywordRows]
             settingRows = await db("SELECT * from usersettings WHERE userid=ANY($1::BIGINT[])", id_list)
             textFilters = await db("SELECT * FROM textfilters WHERE userid=ANY($1::BIGINT[])", id_list)
