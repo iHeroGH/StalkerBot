@@ -166,11 +166,11 @@ class BotCommands(commands.Cog, name="Bot Commands"):
 
         # Gets the shorter list for everything else using the userID from the short keyword dict
         async with self.bot.database() as db:
-            settingRows = await db("SELECT * from usersettings WHERE user_id=ANY($1::BIGINT[])", id_list)
-            textFilters = await db("SELECT * FROM textfilters WHERE user_id=ANY($1::BIGINT[])", id_list)
-            channelFilters = await db("SELECT * FROM channelfilters WHERE user_id=ANY($1::BIGINT[])", id_list)
-            serverFilters = await db("SELECT * FROM serverfilters WHERE user_id=ANY($1::BIGINT[])", id_list)
-            userFilters = await db("SELECT * FROM userfilters WHERE user_id=ANY($1::BIGINT[])", id_list)
+            settingRows = await db("SELECT * from usersettings WHERE userid=ANY($1::BIGINT[])", id_list)
+            textFilters = await db("SELECT * FROM textfilters WHERE userid=ANY($1::BIGINT[])", id_list)
+            channelFilters = await db("SELECT * FROM channelfilters WHERE userid=ANY($1::BIGINT[])", id_list)
+            serverFilters = await db("SELECT * FROM serverfilters WHERE userid=ANY($1::BIGINT[])", id_list)
+            userFilters = await db("SELECT * FROM userfilters WHERE userid=ANY($1::BIGINT[])", id_list)
 
 
         # Split the database rows down into easily-worable dictionaries
