@@ -57,7 +57,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
         await ctx.send(f"Added `{keyword}` into <@{ctx.author.id}>'s list")
 
     @commands.command(aliases=['serverkeyword', 'addserver'])
-    async def addserverkeyword(self, ctx, serverid, keyword:str):
+    async def addserverkeyword(self, ctx, serverid:int, keyword:str):
         """Adds a keyword to your list of DM triggers"""
 
         # Checks if the keyword is too short
@@ -107,7 +107,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
         await ctx.send(f"Removed `{keyword}` from <@{ctx.author.id}>'s list")
 
     @commands.command(aliases=['serverkeywordremove', 'removeserver'])
-    async def removeserverkeyword(self, ctx, serverid, keyword:str):
+    async def removeserverkeyword(self, ctx, serverid:int, keyword:str):
         """Removes a keyword from your list of DM triggers"""
 
         keyword = keyword.lower()
