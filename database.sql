@@ -3,6 +3,12 @@ create TABLE keywords(
     keyword text
 );
 
+create TABLE serverkeywords(
+    userID bigint,
+    serverid bigint,
+    keyword text
+);
+
 create TABLE prefix(
     guildID bigint primary key,
     prefix VARCHAR(50)
