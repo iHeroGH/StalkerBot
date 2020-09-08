@@ -265,7 +265,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
             url_list = [i.url for i in message.attachments]
             lines = ""
             for i in url_list:
-                lines = lines + f"\n[Click Here]{i}"
+                lines = lines + f"\n[Click Here]({i})"
             embed.add_field(name = "Attatchment Links", value= lines, inline = False)
         if keyword:
             embed.set_footer(text=f"Keyword: {keyword}")
