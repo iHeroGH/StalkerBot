@@ -160,8 +160,16 @@ class BotCommands(commands.Cog, name="Bot Commands"):
             await ctx.send(f"You don't have any server-specific keywords. Set some up by running the `{ctx.prefix}addkeyword` command")
             return
 
-        await ctx.send(rows)
-        # await ctx.send(', '.join(keywordList), allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
+        # Creates a list of server:keywords found in DB call
+        keywordList = []
+        for row in rows:
+            keywordList.append(f"{row['serverid'].name}, {row['keywordid']}")
+
+        sendableContent = "Server-Specific Keywords: "
+        sendableContent = sendableContent + f"\n {[i for i in keywordList]}"
+
+
+        await ctx.send(sendableContent, allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
 
     @commands.command()
     async def suggest(self, ctx, *, suggestion:str=None):
