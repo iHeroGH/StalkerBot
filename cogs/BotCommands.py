@@ -261,6 +261,12 @@ class BotCommands(commands.Cog, name="Bot Commands"):
         embed.description = message.content
         embed.add_field(name="Message Channel", value=message.channel.mention, inline=True)
         embed.add_field(name="Message Link", value=f"[Click here]({message.jump_url})", inline=True)
+        if len(message.attachments) != 0:
+            url_list = [i.url for i in message.attachments]
+            lines = ""
+            for i in url_list:
+                lines = lines + f"\n[Click Here]{i}"
+            embed.add_field(name = "Attatchment Links", value= lines, inline = False)
         if keyword:
             embed.set_footer(text=f"Keyword: {keyword}")
         embed.timestamp = message.created_at
