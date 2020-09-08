@@ -243,7 +243,14 @@ class BotCommands(commands.Cog, name="Bot Commands"):
             if settingDict[member.id]['settings'].get('embedmessage', False):
                 sendable_content = {'embed': self.create_message_embed(message, keyword)}
             else:
-                sendable_content = {'content': f"<@!{message.author.id}> ({message.author.name}) has typed the keyword (`{keyword}`) in <#{message.channel.id}>. They typed `{message.content[:1900]}` {(message.jump_url)}"}
+                if len(message.attachments) != 0:
+                    url_list = [i.url for i in message.attachments]
+                    lines = "Attatchment Links: "
+                    for i in url_list:
+                        lines = lines + f"\n{i}"
+                    sendable_content = {'content': f"<@!{message.author.id}> ({message.author.name}) has typed the keyword (`{keyword}`) in <#{message.channel.id}>. They typed `{message.content[:1900]}` {(message.jump_url)}.\n{lines}"}
+                else:
+                    sendable_content = {'content': f"<@!{message.author.id}> ({message.author.name}) has typed the keyword (`{keyword}`) in <#{message.channel.id}>. They typed `{message.content[:1900]}` {(message.jump_url)}."}
             try:
                 await member.send(**sendable_content)
             except discord.Forbidden:
