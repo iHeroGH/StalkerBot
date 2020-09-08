@@ -56,6 +56,36 @@ class BotCommands(commands.Cog, name="Bot Commands"):
 
         await ctx.send(f"Added `{keyword}` into <@{ctx.author.id}>'s list")
 
+    @commands.command(aliases=['serverkeyword', 'addserver'])
+    async def addserverkeyword(self, ctx, serverid, keyword:str):
+        """Adds a keyword to your list of DM triggers"""
+
+        # Checks if the keyword is too short
+        if len(keyword) < self.MINIMUM_KEYWORD_LENGTH:
+            return await ctx.send(f"That keyword is too short. It must be at least {self.MINIMUM_KEYWORD_LENGTH} characters")
+
+        keyword = keyword.lower()
+
+        # Gets the specific userID (to make sure it doesn't already have the specified keyword)
+        async with self.bot.database() as db:
+            rows = await db("SELECT * FROM serverkeywords WHERE userid = $1 AND serverid = $2 AND keyword = $3;", ctx.author.id, serverid, keyword)
+
+            # Checks if the user already has the keyword
+            if len(rows) > 0:
+                await ctx.send("You already have that as a keyword")
+                return
+
+            # Checks if the user has the maxiumum amount of keywords (10)
+            rows = await db("SELECT * FROM serverkeywords WHERE userid = $1;", ctx.author.id)
+            if len(rows) >= self.MAXIMUM_ALLOWED_KEYWORDS:
+                await ctx.send(f"You already have the maximum amount of keywords ({self.MAXIMUM_ALLOWED_KEYWORDS})")
+                return
+
+            # Adds the keyword into the list
+            await db("INSERT INTO serverkeywords VALUES ($1, $2, $3);", ctx.author.id, serverid, keyword)
+
+        await ctx.send(f"Added `{keyword}` into <@{ctx.author.id}>'s list")
+
     @commands.command(aliases=['keywordremove', 'remove'])
     async def removekeyword(self, ctx, keyword:str):
         """Removes a keyword from your list of DM triggers"""
@@ -73,6 +103,26 @@ class BotCommands(commands.Cog, name="Bot Commands"):
 
             # Deletes the keyword
             await db("DELETE FROM keywords WHERE userid = $1 AND keyword = $2;", ctx.author.id, keyword)
+
+        await ctx.send(f"Removed `{keyword}` from <@{ctx.author.id}>'s list")
+
+    @commands.command(aliases=['serverkeywordremove', 'removeserver'])
+    async def removeserverkeyword(self, ctx, serverid, keyword:str):
+        """Removes a keyword from your list of DM triggers"""
+
+        keyword = keyword.lower()
+
+        # Gets the specific keyword and userID
+        async with self.bot.database() as db:
+            rows = await db("SELECT * FROM serverkeywords WHERE userid = $1 AND serverid = $2 AND keyword = $3;", ctx.author.id, serverid, keyword)
+
+            # Checks if the row is already in the list
+            if len(rows) == 0:
+                await ctx.send("That wasn't an existing keyword")
+                return
+
+            # Deletes the keyword
+            await db("DELETE FROM serverkeywords WHERE userid = $1 AND serverid = $2 AND keyword = $3;", ctx.author.id, serverid, keyword)
 
         await ctx.send(f"Removed `{keyword}` from <@{ctx.author.id}>'s list")
 
@@ -99,6 +149,19 @@ class BotCommands(commands.Cog, name="Bot Commands"):
             keywordList.append(row["keyword"])
 
         await ctx.send(', '.join(keywordList), allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
+
+    @commands.command(aliases=['serverkeywords', 'serverkeywordlist', 'serverkeywordslist', 'serverlist'])
+    async def listserverkeywords(self, ctx):
+        """Lists all your keywords"""
+
+        async with self.bot.database() as db:
+            rows = await db("SELECT * FROM serverkeywords WHERE userid = $1;", ctx.author.id)
+        if len(rows) == 0:
+            await ctx.send(f"You don't have any server-specific keywords. Set some up by running the `{ctx.prefix}addkeyword` command")
+            return
+
+        await ctx.send(rows)
+        # await ctx.send(', '.join(keywordList), allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
 
     @commands.command()
     async def suggest(self, ctx, *, suggestion:str=None):
