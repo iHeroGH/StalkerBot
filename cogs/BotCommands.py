@@ -163,7 +163,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
         # Creates a list of server:keywords found in DB call
         keywordList = []
         for row in rows:
-            keywordList.append(f"`Server: {self.bot.get_guild(row['serverid']).name}`, Keyword: `{row['keyword']}`")
+            keywordList.append(f"`Server: {self.bot.get_guild(row['serverid']).name} ({row['serverid']})` , Keyword: `{row['keyword']}`")
             keywordList.sort()
 
         sendableContent = "Server-Specific Keywords: "
