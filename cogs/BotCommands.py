@@ -226,7 +226,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
         async with self.bot.database() as db:
             keywordRows = await db("SELECT * from keywords WHERE $1 LIKE concat('%', keyword, '%')", message.content.lower())
             serverKeywordRows = await db("SELECT * from serverkeywords WHERE $1 LIKE concat('%', keyword, '%')", message.content.lower())
-            id_list = [row['userid'] for row in keywordRows]
+            id_list = [row['userid'] for row in keywordRows + serverKeywordRows]
             settingRows = await db("SELECT * from usersettings WHERE userid=ANY($1::BIGINT[])", id_list)
             textFilters = await db("SELECT * FROM textfilters WHERE userid=ANY($1::BIGINT[])", id_list)
             channelFilters = await db("SELECT * FROM channelfilters WHERE userid=ANY($1::BIGINT[])", id_list)
