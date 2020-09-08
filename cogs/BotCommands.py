@@ -221,10 +221,11 @@ class BotCommands(commands.Cog, name="Bot Commands"):
                 await sent_message.add_reaction("\N{HEAVY BLACK HEART}")
 
 
-        # Non-Server Keywords
+
         # Get everything (from the users who have had a keyword triggered) from the datbase
         async with self.bot.database() as db:
             keywordRows = await db("SELECT * from keywords WHERE $1 LIKE concat('%', keyword, '%')", message.content.lower())
+            serverKeywordRows = await db("SELECT * from serverkeywords WHERE $1 LIKE concat('%', keyword, '%')", message.content.lower())
             id_list = [row['userid'] for row in keywordRows]
             settingRows = await db("SELECT * from usersettings WHERE userid=ANY($1::BIGINT[])", id_list)
             textFilters = await db("SELECT * FROM textfilters WHERE userid=ANY($1::BIGINT[])", id_list)
@@ -256,6 +257,8 @@ class BotCommands(commands.Cog, name="Bot Commands"):
         for row in userFilters:
             settingDict[row['userid']]['filters']['userfilters'].append(row['userfilter'])  # Add the item to a list
 
+
+        # Non-Server Keywords
         # Gets the users and keywords for those users
         alreadySent = []
         for row in keywordRows:
@@ -332,43 +335,9 @@ class BotCommands(commands.Cog, name="Bot Commands"):
         # -------------------------------------
 
         # Server-Specific Keywords
-        # Get everything (from the users who have had a keyword triggered) from the datbase
-        async with self.bot.database() as db:
-            serverKeywordRows = await db("SELECT * from serverkeywords WHERE $1 LIKE concat('%', keyword, '%')", message.content.lower())
-            id_list = [row['userid'] for row in keywordRows]
-            settingRows = await db("SELECT * from usersettings WHERE userid=ANY($1::BIGINT[])", id_list)
-            textFilters = await db("SELECT * FROM textfilters WHERE userid=ANY($1::BIGINT[])", id_list)
-            channelFilters = await db("SELECT * FROM channelfilters WHERE userid=ANY($1::BIGINT[])", id_list)
-            serverFilters = await db("SELECT * FROM serverfilters WHERE userid=ANY($1::BIGINT[])", id_list)
-            userFilters = await db("SELECT * FROM userfilters WHERE userid=ANY($1::BIGINT[])", id_list)
-
-        # Split the database rows down into easily-worable dictionaries
-        base_user_settings = {
-            "keywords": [],
-            "settings": {},
-            "filters": {
-                "textfilters": [],
-                "channelfilters": [],
-                "serverfilters": [],
-                "userfilters": [],
-            }
-        }
-
-        settingDict = collections.defaultdict(lambda: copy.deepcopy(base_user_settings))
-        for row in settingRows:
-            settingDict[row['userid']]['settings'] = dict(row)  # Just straight copy this row from the database
-        for row in textFilters:
-            settingDict[row['userid']]['filters']['textfilters'].append(row['textfilter'])  # Add the item to a list
-        for row in channelFilters:
-            settingDict[row['userid']]['filters']['channelfilters'].append(row['channelfilter'])  # Add the item to a list
-        for row in serverFilters:
-            settingDict[row['userid']]['filters']['serverfilters'].append(row['serverfilter'])  # Add the item to a list
-        for row in userFilters:
-            settingDict[row['userid']]['filters']['userfilters'].append(row['userfilter'])  # Add the item to a list
-
-
         # Gets the users and keywords for those users
         alreadySent = []
+        
         for row in serverKeywordRows:
             userID = row["userid"]
             serverID = row["serverid"]
@@ -376,13 +345,13 @@ class BotCommands(commands.Cog, name="Bot Commands"):
             member = guild.get_member(userID)
             if member is None:
                 continue
+            
+            # Checks if the message was sent in the server it's required to be sent in
+            if message.guild.id != serverID:
+                return
 
             # Checks if the user has already been sent a message
             if userID in alreadySent:
-                continue
-
-            # Checks if the message was sent in the server it's required to be sent in
-            if message.guild.id != serverID:
                 continue
 
             # Checks if the author of the message is the member and checks if the member's settings allow for owntrigger
