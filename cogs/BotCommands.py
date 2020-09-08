@@ -166,7 +166,8 @@ class BotCommands(commands.Cog, name="Bot Commands"):
             keywordList.append(f"`{self.bot.get_guild(row['serverid']).name}`, `{row['keyword']}`")
 
         sendableContent = "Server-Specific Keywords: "
-        sendableContent = sendableContent + f"\n {[i for i in keywordList]}"
+        for i in keywordList: 
+            sendableContent = sendableContent + f"\n {str(i)}"
 
 
         await ctx.send(sendableContent, allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
