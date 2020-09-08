@@ -225,6 +225,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
         # Get everything (from the users who have had a keyword triggered) from the datbase
         async with self.bot.database() as db:
             keywordRows = await db("SELECT * from keywords WHERE $1 LIKE concat('%', keyword, '%')", message.content.lower())
+            serverKeywordRows = await db("SELECT * from serverkeywords WHERE $1 LIKE concat('%', keyword, '%')", message.content.lower())
             id_list = [row['userid'] for row in keywordRows]
             settingRows = await db("SELECT * from usersettings WHERE userid=ANY($1::BIGINT[])", id_list)
             textFilters = await db("SELECT * FROM textfilters WHERE userid=ANY($1::BIGINT[])", id_list)
@@ -256,6 +257,8 @@ class BotCommands(commands.Cog, name="Bot Commands"):
         for row in userFilters:
             settingDict[row['userid']]['filters']['userfilters'].append(row['userfilter'])  # Add the item to a list
 
+
+        # Non-Server Keywords
         # Gets the users and keywords for those users
         alreadySent = []
         for row in keywordRows:
@@ -267,6 +270,87 @@ class BotCommands(commands.Cog, name="Bot Commands"):
 
             # Checks if the user has already been sent a message
             if userID in alreadySent:
+                continue
+
+            # Checks if the author of the message is the member and checks if the member's settings allow for owntrigger
+            if message.author == member and settingDict[member.id]['settings'].get('owntrigger', True) is False:
+                continue
+
+            # Creates a list "lines" that splits the message content by new line. It then checks if the quote trigger setting is
+            # turned on. If it isn't, it appends the item from the lines list to a list "nonQuoted". If the setting is enabled, it
+            # just keeps nonQuoted as the original message. This prevents users from recieving the section of text that is quoted.
+            lines = message.content.split('\n')
+            nonQuoted = []
+            if settingDict[member.id]['settings'].get('quotetrigger', True) is False:
+                for i in lines:
+                    if not i.startswith("> "):
+                        nonQuoted.append(i)
+            else:
+                nonQuoted = lines
+            content = '\n'.join(nonQuoted)
+
+            # Filters
+            for i in settingDict[member.id]['filters']['serverfilters']:
+                if i == message.guild.id:
+                    content = None
+            for i in settingDict[member.id]['filters']['channelfilters']:
+                if i == message.channel.id:
+                    content = None
+            for i in settingDict[member.id]['filters']['userfilters']:
+                if i == message.author.id:
+                    content = None
+            for i in settingDict[member.id]['filters']['textfilters']:
+                if i.lower() in message.content.lower() and content is not None:
+                    lowercaseI = i.lower()
+                    lowerContent = content.lower()
+                    content = lowerContent.replace(lowercaseI, "")
+
+            # If there's no content to be examined, let's just skip the message
+            if content is None or content.strip() == "":
+                continue
+
+            # See if we should send them a message
+            if keyword not in content.lower():
+                continue
+            if channel.permissions_for(member).read_messages is False:
+                continue
+
+            # Sends a message to a user if their keyword is said
+            if settingDict[member.id]['settings'].get('embedmessage', False):
+                sendable_content = {'embed': self.create_message_embed(message, keyword)}
+            else:
+                if len(message.attachments) != 0:
+                    url_list = [i.url for i in message.attachments]
+                    lines = "Attatchment Links: "
+                    for i in url_list:
+                        lines = lines + f"\n<{i}>"
+                    sendable_content = {'content': f"<@!{message.author.id}> ({message.author.name}) has typed the keyword (`{keyword}`) in <#{message.channel.id}>. They typed `{message.content[:1900]}` <{(message.jump_url)}>.\n{lines}"}
+                else:
+                    sendable_content = {'content': f"<@!{message.author.id}> ({message.author.name}) has typed the keyword (`{keyword}`) in <#{message.channel.id}>. They typed `{message.content[:1900]}` <{(message.jump_url)}>."}
+            try:
+                await member.send(**sendable_content)
+            except discord.Forbidden:
+                pass
+            alreadySent.append(member.id)
+        # -------------------------------------
+
+        # Server-Specific Keywords
+        # Gets the users and keywords for those users
+        alreadySent = []
+        for row in serverKeywordRows:
+            userID = row["userid"]
+            serverID = row["serverid"]
+            keyword = row["keyword"]
+            member = guild.get_member(userID)
+            if member is None:
+                continue
+
+            # Checks if the user has already been sent a message
+            if userID in alreadySent:
+                continue
+
+            # Checks if the message was sent in the server it's required to be sent in
+            if message.guild.id != serverID:
                 continue
 
             # Checks if the author of the message is the member and checks if the member's settings allow for owntrigger
