@@ -50,7 +50,9 @@ class LoggerAndHandler(commands.Cog, name="Logger And Handler"):
         if isinstance(error, commands.MissingPermissions):
             await ctx.author.send(f"```py\n{error}```")
             return
-
+        if isinstance(error, commands.NotOwner):
+            await ctx.author.send(f"```py\n{error}```")
+            return
 
         # Webhook Sending
         async with aiohttp.ClientSession() as session:
