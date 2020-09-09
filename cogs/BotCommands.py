@@ -26,6 +26,21 @@ class BotCommands(commands.Cog, name="Bot Commands"):
         url = f"<https://discord.com/api/oauth2/authorize?client_id=723813550136754216&permissions={bot_permissions.value}&scope=bot>"
         await ctx.send(url)
 
+    @commands.command(aliases=['botinfo'])
+    async def info(self, ctx):
+        """Explains the bot"""
+
+        embed = discord.Embed()
+        color = random.randint(0, 0xffffff)
+        embed.color = color
+        stalker = self.bot.get_user(723813550136754216)
+        embed.set_author(name=str(stalker), icon_url=stalker.avatar_url)
+        embed.description = "StalkerBot is just a simple bot that sends you a DM every time a keyword that you said in a channel you have access to!\nYour keywords are global, but you can set server-specific keywords aswell.\nFinally, you can add filters for certain users, text phrases, channels, and even servers. These filters prevent you from getting DMed about your keyword if it's said by a specific user, in a specific text phrase, in a specific channel, or in a specific server. Run `s.help` for more."
+        embed.set_image(url = "https://cdn.discordapp.com/attachments/723820365612187690/753107021095764038/unknown.png")
+        embed.set_thumbnail(url = stalker.avatar_url)
+        
+        await ctx.send(embed=embed)
+
     @commands.command(aliases=['keyword', 'add'])
     async def addkeyword(self, ctx, keyword:str):
         """Adds a keyword to your list of DM triggers"""
