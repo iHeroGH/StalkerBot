@@ -188,7 +188,7 @@ class StalkingEvents(commands.Cog, name="Stalking Events (Message Send/Edit)"):
 
 
     @commands.Cog.listener()
-    async def on_edit(self, before, after):
+    async def on_message_edit(self, before, after):
 
         # Checks that it isn't a DM
         guild = after.guild

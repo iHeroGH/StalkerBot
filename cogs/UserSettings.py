@@ -16,7 +16,9 @@ class UserSettings(commands.Cog, name="User Setting Commands"):
         """Allows users to change individual settings quickly"""
 
         # Checks if the setting provided is an existing setting
-        if setting.lower() != "owntrigger" and setting.lower() != "quotetrigger" and setting.lower() != "embedmessage" or setting is None:
+        if setting == None:
+            return await ctx.send("You didn't select a valid setting to switch. The available settings are `owntrigger`, `quotetrigger`, and `embedmessage`.")
+        if setting.lower() != "owntrigger" and setting.lower() != "quotetrigger" and setting.lower() != "embedmessage":
             return await ctx.send("You didn't select a valid setting to switch. The available settings are `owntrigger`, `quotetrigger`, and `embedmessage`.")
 
         # Get the current settings for a user
