@@ -9,9 +9,49 @@ class UserSettings(commands.Cog, name="User Setting Commands"):
     def __init__(self, bot):
         self.bot = bot
 
+
+
+    @commands.command(aliases=['qs', 'quicksettings', 'quicksetup'])
+    async def quickswitch(self, ctx, setting=None):
+        """Allows users to change individual settings quickly"""
+
+        # Checks if the setting provided is an existing setting
+        if setting.lower() != "owntrigger" and setting.lower() != "quotetrigger" and setting.lower() != "embedmessage" or setting is None:
+            return await ctx.send("You didn't select a valid setting to switch. The available settings are `owntrigger`, `quotetrigger`, and `embedmessage`.")
+
+        # Get the current settings for a user
+        async with self.bot.database() as db:
+            existingSettings = await db("select * from usersettings where userid = $1;", ctx.author.id)
+
+        # Checks to see if existing settings for the user actually exist. If not, defaults to True
+        if existingSettings:
+            owntrigger = existingSettings[0]['owntrigger']
+            quotetrigger = existingSettings[0]['quotetrigger']
+            embedmessage = existingSettings[0]['embedmessage']
+        else:
+            owntrigger = True
+            quotetrigger = True
+            embedmessage = False
+
+        # Updates the selected setting (switches it from whatever it is now to the opposite)
+        if setting.lower() == "owntrigger":
+            async with self.bot.database() as db:
+                await db("INSERT into usersettings (userid, owntrigger) VALUES ($1, $2) on conflict (userid) do update set owntrigger = $2", ctx.author.id, not owntrigger)
+            await ctx.send(f"Updated `owntrigger` from `{owntrigger}` to `{not owntrigger}`")
+        elif setting.lower() == "quotetrigger":
+            async with self.bot.database() as db:
+                await db("INSERT into usersettings (userid, quotetrigger) VALUES ($1, $2) on conflict (userid) do update set quotetrigger = $2", ctx.author.id, not quotetrigger)  
+            await ctx.send(f"Updated `quotetrigger` from `{quotetrigger}` to `{not quotetrigger}`")
+        elif setting.lower() == "embedmessage":
+            async with self.bot.database() as db:
+                await db("INSERT into usersettings (userid, embedmessage) VALUES ($1, $2) on conflict (userid) do update set embedmessage = $2", ctx.author.id, not embedmessage)
+            await ctx.send(f"Updated `embedmessage` from `{embedmessage}` to `{not embedmessage}`")
+
+
+
     @commands.command(aliases=['setup'])
     async def settings(self, ctx):
-        """Allows users to change settings (such as OwnTrigger and QuoteTrigger"""
+        """Allows users to change settings (such as OwnTrigger, QuoteTrigger, and EmbedMessage)"""
 
         # Get the current settings for a user
         async with self.bot.database() as db:
