@@ -41,6 +41,9 @@ class LoggerAndHandler(commands.Cog, name="Logger And Handler"):
         if isinstance(error, commands.TooManyArguments):
             await ctx.send(f"```py\n{error}```")
             return
+        if isinstance(error, (commands.BadArgument, commands.BadUnionArgument)):
+            await ctx.send(f"```py\n{error}```")
+            return
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(f"```py\n{error}```")
             return
