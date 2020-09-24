@@ -75,6 +75,11 @@ class BotCommands(commands.Cog, name="Bot Commands"):
     async def addserverkeyword(self, ctx, serverid:int, keyword:str):
         """Adds a keyword to your list of DM triggers"""
 
+        # Checks if the server exists
+        server = self.bot.get_guild(serverid)
+        if server is None:
+            return await ctx.send("The server ID you provided does not correspond to an existing server")
+
         # Checks if the keyword is too short
         if len(keyword) < self.MINIMUM_KEYWORD_LENGTH:
             return await ctx.send(f"That keyword is too short. It must be at least {self.MINIMUM_KEYWORD_LENGTH} characters")
