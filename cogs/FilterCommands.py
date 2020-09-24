@@ -44,8 +44,8 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
                 int(filter)
             except ValueError:
                 return await ctx.send("You must provide a valid server ID to filter servers")
-                
-            server = self.bot.get_guild(filter)
+
+        server = self.bot.get_guild(filter)
 
         if server is None:
             await ctx.send("You didn't provide a valid server ID")
