@@ -34,12 +34,17 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
         await ctx.send(f"Added {filter.mention} to your channel filter list")
 
     @filter.command(name="server")
-    async def filter_server(self, ctx, filter:int=None):
+    async def filter_server(self, ctx, filter=None):
         """Adds a server filter"""
 
         if filter is None:
             server = ctx.guild
         else:
+            try:
+                int(filter)
+            except ValueError:
+                return await ctx.send("You must provide a valid server ID to filter servers")
+                
             server = self.bot.get_guild(filter)
 
         if server is None:
