@@ -48,7 +48,7 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
         server = self.bot.get_guild(filter)
 
         if server is None:
-            await ctx.send("You didn't provide a valid server ID")
+            return await ctx.send("You didn't provide a valid server ID")
 
         # Opens a connection and inerts the server filter into the serverfilters database
         async with self.bot.database() as db:
@@ -144,7 +144,7 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
             server = self.bot.get_guild(filter)
 
         if server is None:
-            await ctx.send("You didn't provide a valid server ID")
+            return await ctx.send("You didn't provide a valid server ID")
 
         # Opens a connection and inerts the text filter into the serverfilters database
         async with self.bot.database() as db:
