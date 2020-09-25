@@ -30,14 +30,14 @@ class BotCommands(commands.Cog, name="Bot Commands"):
     async def server(self, ctx):
         """Sends an invite link for the support server"""
 
-        url = f"<https://discord.com/invite/x34DnGj>"
+        url = f"https://discord.com/invite/x34DnGj"
         await ctx.send(url)
 
     @commands.command()
     async def vote(self, ctx):
         """Sends the voting links"""
 
-        url = f"`top.gg:` https://top.gg/bot/723813550136754216\n`Discord.ly:` https://discord.ly/stalkerbot"
+        url = f"`top.gg:` <https://top.gg/bot/723813550136754216>\n`Discord.ly:` <https://discord.ly/stalkerbot>"
         await ctx.send(url)
 
     @commands.command(aliases=['botinfo'])
