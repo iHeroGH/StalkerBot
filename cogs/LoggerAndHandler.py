@@ -37,7 +37,7 @@ class LoggerAndHandler(commands.Cog, name="Logger And Handler"):
         # Channel Sending
         if isinstance(error, commands.CommandNotFound):
             await ctx.send(f"```py\n{error}```")
-            return
+            #return
         if isinstance(error, commands.TooManyArguments):
             await ctx.send(f"```py\n{error}```")
             return
