@@ -51,7 +51,7 @@ async def get_prefix(bot, message):
     return commands.when_mentioned_or(prefix)(bot,message)
 
 
-bot = commands.Bot(command_prefix=get_prefix)
+bot = commands.AutoShardedBot(command_prefix=get_prefix)
 bot.database_auth = database_auth
 bot.database = DatabaseConnection
 
