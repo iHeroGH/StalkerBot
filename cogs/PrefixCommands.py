@@ -18,8 +18,10 @@ class PrefixCommands(commands.Cog, name="Prefix Commands"):
             async with self.bot.database() as db:
                 prefixRows = await db("SELECT * from prefix where guildid = $1", ctx.guild.id)
             
-            await ctx.send(f"The prefix for this server is `{prefixRows[0]['prefix']}`")
-            return
+            if len(prefixRows) > 0:
+                return await ctx.send(f"The prefix for this server is `{prefixRows[0]['prefix']}`")
+            else:
+                return await ctx.send(f"The prefix for this server is `s.`")
 
         if len(prefix) > 50:
             await ctx.send("Could not set that as a prefix as it is longer than 50 characters.")
