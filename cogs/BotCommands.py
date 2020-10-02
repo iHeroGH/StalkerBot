@@ -26,14 +26,14 @@ class BotCommands(commands.Cog, name="Bot Commands"):
         url = f"<https://discord.com/api/oauth2/authorize?client_id=723813550136754216&permissions={bot_permissions.value}&scope=bot>"
         await ctx.send(url)
 
-    @commands.command()
+    @commands.command(aliases=['support'])
     async def server(self, ctx):
         """Sends an invite link for the support server"""
 
         url = f"https://discord.com/invite/x34DnGj"
         await ctx.send(url)
 
-    @commands.command()
+    @commands.command(aliases=['upvote'])
     async def vote(self, ctx):
         """Sends the voting links"""
 
