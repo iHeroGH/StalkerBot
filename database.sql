@@ -46,5 +46,5 @@ create TABLE userfilters(
 
 create TABLE tempmute(
     userid BIGINT PRIMARY KEY,
-    time TIMESTAMP,
+    time TIMESTAMP
 );
