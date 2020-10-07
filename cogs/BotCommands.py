@@ -2,6 +2,7 @@ import io
 import random
 import collections
 import copy
+from datetime import datetime as dt, timedelta
 
 import discord
 from discord.ext import commands
@@ -54,6 +55,39 @@ class BotCommands(commands.Cog, name="Bot Commands"):
         embed.set_thumbnail(url = stalker.avatar_url)
         
         await ctx.send(embed=embed)
+
+    @commands.command(aliases=['tm'])
+    async def tempmute(self, ctx, time:int, unit:str):
+        """Temporarily mutes the bot from sending a user DMs for a specificed amount of time"""
+        unit = unit.lower()
+
+        # Checks that units are valid
+        valid_units = {
+            "s": 1,
+            "m": 60,
+            "h": 60 * 60, 
+            "d": 60 * 60 * 24
+        }
+
+        if unit not in valid_units.keys():
+            return await ctx.send("You didn't provide a valid unit (s, m, h, d)")
+        
+        # Checks that time is above 0
+        if time <= 0:
+            return await ctx.send("The time value you provided is under 0 seconds")
+        
+        # Change all time into seconds
+        seconded_time = valid_units.get('unit') * time
+
+        # Add time
+        future = dt.utcnow() + timedelta(seconds=seconded_time) 
+
+        # Add to database
+        async with self.bot.database() as db:
+            await db("INSERT INTO tempmute VALUES($1, $2) ON CONFLICT (userid) DO UPDATE SET time = $2;", ctx.author.id, future)
+
+        await ctx.send(f"I won't send you messages for the next `{time}{unit}`s")
+
 
     @commands.command(aliases=['keyword', 'add'])
     async def addkeyword(self, ctx, keyword:str):

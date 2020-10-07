@@ -52,7 +52,9 @@ class StalkingEvents(commands.Cog, name="Stalking Events (Message Send/Edit)"):
         async with self.bot.database() as db:
             keywordRows = await db("SELECT * from keywords WHERE $1 LIKE concat('%', keyword, '%')", message.content.lower())
             serverKeywordRows = await db("SELECT * from serverkeywords WHERE $1 LIKE concat('%', keyword, '%')", message.content.lower())
-            id_list = [row['userid'] for row in keywordRows + serverKeywordRows]
+            muted = await db("SELECT * FROM tempmute WHERE time > timezone('utc',now())")
+            mutedlist = [user['userid'] for user in muted]
+            id_list = [row['userid'] for row in keywordRows + serverKeywordRows if row['userid'] not in mutedlist]
             settingRows = await db("SELECT * from usersettings WHERE userid=ANY($1::BIGINT[])", id_list)
             textFilters = await db("SELECT * FROM textfilters WHERE userid=ANY($1::BIGINT[])", id_list)
             channelFilters = await db("SELECT * FROM channelfilters WHERE userid=ANY($1::BIGINT[])", id_list)
@@ -228,7 +230,9 @@ class StalkingEvents(commands.Cog, name="Stalking Events (Message Send/Edit)"):
         async with self.bot.database() as db:
             keywordRows = await db("SELECT * from keywords WHERE $1 LIKE concat('%', keyword, '%')", after.content.lower())
             serverKeywordRows = await db("SELECT * from serverkeywords WHERE $1 LIKE concat('%', keyword, '%')", after.content.lower())
-            id_list = [row['userid'] for row in keywordRows + serverKeywordRows]
+            muted = await db("SELECT * FROM tempmute WHERE time > timezone('utc',now())")
+            mutedlist = [user['userid'] for user in muted]
+            id_list = [row['userid'] for row in keywordRows + serverKeywordRows if row['userid'] not in mutedlist]
             settingRows = await db("SELECT * from usersettings WHERE userid=ANY($1::BIGINT[])", id_list)
             textFilters = await db("SELECT * FROM textfilters WHERE userid=ANY($1::BIGINT[])", id_list)
             channelFilters = await db("SELECT * FROM channelfilters WHERE userid=ANY($1::BIGINT[])", id_list)
