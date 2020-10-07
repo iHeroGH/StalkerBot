@@ -90,6 +90,8 @@ class StalkingEvents(commands.Cog, name="Stalking Events (Message Send/Edit)"):
         # Gets the users and keywords for those users
         alreadySent = []
         for row in keywordRows + serverKeywordRows:
+            if row['userid'] in mutedlist:
+                continue
             userID = row["userid"]
             keyword = row["keyword"]
             member = guild.get_member(userID)
@@ -268,6 +270,8 @@ class StalkingEvents(commands.Cog, name="Stalking Events (Message Send/Edit)"):
         # Gets the users and keywords for those users
         alreadySent = []
         for row in keywordRows + serverKeywordRows:
+            if row['userid'] in mutedlist:
+                continue
             userID = row["userid"]
             keyword = row["keyword"]
             member = guild.get_member(userID)
