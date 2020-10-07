@@ -77,7 +77,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
             return await ctx.send("The time value you provided is under 0 seconds")
         
         # Change all time into seconds
-        seconded_time = valid_units.get('unit') * time
+        seconded_time = valid_units[unit] * time
 
         # Add time
         future = dt.utcnow() + timedelta(seconds=seconded_time) 
