@@ -53,10 +53,7 @@ class StalkingEvents(commands.Cog, name="Stalking Events (Message Send/Edit)"):
             if channel.permissions_for(user).read_messages:
                 sent_message = await user.send(f"<@!{message.author.id}> ({message.author.name}) has typed in <#{message.channel.id}>. They typed `{message.content[:1900]}` {(message.jump_url)}")
             if user == megan:
-                heart_codepoints = [
-                    "\U00002764", "\U0000fe0f", "\U0001f9e1", "\U0001f49b", "\U0001f49a",
-                    "\U0001f499", "\U0001f49c", "\U0001f5a4", "\U0001f90e", "\U0001f90d",
-                ]
+                heart_codepoints = ["❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤎", "🤍"]
                 await sent_message.add_reaction(random.choice(heart_codepoints))
 
         # Get everything (from the users who have had a keyword triggered) from the datbase
