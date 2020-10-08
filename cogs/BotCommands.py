@@ -57,7 +57,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
         await ctx.send(embed=embed)
 
     @commands.command(aliases=['tm'])
-    async def tempmute(self, ctx, time:int, unit:str):
+    async def tempmute(self, ctx, time:int, unit:str=None):
         """Temporarily mutes the bot from sending a user DMs for a specificed amount of time"""
         unit = unit.lower()
 
@@ -65,6 +65,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
         valid_units = {
             "s": 1,
             "m": 60,
+            None: 60,
             "h": 60 * 60, 
             "d": 60 * 60 * 24
         }
@@ -86,8 +87,17 @@ class BotCommands(commands.Cog, name="Bot Commands"):
         async with self.bot.database() as db:
             await db("INSERT INTO tempmute VALUES($1, $2) ON CONFLICT (userid) DO UPDATE SET time = $2;", ctx.author.id, future)
 
-        await ctx.send(f"I won't send you messages for the next `{time}{unit}`s")
+        await ctx.send(f"I won't send you messages for the next `{time}{unit}`")
 
+    @commands.command(aliases=['unm', "um"])
+    async def unmute(self, ctx):
+        """Unmutes StalkerBot from sending a user messages"""
+
+        # Remove the user from the tempmute database
+        async with self.bot.database() as db:
+            await db("DELETE FROM tempmute WHERE userid=$1;", ctx.author.id)
+        
+        await ctx.send("Unmuted StalkerBot.")
 
     @commands.command(aliases=['keyword', 'add'])
     async def addkeyword(self, ctx, keyword:str):
