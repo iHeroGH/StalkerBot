@@ -18,6 +18,12 @@ class DatabaseConnection(object):
     def __init__(self, conn=None):
         self.conn = conn
 
+    @classmethod
+    async def get_connection(cls):
+        v = cls()
+        await v.connect()
+        return v
+
     async def connect(self):
         self.conn = await asyncpg.connect(**database_auth)
 
@@ -58,14 +64,14 @@ bot.database = DatabaseConnection
 
 @bot.event
 async def on_ready():
-    
+
     game = discord.Game(f"s.help || Stalking {len(bot.guilds)} guilds.")
     await bot.change_presence(status=discord.Status.online, activity=game)
     change_presence_loop.start()
 
 @tasks.loop(minutes=10)
 async def change_presence_loop():
-    
+
     game = discord.Game(f"s.help || Stalking {len(bot.guilds)} guilds.")
     await bot.change_presence(status=discord.Status.online, activity=game)
 
@@ -76,7 +82,7 @@ async def reloadall(ctx):
 
     [bot.reload_extension(i[:-3].replace(os.sep, ".")) for i in glob.glob("cogs/*.py")]
     await ctx.send("🔁 Reloaded all cogs.")
-    
+
 
 
 [bot.load_extension(i[:-3].replace(os.sep, ".")) for i in glob.glob("cogs/*.py")]
