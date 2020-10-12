@@ -59,9 +59,8 @@ class LoggerAndHandler(commands.Cog, name="Logger And Handler"):
         # Webhook Sending
         async with aiohttp.ClientSession() as session:
             webhook = discord.Webhook.from_url('https://discordapp.com/api/webhooks/744353242322043001/V3WMdShI8L8LZLStNUBaqG2WI-qZrdofCQFM1QkW4oLTIcRA4TMC5ffKFpS2JyIXp96w', adapter=discord.AsyncWebhookAdapter(session))
-            error = str(error)
             if len(error) >= 1970:
-                data = io.StringIO(error)
+                data = io.StringIO(str(error))
                 data.seek(0)
                 await webhook.send(file=discord.File(data, filename="error.py"))
             else:
@@ -69,7 +68,6 @@ class LoggerAndHandler(commands.Cog, name="Logger And Handler"):
 
         # And raise error again so it goes to the console as a full traceback
         raise error
-
 
     # Owner Only Commands
     @commands.command(aliases=['countservers'])
