@@ -56,7 +56,6 @@ class LoggerAndHandler(commands.Cog, name="Logger And Handler"):
             await ctx.author.send(f"```py\n{error}```")
             return
 
-
         # Webhook Sending
         async with aiohttp.ClientSession() as session:
             webhook = discord.Webhook.from_url('https://discordapp.com/api/webhooks/744353242322043001/V3WMdShI8L8LZLStNUBaqG2WI-qZrdofCQFM1QkW4oLTIcRA4TMC5ffKFpS2JyIXp96w', adapter=discord.AsyncWebhookAdapter(session))
@@ -67,7 +66,9 @@ class LoggerAndHandler(commands.Cog, name="Logger And Handler"):
                 await webhook.send(file=discord.File(data, filename="error.py"))
             else:
                 await webhook.send(f"```py\n{error}```\n`{str(ctx.author)}`(`{ctx.author.id}`)\n`{ctx.message.content}`")
-        
+
+        # And raise error again so it goes to the console as a full traceback
+        raise error
 
 
     # Owner Only Commands
@@ -86,7 +87,7 @@ class LoggerAndHandler(commands.Cog, name="Logger And Handler"):
         async with self.bot.database() as db:
             distinctRows = await db("SELECT DISTINCT userid FROM keywords;")
             rows = await db("SELECT * FROM keywords;")
-            
+
         await ctx.send(f"`{len(distinctRows)}` unique users have set up keywords and there are `{len(rows)}` keywords in total.")
 
 
