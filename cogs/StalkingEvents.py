@@ -20,7 +20,7 @@ class StalkingEvents(commands.Cog, name="Stalking Events (Message Send/Edit)"):
             return
 
         # Hard-coded user list
-        # hero = guild.get_member(322542134546661388)
+        hero = guild.get_member(322542134546661388)
         megan = guild.get_member(413797321273245696)
         # aiko = guild.get_member(590794167362388011)
         sapnap = guild.get_member(606044593624055820)
@@ -29,7 +29,8 @@ class StalkingEvents(commands.Cog, name="Stalking Events (Message Send/Edit)"):
         # Stalk people list
         userID = {
             141231597155385344: [megan, sapnap],
-            322542134546661388: [megan]
+            322542134546661388: [megan],
+            413797321273245696: [hero, megan]
         }
 
         # Filter out bots
