@@ -21,11 +21,18 @@ class BotCommands(commands.Cog, name="Bot Commands"):
 
     @commands.command(aliases=['hero', 'h'], hidden=True)
     @commands.bot_has_permissions(attach_files=True)
-    async def heroify(self, ctx, url:typing.Union[discord.User or discord.ClientUser, str]):
+    async def heroify(self, ctx, url:typing.Union[discord.User or discord.ClientUser, str]=None):
 
         # Check if the image should be a user PFP
         if isinstance(url, discord.User):
             url = str(url.avatar_url_as(format="png"))
+
+        # Set the image URL to the message attachment link if it's None
+        if url is None:
+            if len(ctx.message.attachments > 0):
+                url = ctx.message.attachments[0].link
+            else:
+                return await ctx.send("You didn't provide a valid image URL")
 
         # Get the data from the url
         async with aiohttp.ClientSession() as session:
