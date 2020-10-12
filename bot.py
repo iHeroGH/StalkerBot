@@ -59,14 +59,14 @@ bot.database = DatabaseConnection
 @bot.event
 async def on_ready():
     
-    game = discord.Game(f"s.help || Stalking {len(bot.guilds)} guilds.")
+    game = discord.Game(f"Down for Maintenance || Stalking {len(bot.guilds)} guilds.")
     await bot.change_presence(status=discord.Status.online, activity=game)
     change_presence_loop.start()
 
 @tasks.loop(minutes=10)
 async def change_presence_loop():
     
-    game = discord.Game(f"s.help || Stalking {len(bot.guilds)} guilds.")
+    game = discord.Game(f"Down for Maintenance || Stalking {len(bot.guilds)} guilds.")
     await bot.change_presence(status=discord.Status.online, activity=game)
 
 @bot.command()
