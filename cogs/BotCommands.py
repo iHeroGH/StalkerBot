@@ -37,7 +37,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
 
         # Assign variables for the images (the image sent by user and the H)
         base_image = Image.open(image_file)
-        h_image = Image.open("config/hero_h.png")
+        h_image = Image.open("images/hero_h.png")
 
         # Resize the base image to be the same size as the H
         base_image = base_image.resize(h_image.size)
