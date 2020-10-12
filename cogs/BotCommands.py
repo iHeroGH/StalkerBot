@@ -2,6 +2,9 @@ import io
 import random
 import collections
 import copy
+import aiohttp
+from PIL import Image
+import typing
 from datetime import datetime as dt, timedelta
 
 import discord
@@ -15,6 +18,41 @@ class BotCommands(commands.Cog, name="Bot Commands"):
 
     def __init__(self, bot):
         self.bot = bot
+
+    @commands.command(aliases=['hero', 'h'], hidden=True)
+    @commands.bot_has_permissions(attach_files=True)
+    async def heroify(self, ctx, url:typing.Union[discord.User, str]):
+
+        # Check if the image should be a user PFP
+        if isinstance(url, discord.User):
+            url = str(url.avatar_url_as(format="png"))
+
+        # Get the data from the url
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as r:
+                image_bytes = await r.read()
+
+        # "Hey python, treat this as a file so you can open it later"
+        image_file = io.BytesIO(image_bytes)
+
+        # Assign variables for the images (the image sent by user and the H)
+        base_image = Image.open(image_file)
+        h_image = Image.open("config/hero_h.png")
+
+        # Resize the base image to be the same size as the H
+        base_image = base_image.resize(h_image.size)
+
+        # Add an H to the base image
+        base_image.paste(h_image, (0, 0), h_image)
+
+        # Change the base image back to bytes so we can send it to Discord
+        sendable_image = io.BytesIO()
+        base_image.save(sendable_image, "PNG")
+        sendable_image.seek(0)
+
+        await ctx.send(file=discord.File(sendable_image, filename="heroed.png"))
+
+
 
     @commands.command()
     async def invite(self, ctx):
