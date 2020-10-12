@@ -21,7 +21,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
 
     @commands.command(aliases=['hero', 'h'], hidden=True)
     @commands.bot_has_permissions(attach_files=True)
-    async def heroify(self, ctx, url:typing.Union[discord.User, str]):
+    async def heroify(self, ctx, url:typing.Union[discord.User or discord.ClientUser, str]):
 
         # Check if the image should be a user PFP
         if isinstance(url, discord.User):
