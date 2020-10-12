@@ -29,7 +29,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
 
         # Set the image URL to the message attachment link if it's None
         if url is None:
-            if len(ctx.message.attachments > 0):
+            if len(ctx.message.attachments) > 0:
                 url = ctx.message.attachments[0].link
             else:
                 return await ctx.send("You didn't provide a valid image URL")
