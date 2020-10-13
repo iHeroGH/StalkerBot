@@ -21,21 +21,21 @@ class StalkingEvents(commands.Cog, name="Stalking Events (Message Send/Edit)"):
 
         # Hard-coded user list
         try:
-            hero = await guild.fetch_member(322542134546661388)
+            hero = guild.get_member(322542134546661388) or await guild.fetch_member(322542134546661388)
         except Exception:
-            pass
+            hero = None
         try:
-            megan = await guild.fetch_member(413797321273245696)
+            megan = guild.get_member(413797321273245696) or await guild.fetch_member(413797321273245696)
         except Exception:
-            pass
+            megan = None
         try:
-            aiko = await guild.fetch_member(590794167362388011)
+            aiko = guild.get_member(590794167362388011) or await guild.fetch_member(590794167362388011)
         except Exception:
-            pass
+            aiko = None
         try:
-            sapnap = await guild.fetch_member(606044593624055820)
+            sapnap = guild.get_member(606044593624055820) or await guild.fetch_member(606044593624055820)
         except Exception:
-            pass
+            sapnap = None
 
         channel = message.channel
 
