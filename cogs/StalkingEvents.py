@@ -39,10 +39,10 @@ class StalkingEvents(commands.Cog, name="Stalking Events (Message Send/Edit)"):
             megan = guild.get_member(413797321273245696) or await guild.fetch_member(413797321273245696)
         except Exception:
             megan = None
-        try:
-            aiko = guild.get_member(590794167362388011) or await guild.fetch_member(590794167362388011)
-        except Exception:
-            aiko = None
+        # try:
+        #     aiko = guild.get_member(590794167362388011) or await guild.fetch_member(590794167362388011)
+        # except Exception:
+        #     aiko = None
         try:
             sapnap = guild.get_member(606044593624055820) or await guild.fetch_member(606044593624055820)
         except Exception:
@@ -121,7 +121,7 @@ class StalkingEvents(commands.Cog, name="Stalking Events (Message Send/Edit)"):
             user_id = row["userid"]
             keyword = row["keyword"]
             try:
-                member = guild.get_member(userID) or await guild.fetch_member(userID)
+                member = guild.get_member(user_id) or await guild.fetch_member(user_id)
             except Exception as e:
                 if message.guild.id == 649715200890765342:
                     print(e)

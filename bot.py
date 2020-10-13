@@ -6,8 +6,10 @@ import discord
 from discord.ext import commands, tasks
 import asyncpg
 
+
 with open("config.json") as a:
     config = json.load(a)
+
 
 bot_token = config["token"]
 database_auth = config["database"]
@@ -68,10 +70,12 @@ async def on_ready():
     await bot.change_presence(status=discord.Status.online, activity=game)
     change_presence_loop.start()
 
+
 @tasks.loop(minutes=10)
 async def change_presence_loop():
     game = discord.Game(f"s.help || Stalking {len(bot.guilds)} guilds.")
     await bot.change_presence(status=discord.Status.online, activity=game)
+
 
 @bot.command()
 @commands.is_owner()
@@ -80,7 +84,6 @@ async def reloadall(ctx):
 
     [bot.reload_extension(i[:-3].replace(os.sep, ".")) for i in glob.glob("cogs/*.py")]
     await ctx.send("🔁 Reloaded all cogs.")
-
 
 
 [bot.load_extension(i[:-3].replace(os.sep, ".")) for i in glob.glob("cogs/*.py")]

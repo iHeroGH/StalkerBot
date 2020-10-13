@@ -1,6 +1,5 @@
 import discord
 from discord.ext import commands
-import asyncpg
 
 
 class FilterCommands(commands.Cog, name="Filter Commands"):
@@ -21,7 +20,7 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
         # Opens a connection and inerts the text filter into the textfilters database
         async with self.bot.database() as db:
             await db("INSERT INTO textfilters (userid, textfilter) VALUES ($1, $2);", ctx.author.id, filter)
-        
+
         await ctx.send(f"Added `{filter}` to your text filter list", allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
 
     @filter.command(name="channel")
@@ -53,7 +52,7 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
         # Opens a connection and inerts the server filter into the serverfilters database
         async with self.bot.database() as db:
             await db("INSERT INTO serverfilters (userid, serverfilter) VALUES ($1, $2);", ctx.author.id, filter)
-        
+
         await ctx.send(f"Added `{filter}` to your server filter list")
 
     @filter.command(name="user")
@@ -70,7 +69,7 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
         # Opens a connection and inerts the user filter into the serverfilters database
         async with self.bot.database() as db:
             await db("INSERT INTO userfilters (userid, userfilter) VALUES ($1, $2);", ctx.author.id, filter)
-        
+
         await ctx.send(f"Added `{filter}` to your user filter list", allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
 
     @filter.command(name="list")
@@ -149,7 +148,7 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
         # Opens a connection and inerts the text filter into the serverfilters database
         async with self.bot.database() as db:
             await db("DELETE FROM serverfilters WHERE userid=$1 AND serverfilter=$2;", ctx.author.id, filter)
-        
+
         await ctx.send("Done.")
 
     @filter_remove.command(name="user")
@@ -166,7 +165,7 @@ class FilterCommands(commands.Cog, name="Filter Commands"):
         # Opens a connection and inerts the user filter into the userfilters database
         async with self.bot.database() as db:
             await db("DELETE FROM userfilters WHERE userid=$1 AND userfilter=$2;", ctx.author.id, filter)
-        
+
         await ctx.send("Done.")
 
 

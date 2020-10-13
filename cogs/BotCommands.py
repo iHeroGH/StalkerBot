@@ -1,14 +1,12 @@
 import io
 import random
-import collections
-import copy
 import aiohttp
-from PIL import Image
 import typing
 from datetime import datetime as dt, timedelta
 
 import discord
 from discord.ext import commands
+from PIL import Image
 
 
 class BotCommands(commands.Cog, name="Bot Commands"):
@@ -59,8 +57,6 @@ class BotCommands(commands.Cog, name="Bot Commands"):
 
         await ctx.send(file=discord.File(sendable_image, filename="heroed.png"))
 
-
-
     @commands.command()
     async def invite(self, ctx):
         """Sends an invite link for the bot"""
@@ -76,14 +72,14 @@ class BotCommands(commands.Cog, name="Bot Commands"):
     async def server(self, ctx):
         """Sends an invite link for the support server"""
 
-        url = f"https://discord.com/invite/x34DnGj"
+        url = "https://discord.com/invite/x34DnGj"
         await ctx.send(url)
 
     @commands.command(aliases=['upvote'])
     async def vote(self, ctx):
         """Sends the voting links"""
 
-        url = f"`top.gg:` <https://top.gg/bot/723813550136754216>\n`Discord.ly:` <https://discord.ly/stalkerbot>"
+        url = "`top.gg:` <https://top.gg/bot/723813550136754216>\n`Discord.ly:` <https://discord.ly/stalkerbot>"
         await ctx.send(url)
 
     @commands.command(aliases=['botinfo'])
@@ -93,12 +89,12 @@ class BotCommands(commands.Cog, name="Bot Commands"):
         embed = discord.Embed()
         color = random.randint(0, 0xffffff)
         embed.color = color
-        stalker = self.bot.get_user(723813550136754216)
+        stalker = self.bot.get_user(723813550136754216) or await self.bot.fetch_user(723813550136754216)
         embed.set_author(name=str(stalker), icon_url=stalker.avatar_url)
         embed.description = "StalkerBot is just a simple bot that sends you a DM every time a keyword that you set is said in a channel you have access to!\nYour keywords are *global*, but you can set *server-specific keywords* aswell.\nFinally, you can add *filters* for certain users, text phrases, channels, and even servers. These filters prevent you from getting DMed about your keyword if it's said by a specific user, in a specific text phrase, in a specific channel, or in a specific server.\nRun `s.help` for more."
-        embed.set_image(url = "https://cdn.discordapp.com/attachments/723820365612187690/753286003283722330/unknown.png")
-        embed.set_thumbnail(url = stalker.avatar_url)
-        
+        embed.set_image(url="https://cdn.discordapp.com/attachments/723820365612187690/753286003283722330/unknown.png")
+        embed.set_thumbnail(url=stalker.avatar_url)
+
         await ctx.send(embed=embed)
 
     @commands.command(aliases=['tm'])
@@ -111,22 +107,22 @@ class BotCommands(commands.Cog, name="Bot Commands"):
             "s": 1,
             "m": 60,
             None: 60,
-            "h": 60 * 60, 
-            "d": 60 * 60 * 24
+            "h": 60 * 60,
+            "d": 60 * 60 * 24,
         }
 
         if unit not in valid_units.keys():
             return await ctx.send("You didn't provide a valid unit (s, m, h, d)")
-        
+
         # Checks that time is above 0
         if time <= 0:
             return await ctx.send("The time value you provided is under 0 seconds")
-        
+
         # Change all time into seconds
         seconded_time = valid_units[unit] * time
 
         # Add time
-        future = dt.utcnow() + timedelta(seconds=seconded_time) 
+        future = dt.utcnow() + timedelta(seconds=seconded_time)
 
         # Add to database
         async with self.bot.database() as db:
@@ -141,7 +137,7 @@ class BotCommands(commands.Cog, name="Bot Commands"):
         # Remove the user from the tempmute database
         async with self.bot.database() as db:
             await db("DELETE FROM tempmute WHERE userid=$1;", ctx.author.id)
-        
+
         await ctx.send("Unmuted StalkerBot.")
 
     @commands.command(aliases=['keyword', 'add'])
@@ -290,9 +286,8 @@ class BotCommands(commands.Cog, name="Bot Commands"):
             keywordList.sort()
 
         sendableContent = "Server-Specific Keywords: "
-        for i in keywordList: 
+        for i in keywordList:
             sendableContent = sendableContent + f"\n{str(i)}"
-
 
         await ctx.send(sendableContent, allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
 
@@ -344,7 +339,6 @@ class BotCommands(commands.Cog, name="Bot Commands"):
         async with self.bot.database() as db:
             await db("INSERT INTO keywords VALUES ($1, $2);", user.id, keyword)
         await ctx.send(f"Added `{keyword}` to {user.name}'s list")
-
 
 
 def setup(bot):

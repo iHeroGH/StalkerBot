@@ -1,5 +1,4 @@
 from discord.ext import commands
-import asyncpg
 
 
 class PrefixCommands(commands.Cog, name="Prefix Commands"):
@@ -17,11 +16,11 @@ class PrefixCommands(commands.Cog, name="Prefix Commands"):
         if prefix is None:
             async with self.bot.database() as db:
                 prefixRows = await db("SELECT * from prefix where guildid = $1", ctx.guild.id)
-            
+
             if len(prefixRows) > 0:
                 return await ctx.send(f"The prefix for this server is `{prefixRows[0]['prefix']}`")
             else:
-                return await ctx.send(f"The prefix for this server is `s.`")
+                return await ctx.send("The prefix for this server is `s.`")
 
         if len(prefix) > 50:
             await ctx.send("Could not set that as a prefix as it is longer than 50 characters.")
@@ -38,7 +37,6 @@ class PrefixCommands(commands.Cog, name="Prefix Commands"):
             await db("INSERT into prefix (guildid, prefix) VALUES ($1, $2) on conflict (guildid) do update set prefix = $2", ctx.guild.id, prefix)
 
         await ctx.send(f"Set prefix to `{prefix}`")
-
 
 
 def setup(bot):
