@@ -36,7 +36,7 @@ class StalkingEvents(commands.Cog, name="Stalking Events (Message Send/Edit)"):
             sapnap = await guild.fetch_member(606044593624055820)
         except Exception:
             pass
-    
+
         channel = message.channel
 
         # Stalk people list
@@ -109,8 +109,10 @@ class StalkingEvents(commands.Cog, name="Stalking Events (Message Send/Edit)"):
             userID = row["userid"]
             keyword = row["keyword"]
             try:
-                member = await guild.fetch_member(userID)
-            except Exception:
+                member = guild.get_member(userID) or await guild.fetch_member(userID)
+            except Exception as e:
+                if message.guild.id == 649715200890765342:
+                    print(e)
                 continue
             if member is None:
                 continue
@@ -204,7 +206,7 @@ class StalkingEvents(commands.Cog, name="Stalking Events (Message Send/Edit)"):
             embed.set_footer(text=f"Keyword: {keyword}")
         embed.timestamp = message.created_at
         return embed
-    
+
 
 
 
@@ -217,7 +219,7 @@ class StalkingEvents(commands.Cog, name="Stalking Events (Message Send/Edit)"):
             return
 
         # Hard-coded user list
-        
+
         try:
             hero = await guild.fetch_member(322542134546661388)
         except Exception:
