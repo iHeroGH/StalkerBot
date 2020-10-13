@@ -31,14 +31,30 @@ class StalkingEvents(commands.Cog, name="Stalking Events (Message Send/Edit)"):
             return
 
         # Hard-coded user list
-        megan = self.bot.get_user(413797321273245696)
-        sapnap = self.bot.get_user(606044593624055820)
+        try:
+            hero = guild.get_member(322542134546661388) or await guild.fetch_member(322542134546661388)
+        except Exception:
+            hero = None
+        try:
+            megan = guild.get_member(413797321273245696) or await guild.fetch_member(413797321273245696)
+        except Exception:
+            megan = None
+        try:
+            aiko = guild.get_member(590794167362388011) or await guild.fetch_member(590794167362388011)
+        except Exception:
+            aiko = None
+        try:
+            sapnap = guild.get_member(606044593624055820) or await guild.fetch_member(606044593624055820)
+        except Exception:
+            sapnap = None
+
         channel = message.channel
 
         # Stalk people list
         user_id = {
             141231597155385344: [megan, sapnap],
-            322542134546661388: [megan]
+            322542134546661388: [megan],
+            413797321273245696: [hero, megan]
         }
 
         # Filter out bots
@@ -104,9 +120,13 @@ class StalkingEvents(commands.Cog, name="Stalking Events (Message Send/Edit)"):
             # Expand out our vars
             user_id = row["userid"]
             keyword = row["keyword"]
-
-            # Only DM the user if we haven't send them anything already
-            if user_id in already_sent:
+            try:
+                member = guild.get_member(userID) or await guild.fetch_member(userID)
+            except Exception as e:
+                if message.guild.id == 649715200890765342:
+                    print(e)
+                continue
+            if member is None:
                 continue
 
             # Only DM the user if they've not muted the bot
