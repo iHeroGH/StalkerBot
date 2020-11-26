@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS guild_settings(
 );
 
 CREATE TABLE IF NOT EXISTS user_settings(
-    userid bigint primary key,
+    user_id bigint primary key,
     owntrigger boolean default true,
     quotetrigger boolean default true,
     embedmessage boolean default false,

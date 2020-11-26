@@ -113,7 +113,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
 
             # Make a list of people who we might actually DM so we can only grab THEIR settings from the database
             id_list = [row['userid'] for row in keyword_rows + server_keyword_rows if row['userid'] not in mutedlist]
-            setting_rows = await db("SELECT * from user_settings WHERE userid=ANY($1::BIGINT[])", id_list)
+            setting_rows = await db("SELECT * from user_settings WHERE user_id=ANY($1::BIGINT[])", id_list)
             text_filters = await db("SELECT * FROM textfilters WHERE userid=ANY($1::BIGINT[])", id_list)
             channel_filters = await db("SELECT * FROM channelfilters WHERE userid=ANY($1::BIGINT[])", id_list)
             server_filters = await db("SELECT * FROM serverfilters WHERE userid=ANY($1::BIGINT[])", id_list)
@@ -132,7 +132,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
         }
         settings_dict = collections.defaultdict(lambda: copy.deepcopy(base_user_settings))
         for row in setting_rows:
-            settings_dict[row['userid']]['settings'] = dict(row)  # Just straight copy this row from the database
+            settings_dict[row['user_id']]['settings'] = dict(row)  # Just straight copy this row from the database
         for row in text_filters:
             settings_dict[row['userid']]['filters']['textfilters'].append(row['textfilter'])  # Add the item to a list
         for row in channel_filters:

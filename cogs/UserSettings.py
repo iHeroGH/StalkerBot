@@ -17,7 +17,7 @@ class UserSettings(utils.Cog, name="User Setting Commands"):
 
         # Get the current settings for a user
         db = await self.bot.database.get_connection()
-        current_settings_rows = await db("SELECT * from user_settings WHERE userid=$1;", ctx.author.id)
+        current_settings_rows = await db("SELECT * from user_settings WHERE user_id=$1;", ctx.author.id)
 
         # See what their current settings are
         if current_settings_rows:
@@ -37,8 +37,8 @@ class UserSettings(utils.Cog, name="User Setting Commands"):
 
         # Run database query
         await db(
-            """INSERT INTO user_settings (userid, owntrigger, quotetrigger, embedmessage, bottrigger) VALUES
-            ($1, $2, $3, $4, $5) ON conflict (userid) DO UPDATE SET owntrigger=$2, quotetrigger=$3, embedmessage=$4, editmessage=$5, bottrigger=$6""",
+            """INSERT INTO user_settings (user_id, owntrigger, quotetrigger, embedmessage, bottrigger) VALUES
+            ($1, $2, $3, $4, $5) ON conflict (user_id) DO UPDATE SET owntrigger=$2, quotetrigger=$3, embedmessage=$4, editmessage=$5, bottrigger=$6""",
             ctx.author.id, updated_settings['owntrigger'], updated_settings['quotetrigger'], updated_settings['embedmessage'], updated_settings['editmessage'], updated_settings['bottrigger'],
         )
         await db.disconnect()
@@ -52,7 +52,7 @@ class UserSettings(utils.Cog, name="User Setting Commands"):
 
         # Get the current settings for a user
         async with self.bot.database() as db:
-            existingSettings = await db("select * from user_settings where userid = $1;", ctx.author.id)
+            existingSettings = await db("select * from user_settings where user_id = $1;", ctx.author.id)
 
         # Checks to see if existing settings for the user actually exist. If not, defaults to True
         if existingSettings:
@@ -114,23 +114,23 @@ class UserSettings(utils.Cog, name="User Setting Commands"):
             # Checks which emoji was reacted and does the stuff
             if reaction.emoji == validEmoji[0]:
                 async with self.bot.database() as db:
-                    await db("INSERT INTO user_settings (userid, owntrigger) VALUES ($1, $2) on conflict (userid) do update set owntrigger = $2", ctx.author.id, not owntrigger)
+                    await db("INSERT INTO user_settings (user_id, owntrigger) VALUES ($1, $2) on conflict (user_id) do update set owntrigger = $2", ctx.author.id, not owntrigger)
                 owntrigger = not owntrigger
             elif reaction.emoji == validEmoji[1]:
                 async with self.bot.database() as db:
-                    await db("INSERT INTO user_settings (userid, quotetrigger) VALUES ($1, $2) on conflict (userid) do update set quotetrigger = $2", ctx.author.id, not quotetrigger)
+                    await db("INSERT INTO user_settings (user_id, quotetrigger) VALUES ($1, $2) on conflict (user_id) do update set quotetrigger = $2", ctx.author.id, not quotetrigger)
                 quotetrigger = not quotetrigger
             elif reaction.emoji == validEmoji[2]:
                 async with self.bot.database() as db:
-                    await db("INSERT INTO user_settings (userid, embedmessage) VALUES ($1, $2) on conflict (userid) do update set embedmessage = $2", ctx.author.id, not embedmessage)
+                    await db("INSERT INTO user_settings (user_id, embedmessage) VALUES ($1, $2) on conflict (user_id) do update set embedmessage = $2", ctx.author.id, not embedmessage)
                 embedmessage = not embedmessage
             elif reaction.emoji == validEmoji[3]:
                 async with self.bot.database() as db:
-                    await db("INSERT INTO user_settings (userid, editmessage) VALUES ($1, $2) on conflict (userid) do update set editmessage = $2", ctx.author.id, not editmessage)
+                    await db("INSERT INTO user_settings (user_id, editmessage) VALUES ($1, $2) on conflict (user_id) do update set editmessage = $2", ctx.author.id, not editmessage)
                 editmessage = not editmessage
             elif reaction.emoji == validEmoji[4]:
                 async with self.bot.database() as db:
-                    await db("INSERT INTO user_settings (userid, bottrigger) VALUES ($1, $2) on conflict (userid) do update set editmessage = $2", ctx.author.id, not bottrigger)
+                    await db("INSERT INTO user_settings (user_id, bottrigger) VALUES ($1, $2) on conflict (user_id) do update set editmessage = $2", ctx.author.id, not bottrigger)
                 bottrigger = not bottrigger
             elif reaction.emoji == validEmoji[5]:
                 break
