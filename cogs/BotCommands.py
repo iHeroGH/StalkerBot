@@ -12,7 +12,7 @@ class BotCommands(utils.Cog, name="Bot Commands"):
     MAXIMUM_ALLOWED_KEYWORDS = 10
     MINIMUM_KEYWORD_LENGTH = 2
 
-    @utils.command(aliases=['botinfo'])
+    @utils.command()
     async def info(self, ctx):
         """Explains the bot"""
 
