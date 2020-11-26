@@ -9,16 +9,18 @@ import voxelbotutils as utils
 
 from converters import send_type, send_snowflake
 
+
 class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
 
     def __init__(self, bot):
         super().__init__(bot)
-        self.last_dm = 322542134546661388 
+        self.last_dm = 322542134546661388
 
     @utils.Cog.listener()
     async def on_message(self, message):
 
-        if message.guild is None and not message.content.startswith("s.") and message.author.id != 723813550136754216: # If the message is in DMs, and it isn't a command, and it isn't sent by StalkerBot
+        # If the message is in DMs, and it isn't a command, and it isn't sent by StalkerBot
+        if message.guild is None and not message.content.startswith("s.") and message.author.id != 723813550136754216:
             self.last_dm = message.author.id
 
     @utils.command(aliases=['hero', 'h'], hidden=True)
@@ -31,11 +33,11 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
 
         # Decide what type of H to use
         h_type = {
-            "h": 'images/cursive_hero_h.png', # Cursive H
-            "H": 'images/hero_h.png', # Normal H
-            "A": 'images/aiko_a.png', # Aiko A
-            "L": 'images/liz_l.png', # Liz L
-            "l": 'images/lemon.png' # Lemon
+            "h": 'images/cursive_hero_h.png',  # Cursive H
+            "H": 'images/hero_h.png',  # Normal H
+            "A": 'images/aiko_a.png',  # Aiko A
+            "L": 'images/liz_l.png',  # Liz L
+            "l": 'images/lemon.png'  # Lemon
         }[ident[0]]
 
         # Check if the image should be a user PFP
@@ -113,14 +115,14 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
             await ctx.message.delete()
         else:
             await ctx.message.add_reaction("👌")
-        
+
     @utils.command()
     @commands.is_owner()
     async def react(self, ctx, messageid, reaction="okay"):
         """Reacts to a message in a channel with a reaction"""
 
         try:
-            reaction = { # Preset reactions
+            reaction = {  # Preset reactions
                 "okay": "👌",
                 "up": "👍",
                 "down": "👎",

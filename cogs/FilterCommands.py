@@ -2,9 +2,10 @@ import discord
 from discord.ext import commands
 import voxelbotutils as utils
 
+
 class FilterCommands(utils.Cog, name="Filter Commands"):
 
-    @commands.group(invoke_without_command=True)
+    @utils.group(invoke_without_command=True)
     async def filter(self, ctx):
         """Sets a filter provided a type (can be "list" which lists all your filters)"""
 
@@ -55,7 +56,7 @@ class FilterCommands(utils.Cog, name="Filter Commands"):
     @filter.command(name="user")
     async def filter_user(self, ctx, filter:int=None):
         """Adds a server filter"""
-        
+
         user = None
 
         if filter is not None:
@@ -97,7 +98,6 @@ class FilterCommands(utils.Cog, name="Filter Commands"):
         # userObjects = [self.bot.get_user(o) for o in userFilters]
         # userNames = [i.mention for i in userObjects if i is not None]
         userNames = [f"<@{uid}>" for uid in userFilters]
-
 
         # Empty Checks
         if len(textFilters) < 1:

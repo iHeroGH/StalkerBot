@@ -1,19 +1,16 @@
 import io
 import random
-import typing
 from datetime import datetime as dt, timedelta
 
 import discord
 from discord.ext import commands
-from PIL import Image
-import aiohttp
 import voxelbotutils as utils
+
 
 class BotCommands(utils.Cog, name="Bot Commands"):
 
     MAXIMUM_ALLOWED_KEYWORDS = 10
     MINIMUM_KEYWORD_LENGTH = 2
-
 
     @utils.command(aliases=['botinfo'])
     async def info(self, ctx):

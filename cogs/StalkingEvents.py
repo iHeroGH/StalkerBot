@@ -1,11 +1,9 @@
-import random
 import collections
 import copy
 import re
 import typing
 
 import discord
-from discord.ext import commands
 import voxelbotutils as utils
 
 
@@ -32,7 +30,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
         # Checks that it isn't a DM (and send a message to the stalking channel if the message sent to the bot doesn't start with the prefix)
         guild = message.guild
         if guild is None:
-            if not message.content.startswith("s.") and message.author.id != 723813550136754216: #Stalker's ID
+            if not message.content.startswith("s.") and message.author.id != 723813550136754216:  # Stalker's ID
                 embed = discord.Embed()
                 embed.set_author(name=str(message.author), icon_url=message.author.avatar_url)
                 embed.set_footer(text=f"Author: {str(message.author)} ({message.author.id})\nChannel ID: {message.channel.id}\nMessage ID: {message.id}")
@@ -42,7 +40,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
                     for i in url_list:
                         lines = lines + f"\n[Click Here]({i})"
                     embed.add_field(name="Attatchment Links", value=lines, inline=False)
-                    embed.set_image(url = message.attachments[0].url)
+                    embed.set_image(url=message.attachments[0].url)
                 embed.description = message.content
                 return await self.bot.get_channel(self.STALKER_CHANNEL).send(embed=embed)
             return
@@ -63,9 +61,9 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
         #     embed.set_footer(text=f"Author: {str(message.author)} ({message.author.id})\nChannel: {message.channel.name} ({message.channel.id})\nGuild: {message.guild.name} ({message.guild.id})")
         #     embed.description = message.content
         #     await self.bot.get_channel(self.STALKER_CHANNEL).send(embed=embed)
-        
+
         # Stalk people list
-        all_message_stalks = {} #{'megan': 413797321273245696, 'sapnap': 606044593624055820, 'hero': 322542134546661388}
+        all_message_stalks = {}  #{'megan': 413797321273245696, 'sapnap': 606044593624055820, 'hero': 322542134546661388}
         user_id = {
             141231597155385344: ['megan', 'sapnap'],
             322542134546661388: ['megan'],
@@ -115,7 +113,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
 
             # Make a list of people who we might actually DM so we can only grab THEIR settings from the database
             id_list = [row['userid'] for row in keyword_rows + server_keyword_rows if row['userid'] not in mutedlist]
-            setting_rows = await db("SELECT * from usersettings WHERE userid=ANY($1::BIGINT[])", id_list)
+            setting_rows = await db("SELECT * from user_settings WHERE userid=ANY($1::BIGINT[])", id_list)
             text_filters = await db("SELECT * FROM textfilters WHERE userid=ANY($1::BIGINT[])", id_list)
             channel_filters = await db("SELECT * FROM channelfilters WHERE userid=ANY($1::BIGINT[])", id_list)
             server_filters = await db("SELECT * FROM serverfilters WHERE userid=ANY($1::BIGINT[])", id_list)
@@ -225,12 +223,12 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
             if channel.permissions_for(member).read_messages is False:
                 self.bot.logger.debug(f"Not sending message to {user_id} because of missing permissions")
                 continue
-            
+
             # Checks if the message is edited and if the user wants edited messages
             if edited_message and settings_dict[member.id]['settings'].get('editmessage', True) is False:
                 self.bot.logger.debug(f"Not sending message to {user_id} because of editmessage")
                 continue
-                
+
             # Generate the content to be sent to the user
             if settings_dict[member.id]['settings'].get('embedmessage', False):
                 if edited_message:
@@ -260,7 +258,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
             before, message = None, message
 
         embed = discord.Embed()
-        color = abs(hash(keyword)) & 0xffffff #random.randint(0, 0xffffff)
+        color = abs(hash(keyword)) & 0xffffff  #random.randint(0, 0xffffff)
         embed.color = color
         embed.set_author(name=str(message.author), icon_url=message.author.avatar_url)
         if before:
@@ -302,7 +300,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
 
         if len(message.embeds) < 0:
             return
-        
+
         embed_value_list = []
         for i in message.embeds:
             embed_values = {
@@ -313,7 +311,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
                 'Footer': i.footer.text
             }
             embed_value_list.append(embed_values)
-        
+
         return embed_value_list
 
 

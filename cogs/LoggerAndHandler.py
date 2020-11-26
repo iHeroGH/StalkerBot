@@ -1,9 +1,8 @@
-import io
-
+import aiohttp
 import discord
 from discord.ext import commands
-import aiohttp
 import voxelbotutils as utils
+
 
 class LoggerAndHandler(utils.Cog, name="Logger And Handler"):
 

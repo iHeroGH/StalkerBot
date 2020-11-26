@@ -3,23 +3,7 @@ CREATE TABLE IF NOT EXISTS guild_settings(
     prefix VARCHAR(30)
 );
 
-create TABLE IF NOT EXISTS keywords(
-    userID bigint,
-    keyword text
-);
-
-create TABLE IF NOT EXISTS serverkeywords(
-    userID bigint,
-    serverid bigint,
-    keyword text
-);
-
-create TABLE IF NOT EXISTS prefix(
-    guildID bigint primary key,
-    prefix VARCHAR(50)
-);
-
-create TABLE IF NOT EXISTS user_settings(
+CREATE TABLE IF NOT EXISTS user_settings(
     userid bigint primary key,
     owntrigger boolean default true,
     quotetrigger boolean default true,
@@ -28,30 +12,41 @@ create TABLE IF NOT EXISTS user_settings(
     bottrigger boolean default true
 );
 
-create TABLE IF NOT EXISTS textfilters(
+CREATE TABLE IF NOT EXISTS keywords(
+    userID bigint,
+    keyword text
+);
+
+CREATE TABLE IF NOT EXISTS serverkeywords(
+    userID bigint,
+    serverid bigint,
+    keyword text
+);
+
+CREATE TABLE IF NOT EXISTS textfilters(
     userid bigint,
     textfilter text
 );
 
-create TABLE IF NOT EXISTS channelfilters(
+CREATE TABLE IF NOT EXISTS channelfilters(
     userid bigint,
     channelfilter BIGINT,
     PRIMARY KEY (userid, channelfilter)
 );
 
-create TABLE IF NOT EXISTS serverfilters(
+CREATE TABLE IF NOT EXISTS serverfilters(
     userid bigint,
     serverfilter BIGINT,
     PRIMARY KEY (userid, serverfilter)
 );
 
-create TABLE IF NOT EXISTS userfilters(
+CREATE TABLE IF NOT EXISTS userfilters(
     userid bigint,
     userfilter BIGINT,
     PRIMARY KEY (userid, userfilter)
 );
 
-create TABLE IF NOT EXISTS tempmute(
+CREATE TABLE IF NOT EXISTS tempmute(
     userid BIGINT PRIMARY KEY,
     time TIMESTAMP
 );
