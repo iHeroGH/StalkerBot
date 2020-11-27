@@ -109,6 +109,7 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
             payload["file"] = discord.File(image_file, filename="image.png")
 
         # And send
+        self.bot.logger.debug(f"Sending {snowflake} message {payload['content']}")
         await snowflake.send(**payload)
 
         # React to (or delete) the command message
