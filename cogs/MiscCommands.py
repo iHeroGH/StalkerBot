@@ -12,9 +12,10 @@ from converters import send_type, send_snowflake
 
 class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
 
+    last_dm = 322542134546661388
+
     def __init__(self, bot):
         super().__init__(bot)
-        self.last_dm = 322542134546661388
 
     @utils.Cog.listener()
     async def on_message(self, message):
