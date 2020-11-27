@@ -28,7 +28,7 @@ class BotCommands(utils.Cog, name="Bot Commands"):
         await ctx.send(embed=embed)
 
     @utils.command(aliases=['tm', 'mute'])
-    async def tempmute(self, ctx, time:int, unit:str=None):
+    async def tempmute(self, ctx, time:int, unit:str="m"):
         """Temporarily mutes the bot from sending a user DMs for a specificed amount of time"""
         unit = unit.lower()
 
@@ -36,7 +36,6 @@ class BotCommands(utils.Cog, name="Bot Commands"):
         valid_units = {
             "s": 1,
             "m": 60,
-            None: 60,
             "h": 60 * 60,
             "d": 60 * 60 * 24,
         }

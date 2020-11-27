@@ -83,7 +83,7 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
 
         # Set the user to whoever last DMed stalkerbot
         if channel_type == "u":
-            snowflake = snowflake or self.bot.get_user(self.bot.last_dm)
+            snowflake = snowflake or self.bot.get_user(self.last_dm)
 
         snowflake = snowflake or ctx.channel
         # Hopefully `snowflake` is a Discord object, but if it's an int we should try getting it
