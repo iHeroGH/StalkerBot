@@ -123,7 +123,7 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
     async def react(self, ctx, messageid, channelid:reaction_channel=None, reaction:str="okay"):
         """Reacts to a message in a channel with a reaction"""
 
-        if channelid is not None:
+        if channelid:
             channel = await self.bot.get_channel(channelid)
         else:  
             channel = ctx.channel
