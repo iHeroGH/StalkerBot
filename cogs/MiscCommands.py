@@ -123,6 +123,8 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
     async def react(self, ctx, messageid, channelid:typing.Optional[reaction_channel.ReactionChannel], reaction="okay"):
         """Reacts to a message in a channel with a reaction"""
 
+        channel = None
+
         if type(channel) is int:
             channel = self.bot.get_channel(channelid)
 
