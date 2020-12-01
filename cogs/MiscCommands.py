@@ -123,22 +123,26 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
     async def react(self, ctx, messageid:discord.Message, *reactions):
         """Reacts to a message in a channel with a reaction"""
 
+        # Default reaction to okay if none are provided
         if not reactions:
             reactions = ['okay']
 
-        print(reactions)
-        for reaction in reactions:
+        for reaction in reactions: # Loop through the reactions
             try:
                 reaction = {  # Preset reactions
                     "okay": "👌",
                     "up": "👍",
                     "down": "👎",
                 }[reaction.lower()]
-            except KeyError:
+            except KeyError: # if it isn't in the presets, it's itself
                 reaction = reaction
-            print(reaction)
 
-            await messageid.add_reaction(reaction)
+            if reaction.lower == "hearts": # if it's 'hearts', it's all the hearts
+                hearts = ["❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤍"]
+                for reaction in hearts:
+                    await messageid.add_reaction(reaction)
+            else:
+                await messageid.add_reaction(reaction) # Add the reaction
 
 
 def setup(bot):
