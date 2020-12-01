@@ -120,15 +120,8 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
 
     @utils.command()
     @commands.is_owner()
-    async def react(self, ctx, messageid, channelid:typing.Optional[reaction_channel.ReactionChannel], reaction="okay"):
+    async def react(self, ctx, messageid:discord.Message, reaction="okay"):
         """Reacts to a message in a channel with a reaction"""
-
-        channel = None
-
-        if type(channel) is int:
-            channel = self.bot.get_channel(channelid)
-
-        channel = channel or ctx.channel
 
         try:
             reaction = {  # Preset reactions
@@ -139,8 +132,7 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
         except KeyError:
             reaction = reaction
 
-        message = await channel.fetch_message(messageid)
-        await message.add_reaction(reaction)
+        await messageid.add_reaction(reaction)
 
 
 def setup(bot):
