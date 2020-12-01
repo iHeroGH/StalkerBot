@@ -137,7 +137,7 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
             except KeyError: # if it isn't in the presets, it's itself
                 reaction = reaction
 
-            if reaction.lower == "hearts": # if it's 'hearts', it's all the hearts
+            if reaction.lower() == "hearts": # if it's 'hearts', it's all the hearts
                 hearts = ["❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤍"]
                 for reaction in hearts:
                     await messageid.add_reaction(reaction)
