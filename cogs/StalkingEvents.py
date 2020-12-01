@@ -62,43 +62,43 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
         #     embed.description = message.content
         #     await self.bot.get_channel(self.STALKER_CHANNEL).send(embed=embed)
 
-        # Stalk people list
-        all_message_stalks = {}  #{'megan': 413797321273245696, 'sapnap': 606044593624055820, 'hero': 322542134546661388}
-        user_id = {
-            141231597155385344: ['megan', 'sapnap'],
-            322542134546661388: ['megan'],
-        }
+        # # Stalk people list
+        # all_message_stalks = {}  #{'megan': 413797321273245696, 'sapnap': 606044593624055820, 'hero': 322542134546661388}
+        # user_id = {
+        #     141231597155385344: ['megan', 'sapnap'],
+        #     322542134546661388: ['megan'],
+        # }
 
-        # Sends a message to a list of users whenever user_dm_list ID matches with the user_id in the stalk people list :tm: list
-        user_dm_list = user_id.get(message.author.id, [])
-        for user_name in user_dm_list:
+        # # Sends a message to a list of users whenever user_dm_list ID matches with the user_id in the stalk people list :tm: list
+        # user_dm_list = user_id.get(message.author.id, [])
+        # for user_name in user_dm_list:
 
-            # Try and grab the member object
-            self.bot.logger.debug(f"Trying to send message {message.id} by {message.author.id} to '{user_name}'")
-            try:
-                user_id = all_message_stalks.get(user_name)
-                assert user_id is not None
-                user = guild.get_member(user_id) or await guild.fetch_member(user_id)
-            except (AssertionError, discord.HTTPException):
-                continue
-            if user is None:
-                continue
+        #     # Try and grab the member object
+        #     self.bot.logger.debug(f"Trying to send message {message.id} by {message.author.id} to '{user_name}'")
+        #     try:
+        #         user_id = all_message_stalks.get(user_name)
+        #         assert user_id is not None
+        #         user = guild.get_member(user_id) or await guild.fetch_member(user_id)
+        #     except (AssertionError, discord.HTTPException):
+        #         continue
+        #     if user is None:
+        #         continue
 
-            # Make sure they can read messages
-            if not channel.permissions_for(user).read_messages:
-                continue
+        #     # Make sure they can read messages
+        #     if not channel.permissions_for(user).read_messages:
+        #         continue
 
-            # Send message
-            self.bot.logger.info(f"Sending message {message.id} by {message.author.id} to {user.id} as part of all message stalking")
-            try:
-                sent_message = await user.send(f"<@!{message.author.id}> ({message.author.name}) has typed in <#{message.channel.id}>. They typed `{message.content[:1900]}` {(message.jump_url)}")
-            except discord.HTTPException:
-                continue
+        #     # Send message
+        #     self.bot.logger.info(f"Sending message {message.id} by {message.author.id} to {user.id} as part of all message stalking")
+        #     try:
+        #         sent_message = await user.send(f"<@!{message.author.id}> ({message.author.name}) has typed in <#{message.channel.id}>. They typed `{message.content[:1900]}` {(message.jump_url)}")
+        #     except discord.HTTPException:
+        #         continue
 
-            # We love Megan <3
-            if user_name == 'megan':
-                heart_codepoints = ["❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤎", "🤍"]
-                #await sent_message.add_reaction(random.choice(heart_codepoints))
+        #     # We love Megan <3
+        #     if user_name == 'megan':
+        #         heart_codepoints = ["❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤎", "🤍"]
+        #         #await sent_message.add_reaction(random.choice(heart_codepoints))
 
         # Get everything (from the users who have had a keyword triggered) from the datbase
         async with self.bot.database() as db:
