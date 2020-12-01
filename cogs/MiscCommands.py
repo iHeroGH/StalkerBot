@@ -126,6 +126,7 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
         if not reactions:
             reactions = ['okay']
 
+        print(reactions)
         for reaction in reactions:
             try:
                 reaction = {  # Preset reactions
@@ -135,6 +136,7 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
                 }[reaction.lower()]
             except KeyError:
                 reaction = reaction
+            print(reaction)
 
             await messageid.add_reaction(reaction)
 
