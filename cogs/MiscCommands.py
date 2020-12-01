@@ -7,7 +7,7 @@ import io
 from PIL import Image
 import voxelbotutils as utils
 
-from converters import send_type, send_snowflake
+from converters import send_type, send_snowflake, reaction_channel
 
 
 class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
@@ -120,8 +120,10 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
 
     @utils.command()
     @commands.is_owner()
-    async def react(self, ctx, messageid, reaction="okay"):
+    async def react(self, ctx, messageid, channelid:reaction_channel=None, reaction:str="okay"):
         """Reacts to a message in a channel with a reaction"""
+
+        channel = await self.bot.get_channel(channelid) or ctx.channel
 
         try:
             reaction = {  # Preset reactions
@@ -132,7 +134,7 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
         except KeyError:
             reaction = reaction
 
-        message = await ctx.channel.fetch_message(messageid)
+        message = await channel.fetch_message(messageid)
         await message.add_reaction(reaction)
 
 
