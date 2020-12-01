@@ -120,7 +120,7 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
 
     @utils.command()
     @commands.is_owner()
-    async def react(self, ctx, messageid, channel:typing.Union[discord.TextChannel, reaction_channel.ReactionChannel]=None, reaction:str="okay"):
+    async def react(self, ctx, messageid, channel:typing.Optional[typing.Union[discord.TextChannel, reaction_channel.ReactionChannel]], reaction:str="okay"):
         """Reacts to a message in a channel with a reaction"""
 
         channel = channel or ctx.channel
