@@ -120,19 +120,23 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
 
     @utils.command()
     @commands.is_owner()
-    async def react(self, ctx, messageid:discord.Message, reaction="okay"):
+    async def react(self, ctx, messageid:discord.Message, *reactions):
         """Reacts to a message in a channel with a reaction"""
 
-        try:
-            reaction = {  # Preset reactions
-                "okay": "👌",
-                "up": "👍",
-                "down": "👎",
-            }[reaction.lower()]
-        except KeyError:
-            reaction = reaction
+        if not reactions:
+            reactions = ['okay']
 
-        await messageid.add_reaction(reaction)
+        for reaction in reactions:
+            try:
+                reaction = {  # Preset reactions
+                    "okay": "👌",
+                    "up": "👍",
+                    "down": "👎",
+                }[reaction.lower()]
+            except KeyError:
+                reaction = reaction
+
+            await messageid.add_reaction(reaction)
 
 
 def setup(bot):
