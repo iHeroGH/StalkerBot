@@ -27,6 +27,26 @@ class BotCommands(utils.Cog, name="Bot Commands"):
 
         await ctx.send(embed=embed)
 
+    @utils.command(aliases=['follow'])
+    @commands.has_permissions(manage_guild=True)
+    async def updates(self, ctx):
+        """Subscribes the current channel to the announcements channel"""
+
+        channel = self.bot.get_channel(744636840040202381) # Get the Stalker Updates channel
+        
+        await ctx.send("Are you sure you want to subscribe this channel to recieve StalkerBot updates? (type `yes` to confirm)")
+
+        def check(m):
+            return m.author == ctx.author and m.channel == ctx.channel
+        
+        message = await self.bot.wait_for('message', check=check, timeout=120)
+
+        if message.content.lower() == "yes":
+            await channel.follow(destination=ctx.channel)
+        else:
+            await ctx.send("Confirmation not recieved for channel subscription.")
+
+
     @utils.command(aliases=['tm', 'mute'])
     async def tempmute(self, ctx, time:int, unit:str="m"):
         """Temporarily mutes the bot from sending a user DMs for a specificed amount of time"""
