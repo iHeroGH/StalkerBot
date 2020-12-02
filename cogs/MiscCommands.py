@@ -143,6 +143,7 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
                     await messageid.add_reaction(reaction)
             else:
                 await messageid.add_reaction(reaction) # Add the reaction
+                await ctx.message.add_reaction("👌") # React to the command with a confirmation
 
 
 def setup(bot):
