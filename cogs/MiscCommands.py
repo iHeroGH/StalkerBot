@@ -140,10 +140,11 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
             if reaction.lower() == "hearts": # if it's 'hearts', it's all the hearts
                 hearts = ["❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤍"]
                 for reaction in hearts:
-                    await messageid.add_reaction(reaction)
+                    await messageid.add_reaction(reaction) # Add all the hearts
             else:
                 await messageid.add_reaction(reaction) # Add the reaction
-                await ctx.message.add_reaction("👌") # React to the command with a confirmation
+        
+        await ctx.message.add_reaction("👌") # React to the command with a confirmation
 
 
 def setup(bot):
