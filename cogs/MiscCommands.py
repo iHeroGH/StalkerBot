@@ -141,12 +141,8 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
 
             # Go through the reactions
             for r in reaction:
-                try:
-                    await message.add_reaction(r)
-                    await ctx.send(r)
-                except discord.HTTPException:
-                    await message.add_reaction(f":{r}:")
-                    await ctx.send(f":{r}:")
+                await message.add_reaction(r)
+                
         
         await ctx.message.add_reaction("👌") # React to the command with a confirmation
 
