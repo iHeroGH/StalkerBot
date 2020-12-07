@@ -137,7 +137,7 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
                     "hearts": ["❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤍"]
                 }[reaction.lower()]
             except KeyError: # if it isn't in the presets, it's itself
-                reaction = list(reaction)
+                reaction = [reaction]
 
             # Go through the reactions
             for r in reaction:
