@@ -137,10 +137,14 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
                     "hearts": ["❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤍"]
                 }[reaction.lower()]
             except KeyError: # if it isn't in the presets, it's itself
-                reaction = reaction
+                reaction = list(reaction)
 
+            # Go through the reactions
             for r in reaction:
-                await message.add_reaction(r)
+                try:
+                    await message.add_reaction(r)
+                except discord.HTTPException:
+                    await message.add_reaction(f":{r}:")
         
         await ctx.message.add_reaction("👌") # React to the command with a confirmation
 
