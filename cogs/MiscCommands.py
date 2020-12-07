@@ -141,6 +141,7 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
 
             # Go through the reactions
             for r in reaction:
+                await ctx.send(r)
                 try:
                     await message.add_reaction(r)
                 except discord.HTTPException:
