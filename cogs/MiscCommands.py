@@ -130,20 +130,17 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
         for reaction in reactions: # Loop through the reactions
             try:
                 reaction = {  # Preset reactions
-                    "ok": "👌",
-                    "okay": "👌",
-                    "up": "👍",
-                    "down": "👎",
+                    "ok": ["👌"],
+                    "okay": ["👌"],
+                    "up": ["👍"],
+                    "down": ["👎"],
                     "hearts": ["❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤍"]
                 }[reaction.lower()]
             except KeyError: # if it isn't in the presets, it's itself
                 reaction = reaction
 
-            if type(reaction) == list:
-                for r in reaction:
-                    await message.add_reaction(r)
-            else:
-                await message.add_reaction(reaction)
+            for r in reaction:
+                await message.add_reaction(r)
         
         await ctx.message.add_reaction("👌") # React to the command with a confirmation
 
