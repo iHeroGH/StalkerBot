@@ -98,7 +98,7 @@ class FilterCommands(utils.Cog, name="Filter Commands"):
         # userObjects = [self.bot.get_user(o) for o in userFilters]
         # userNames = [i.mention for i in userObjects if i is not None]
         userNames = [f"<@{uid}>" for uid in userFilters]
-2
+
         # Empty Checks
         if len(textFilters) < 1:
             textFilters = ["No text filters have been set up"]
