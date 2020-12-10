@@ -13,7 +13,7 @@ class MessageCounter(utils.Cog):
 
     @tasks.loop(minutes=10)
     async def tell_me_more(self):
-        await self.bot.get_user(322542134546661388).send(f"Bot has received {self.bot.counter} messages over 10 minutes")
+        await self.bot.get_user(322542134546661388).send(f"Bot has seen {self.bot.counter} messages over 10 minutes")
         self.bot.counter = 0
 
 
