@@ -10,19 +10,19 @@ event_webhook_url = ""  # Some events will be posted via webhook to this url
     # Guilds - recommended: true. Used for guild join/remove, channel create/delete/update, Bot.get_channel, Bot.guilds.
     guilds = true
     # Members - recommended: false (privileged intent). Used for member join/remove/update, Member.roles, Member.nick, User.name, etc.
-    members = false
+    members = true
     # Bans - recommended: false. Used for member ban/unban.
-    bans = true
+    bans = false
     # Emojis - recommended: false. Used for guild emojis update, Bot.get_emoji, Guild.emojis.
-    emojis = true
+    emojis = false
     # Integrations - recommended: false. Used for guild integrations update.
     integrations = true
     # Webhooks - recommended: false. Used for guild webhooks update.
-    webhooks = true
+    webhooks = false
     # Invites - recommended: false. Used for invite create/delete.
-    invites = true
+    invites = false
     # Voice states - recommended: false. Used for voice state update, VoiceChannel.members, Member.voice.
-    voice_states = true
+    voice_states = false
     # Presences - recommended: false (privileged intent). Used for member update (for activities and status), Member.status.
     presences = false
     # Guild messages - recommended: true. Used for message events in guilds.
