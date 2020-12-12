@@ -37,6 +37,8 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
             "h": 'images/cursive_hero_h.png',  # Cursive H
             "H": 'images/hero_h.png',  # Normal H
             "A": 'images/aiko_a.png',  # Aiko A
+            "a": 'images/cursive_aiko_a.png' # Cursive A
+            "m": 'images/megan_m.png' # Megan M
             "L": 'images/liz_l.png',  # Liz L
             "l": 'images/lemon.png'  # Lemon
         }[ident[0]]
