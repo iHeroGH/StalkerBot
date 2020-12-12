@@ -123,7 +123,7 @@ class FilterCommands(utils.Cog, name="Filter Commands"):
 
         async with self.bot.database() as db:
             await db("DELETE FROM textfilters WHERE userid=$1 and textfilter=$2;", ctx.author.id, filter)
-        return await ctx.send("Done.")
+        return await ctx.send(f"Removed `{filter}` from your text filter list")
 
     @filter_remove.command(name="channel")
     @commands.guild_only()
@@ -132,7 +132,7 @@ class FilterCommands(utils.Cog, name="Filter Commands"):
 
         async with self.bot.database() as db:
             await db("DELETE FROM channelfilters WHERE userid=$1 AND channelfilter=$2;", ctx.author.id, filter.id)
-        return await ctx.send("Done.")
+        return await ctx.send(f"Removed `{filter.mention}` from your channel filter list")
 
     @filter_remove.command(name="server")
     async def filter_remove_server(self, ctx, filter:int=None):
@@ -150,7 +150,7 @@ class FilterCommands(utils.Cog, name="Filter Commands"):
         async with self.bot.database() as db:
             await db("DELETE FROM serverfilters WHERE userid=$1 AND serverfilter=$2;", ctx.author.id, filter)
 
-        await ctx.send("Done.")
+        await ctx.send(f"You will now get messages from `{filter}` again")
 
     @filter_remove.command(name="user")
     async def filter_remove_user(self, ctx, filter:int=None):
@@ -167,7 +167,7 @@ class FilterCommands(utils.Cog, name="Filter Commands"):
         async with self.bot.database() as db:
             await db("DELETE FROM userfilters WHERE userid=$1 AND userfilter=$2;", ctx.author.id, filter)
 
-        await ctx.send("Done.")
+        await ctx.send(f"You will now get messages from `{filter}` again.")
 
     @utils.command()
     async def block(self, ctx, user:discord.User):

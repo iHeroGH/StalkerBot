@@ -1,5 +1,4 @@
 import io
-import random
 from datetime import datetime as dt, timedelta
 
 import discord
@@ -16,14 +15,12 @@ class BotCommands(utils.Cog, name="Bot Commands"):
     async def info(self, ctx):
         """Explains the bot"""
 
-        embed = discord.Embed()
-        color = random.randint(0, 0xffffff)
-        embed.color = color
-        stalker = self.bot.get_user(723813550136754216) or await self.bot.fetch_user(723813550136754216)
-        embed.set_author(name=str(stalker), icon_url=stalker.avatar_url)
-        embed.description = "StalkerBot is just a simple bot that sends you a DM every time a keyword that you set is said in a channel you have access to!\nYour keywords are *global*, but you can set *server-specific keywords* aswell.\nFinally, you can add *filters* for certain users, text phrases, channels, and even servers. These filters prevent you from getting DMed about your keyword if it's said by a specific user, in a specific text phrase, in a specific channel, or in a specific server.\nRun `s.help` for more."
-        embed.set_image(url="https://cdn.discordapp.com/attachments/723820365612187690/753286003283722330/unknown.png")
-        embed.set_thumbnail(url=stalker.avatar_url)
+        with utils.Embed(use_random_colour=True) as embed:
+            stalker = self.bot.get_user(723813550136754216) or await self.bot.fetch_user(723813550136754216)
+            embed.set_author(name=str(stalker), icon_url=stalker.avatar_url)
+            embed.description = "StalkerBot is just a simple bot that sends you a DM every time a keyword that you set is said in a channel you have access to!\nYour keywords are *global*, but you can set *server-specific keywords* aswell.\nFinally, you can add *filters* for certain users, text phrases, channels, and even servers. These filters prevent you from getting DMed about your keyword if it's said by a specific user, in a specific text phrase, in a specific channel, or in a specific server.\nRun `s.help` for more."
+            embed.set_image(url="https://cdn.discordapp.com/attachments/723820365612187690/753286003283722330/unknown.png")
+            embed.set_thumbnail(url=stalker.avatar_url)
 
         await ctx.send(embed=embed)
 
