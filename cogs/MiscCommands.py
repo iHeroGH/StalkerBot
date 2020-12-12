@@ -28,7 +28,7 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
     @commands.bot_has_permissions(attach_files=True)
     async def heroify(self, ctx, ident='h', url:typing.Union[discord.User or discord.ClientUser, str]=None):
 
-        possible = ['h', 'H', 'A', 'L', 'l']
+        possible = ['h', 'H', 'A', 'a', 'm', 'L', 'l']
         if ident not in possible:
             return await ctx.send(f"You didn't provide a valid heroify identifier ({', '.join(possible)})")
 
