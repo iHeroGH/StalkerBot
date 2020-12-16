@@ -19,6 +19,10 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
     @utils.Cog.listener()
     async def on_message_edit(self, before, after):
 
+        # Checks if the message content has changed
+        if(before.content == after.content):
+            return
+
         await self.deal_with_message(after, edited_message=before)
 
     async def deal_with_message(self, message, edited_message=None):
