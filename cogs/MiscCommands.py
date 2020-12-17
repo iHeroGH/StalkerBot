@@ -28,7 +28,7 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
     @commands.bot_has_permissions(attach_files=True)
     async def heroify(self, ctx, ident='h', url:typing.Union[discord.User or discord.ClientUser, str]=None):
 
-        possible = ['h', 'H', 'A', 'a', 'm', 'L', 'l']
+        possible = ['h', 'H', 'A', 'a', 'm', 'L', 'l', 'e']
         if ident not in possible:
             return await ctx.send(f"You didn't provide a valid heroify identifier ({', '.join(possible)})")
 
@@ -40,7 +40,8 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
             "a": 'images/cursive_aiko_a.png', # Cursive A
             "m": 'images/megan_m.png', # Megan M
             "L": 'images/liz_l.png',  # Liz L
-            "l": 'images/lemon.png'  # Lemon
+            "l": 'images/lemon.png',  # Lemon
+            "e": 'images/eyes.png' # Eyes
         }[ident[0]]
 
         # Check if the image should be a user PFP
