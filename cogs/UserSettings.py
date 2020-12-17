@@ -48,7 +48,7 @@ class UserSettings(utils.Cog, name="User Setting Commands"):
 
     @utils.command(aliases=['setup', 'usersettings'])
     async def settings(self, ctx):
-        """Allows users to change settings (such as OwnTrigger, QuoteTrigger, EmbedMessage, EditMessage, and BotTrigger)"""
+        """Allows users to change their settings"""
 
         # Get the current settings for a user
         async with self.bot.database() as db:
