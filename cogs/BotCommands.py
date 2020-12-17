@@ -172,7 +172,7 @@ class BotCommands(utils.Cog, name="Bot Commands"):
         await ctx.send(f"Removed `{keyword}` from <@{ctx.author.id}>'s list")
 
     @utils.command()
-    async def removeall(self, ctx, ident=None):
+    async def removeall(self, ctx, ident:str=None):
         """Removes all keywords from your list of DM triggers given an optional type (global/server)"""
 
         if ident is None:

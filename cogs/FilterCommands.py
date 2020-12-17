@@ -31,7 +31,7 @@ class FilterCommands(utils.Cog, name="Filter Commands"):
         await ctx.send(f"Added {filter.mention} to your channel filter list")
 
     @filter.command(name="server")
-    async def filter_server(self, ctx, filter=None):
+    async def filter_server(self, ctx, filter:int=None):
         """Adds a server filter"""
 
         if filter is None:
