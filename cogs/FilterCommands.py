@@ -7,13 +7,24 @@ class FilterCommands(utils.Cog, name="Filter Commands"):
 
     @utils.group(invoke_without_command=True)
     async def filter(self, ctx):
-        """Sets a filter provided a type (can be "list" which lists all your filters)"""
+        """The parent group for the filter commands."""
 
         await ctx.send_help(ctx.command)
 
-    @filter.command(name="text")
-    async def filter_text(self, ctx, filter:str):
-        """Adds a text filter"""
+
+    @filter.subcommand_group(name="add", invoke_without_command=True)
+    async def filter_add(self, ctx):
+        """
+        Sets a filter provided a type (can be "list" which lists all your filters).
+        """
+
+        await ctx.send_help(ctx.command)
+
+    @filter_add.command(name="text")
+    async def filter_add_text(self, ctx, filter:str):
+        """
+        Adds a text filter.
+        """
 
         # Opens a connection and inerts the text filter into the textfilters database
         async with self.bot.database() as db:
@@ -23,15 +34,17 @@ class FilterCommands(utils.Cog, name="Filter Commands"):
 
     @filter.command(name="channel")
     @commands.guild_only()
-    async def filter_channel(self, ctx, filter:discord.TextChannel):
-        """Adds a channel filter"""
+    async def filter_add_channel(self, ctx, filter:discord.TextChannel):
+        """
+        Adds a channel filter.
+        """
 
         async with self.bot.database() as db:
             await db("INSERT INTO channelfilters (userid, channelfilter) VALUES ($1, $2);", ctx.author.id, filter.id)
         await ctx.send(f"Added {filter.mention} to your channel filter list")
 
     @filter.command(name="server")
-    async def filter_server(self, ctx, filter:int=None):
+    async def filter_add_server(self, ctx, filter:int=None):
         """Adds a server filter"""
 
         if filter is None:
@@ -54,7 +67,7 @@ class FilterCommands(utils.Cog, name="Filter Commands"):
         await ctx.send(f"Added `{filter}` to your server filter list")
 
     @filter.command(name="user")
-    async def filter_user(self, ctx, filter:int=None):
+    async def filter_add_user(self, ctx, filter:int=None):
         """Adds a server filter"""
 
         user = None
