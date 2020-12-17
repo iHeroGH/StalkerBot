@@ -111,7 +111,7 @@ class FilterCommands(utils.Cog, name="Filter Commands"):
 
         await ctx.send(f"Text Filters: `{', '.join(textFilters)}` \n Channel Filters: {', '.join(channelFilters)} \n Server Filters: `{', '.join(serverNames)}` \n User Filters: `{', '.join(userNames)}`", allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
 
-    @filter.group(name="remove", invoke_without_command=True)
+    @filter.subcommand_group(name="remove", invoke_without_command=True)
     async def filter_remove(self, ctx):
         """Removes a filter (text or channel)"""
 
