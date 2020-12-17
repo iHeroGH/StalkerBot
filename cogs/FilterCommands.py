@@ -32,7 +32,7 @@ class FilterCommands(utils.Cog, name="Filter Commands"):
 
         await ctx.send(f"Added `{filter}` to your text filter list", allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
 
-    @filter.command(name="channel")
+    @filter_add.command(name="channel")
     @commands.guild_only()
     async def filter_add_channel(self, ctx, filter:discord.TextChannel):
         """
@@ -43,7 +43,7 @@ class FilterCommands(utils.Cog, name="Filter Commands"):
             await db("INSERT INTO channelfilters (userid, channelfilter) VALUES ($1, $2);", ctx.author.id, filter.id)
         await ctx.send(f"Added {filter.mention} to your channel filter list")
 
-    @filter.command(name="server")
+    @filter_add.command(name="server")
     async def filter_add_server(self, ctx, filter:int=None):
         """Adds a server filter"""
 
@@ -66,7 +66,7 @@ class FilterCommands(utils.Cog, name="Filter Commands"):
 
         await ctx.send(f"Added `{filter}` to your server filter list")
 
-    @filter.command(name="user")
+    @filter_add.command(name="user")
     async def filter_add_user(self, ctx, filter:int=None):
         """Adds a server filter"""
 
