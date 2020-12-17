@@ -6,7 +6,7 @@ import voxelbotutils as utils
 class UserSettings(utils.Cog, name="User Setting Commands"):
 
     @utils.command(aliases=['qs', 'quicksettings', 'quicksetup'])
-    async def quickswitch(self, ctx, setting=None):
+    async def quickswitch(self, ctx, setting:str=None):
         """Allows users to change individual settings quickly"""
 
         # See if they provided a valid setting
