@@ -185,7 +185,7 @@ class FilterCommands(utils.Cog, name="Filter Commands"):
     @utils.command()
     async def block(self, ctx, user:discord.User):
         """Blocks a given user by invoking filter user"""
-        return await ctx.invoke(self.bot.get_command("filter user"), user.id)
+        return await ctx.invoke(self.bot.get_command("filter add user"), user.id)
 
     @utils.command()
     async def unblock(self, ctx, user:discord.User):
