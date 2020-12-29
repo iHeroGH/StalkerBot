@@ -6,6 +6,7 @@ import typing
 import discord
 import voxelbotutils as utils
 
+import containsStalkerTrigger from cogs.cst
 
 class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
 
@@ -56,7 +57,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
 
         # React with eyes if message contains "Stalker" lol (only on Voxel Fox)
         if guild.id == 208895639164026880:
-            stalkEventTrigger(self, message)
+            containsStalkerTrigger(self, message)
 
         # # Send a message to a channel on the StalkerBot test server if "stalkerbot" or the bot's id is in the message
         # if "stalkerbot" in message.content.lower() or f"{message.guild.me.id}" in message.content.lower():
