@@ -21,7 +21,7 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
     async def on_message(self, message):
 
         # If the message is in DMs, and it isn't a command, and it isn't sent by StalkerBot
-        if message.guild is None and not message.content.startswith("s.") and message.author.id != 723813550136754216:
+        if message.guild is None and not message.content.lower().startswith("s.") and message.author.id != 723813550136754216:
             self.last_dm = message.author.id
 
     @utils.command(aliases=['hero', 'h'], hidden=True)
