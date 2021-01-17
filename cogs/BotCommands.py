@@ -201,11 +201,19 @@ class BotCommands(utils.Cog, name="Bot Commands"):
         await ctx.send(f"Removed {delete_type} keywords from <@{ctx.author.id}>'s list")
 
     @utils.command(aliases=['keywords', 'keywordlist', 'keywordslist', 'list'])
-    async def listkeywords(self, ctx):
+    async def listkeywords(self, ctx, user:discord.User=None):
         """Lists all your keywords"""
+        
+        # If the user isn't given, assume it's the author
+        user = user or ctx.author
 
+        # If the author isn't the owner of the bot, list the author's keywords
+        if not (await self.bot.is_owner(ctx.author)):
+            user = ctx.author
+
+        # Get the data from the database
         async with self.bot.database() as db:
-            rows = await db("select * from keywords where userid = $1;", ctx.author.id)
+            rows = await db("select * from keywords where userid = $1;", user.id)
         if len(rows) == 0:
             await ctx.send(f"You don't have any keywords. Set some up by running the `{ctx.prefix}addkeyword` command")
             return
