@@ -31,23 +31,10 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
         if not self.bot.is_ready():
             return
 
-        # Checks that it isn't a DM (and send a message to the stalking channel if the message sent to the bot doesn't start with the prefix)
-        guild = message.guild
-        if guild is None:
-            if not message.content.lower().startswith("s.") and message.author.id != 723813550136754216:  # Stalker's ID
-                embed = discord.Embed()
-                embed.set_author(name=str(message.author), icon_url=message.author.avatar_url)
-                embed.set_footer(text=f"Author: {str(message.author)} ({message.author.id})\nChannel ID: {message.channel.id}\nMessage ID: {message.id}")
-                if message.attachments:
-                    url_list = [i.url for i in message.attachments]
-                    lines = ""
-                    for i in url_list:
-                        lines = lines + f"\n[Click Here]({i})"
-                    embed.add_field(name="Attatchment Links", value=lines, inline=False)
-                    embed.set_image(url=message.attachments[0].url)
-                embed.description = message.content
-                return await self.bot.get_channel(self.STALKER_CHANNEL).send(embed=embed)
+        if message.guild is None:
             return
+        
+        guild = message.guild
         channel = message.channel
 
         # Filter out StalkerBot

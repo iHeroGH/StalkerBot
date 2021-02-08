@@ -12,8 +12,10 @@ from converters import send_type, send_snowflake, reaction_channel
 
 class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
 
-    last_dm = 322542134546661388
+    STALKER_CHANNEL = 772615385102549022
 
+    last_dm = 322542134546661388
+    
     def __init__(self, bot):
         super().__init__(bot)
 
@@ -22,6 +24,19 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
 
         # If the message is in DMs, and it isn't a command, and it isn't sent by StalkerBot
         if message.guild is None and not message.content.lower().startswith("s.") and message.author.id != 723813550136754216:
+            embed = discord.Embed()
+            embed.set_author(name=str(message.author), icon_url=message.author.avatar_url)
+            embed.set_footer(text=f"Author: {str(message.author)} ({message.author.id})\nChannel ID: {message.channel.id}\nMessage ID: {message.id}")
+            if message.attachments:
+                url_list = [i.url for i in message.attachments]
+                lines = ""
+                for i in url_list:
+                    lines = lines + f"\n[Click Here]({i})"
+                embed.add_field(name="Attatchment Links", value=lines, inline=False)
+                embed.set_image(url=message.attachments[0].url)
+            embed.description = message.content
+            await self.bot.get_channel(self.STALKER_CHANNEL).send(embed=embed)
+
             self.last_dm = message.author.id
 
     @utils.command(aliases=['hero', 'h'], hidden=True)
