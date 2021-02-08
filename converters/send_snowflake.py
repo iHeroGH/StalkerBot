@@ -8,7 +8,6 @@ class SendSnowflake(commands.Converter):
     async def convert(self, ctx, value):
 
         # This function accepts any ints, and only returns a value if the int matches the format of a user or channel ID
-        print(value)
         if re.match(r"^(<!?@|(<#)?)?(?P<ID>[0-9]{16,24})>?$", str(value)):
             return re.match(r"^(<!?@|(<#)?)?(?P<ID>[0-9]{16,24})>?$", str(value)).group("ID")
 
