@@ -100,6 +100,7 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
     async def send(self, ctx, channel_type:send_type.SendType, snowflake:typing.Optional[typing.Union[send_snowflake.SendSnowflake]], *, message:str=None):
         """Sends a message to a channel or a user through StalkerBot"""
 
+        print(snowflake)
         # Set the user to whoever last DMed stalkerbot
         if channel_type == "u":
             snowflake = snowflake or self.bot.get_user(self.last_dm)
