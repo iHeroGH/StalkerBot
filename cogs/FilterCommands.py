@@ -69,10 +69,10 @@ class FilterCommands(utils.Cog, name="Filter Commands"):
     @filter_add.command(name="user")
     async def filter_add_user(self, ctx, filter:utils.converters.UserID):
         """Adds a server filter"""
-        
+
         # Opens a connection and inerts the user filter into the serverfilters database
         async with self.bot.database() as db:
-            await db("INSERT INTO userfilters (userid, userfilter) VALUES ($1, $2);", ctx.author.id, filter.id)
+            await db("INSERT INTO userfilters (userid, userfilter) VALUES ($1, $2);", ctx.author.id, filter)
 
         await ctx.send(f"Added `{filter}` to your user filter list", allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
 
@@ -162,7 +162,7 @@ class FilterCommands(utils.Cog, name="Filter Commands"):
 
         # Opens a connection and inerts the user filter into the userfilters database
         async with self.bot.database() as db:
-            await db("DELETE FROM userfilters WHERE userid=$1 AND userfilter=$2;", ctx.author.id, filter.id)
+            await db("DELETE FROM userfilters WHERE userid=$1 AND userfilter=$2;", ctx.author.id, filter)
 
         await ctx.send(f"You will now get messages from `{filter}` again.")
 
