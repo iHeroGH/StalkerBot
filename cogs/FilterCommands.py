@@ -67,21 +67,12 @@ class FilterCommands(utils.Cog, name="Filter Commands"):
         await ctx.send(f"Added `{filter}` to your server filter list")
 
     @filter_add.command(name="user")
-    async def filter_add_user(self, ctx, filter:int=None):
+    async def filter_add_user(self, ctx, filter:utils.converters.UserID):
         """Adds a server filter"""
-
-        user = None
-
-        if filter is not None:
-            user = self.bot.get_user(filter) or await self.bot.fetch_user(filter)
-
-        if user is None:
-            await ctx.send("You didn't provide a valid user ID")
-            return
-
+        
         # Opens a connection and inerts the user filter into the serverfilters database
         async with self.bot.database() as db:
-            await db("INSERT INTO userfilters (userid, userfilter) VALUES ($1, $2);", ctx.author.id, filter)
+            await db("INSERT INTO userfilters (userid, userfilter) VALUES ($1, $2);", ctx.author.id, filter.id)
 
         await ctx.send(f"Added `{filter}` to your user filter list", allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
 
@@ -166,19 +157,12 @@ class FilterCommands(utils.Cog, name="Filter Commands"):
         await ctx.send(f"You will now get messages from `{filter}` again")
 
     @filter_remove.command(name="user")
-    async def filter_remove_user(self, ctx, filter:int=None):
+    async def filter_remove_user(self, ctx, filter:utils.converters.UserID):
         """Adds a server filter"""
-
-        if filter is not None:
-            user = self.bot.get_user(filter) or await self.bot.fetch_user(filter)
-
-        if user is None:
-            await ctx.send("You didn't provide a valid user ID")
-            return
 
         # Opens a connection and inerts the user filter into the userfilters database
         async with self.bot.database() as db:
-            await db("DELETE FROM userfilters WHERE userid=$1 AND userfilter=$2;", ctx.author.id, filter)
+            await db("DELETE FROM userfilters WHERE userid=$1 AND userfilter=$2;", ctx.author.id, filter.id)
 
         await ctx.send(f"You will now get messages from `{filter}` again.")
 
