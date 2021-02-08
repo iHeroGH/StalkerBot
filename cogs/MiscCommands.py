@@ -95,46 +95,46 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
 
         await ctx.send(file=discord.File(sendable_image, filename="heroed.png"))
 
-    # @utils.command()
-    # @commands.is_owner()
-    # async def send(self, ctx, channel_type:typing.Optional[send_type.SendType], snowflake:typing.Optional[typing.Union[discord.User, discord.TextChannel, send_snowflake.SendSnowflake]], *, message:str=None):
-    #     """Sends a message to a channel or a user through StalkerBot"""
+    @utils.command()
+    @commands.is_owner()
+    async def send(self, ctx, channel_type:typing.Optional[send_type.SendType], snowflake:typing.Optional[typing.Union[send_snowflake.SendSnowflake]], *, message:str=None):
+        """Sends a message to a channel or a user through StalkerBot"""
 
-    #     # Set the user to whoever last DMed stalkerbot
-    #     if channel_type == "u":
-    #         snowflake = snowflake or self.bot.get_user(self.last_dm)
+        # Set the user to whoever last DMed stalkerbot
+        if channel_type == "u":
+            snowflake = snowflake or self.bot.get_user(self.last_dm)
 
-    #     snowflake = snowflake or ctx.channel
-    #     # Hopefully `snowflake` is a Discord object, but if it's an int we should try getting it
-    #     if type(snowflake) is int:
-    #         method = {
-    #             "c": self.bot.get_channel,
-    #             "u": self.bot.get_user,
-    #         }[channel_type[0]]
-    #         snowflake = method(snowflake)
+        snowflake = snowflake or ctx.channel
+        # Hopefully `snowflake` is a Discord object, but if it's an int we should try getting it
+        if type(snowflake) is int:
+            method = {
+                "c": self.bot.get_channel,
+                "u": self.bot.get_user,
+            }[channel_type[0]]
+            snowflake = method(snowflake)
 
-    #     # Set up what we want to send
-    #     payload = {
-    #         "content": message,
-    #     }
+        # Set up what we want to send
+        payload = {
+            "content": message,
+        }
 
-    #     # Different send if the message had attachments
-    #     if ctx.message.attachments:
-    #         async with aiohttp.ClientSession() as session:
-    #             async with session.get(ctx.message.attachments[0].url) as r:
-    #                 image_bytes = await r.read()
-    #         image_file = io.BytesIO(image_bytes)
-    #         payload["file"] = discord.File(image_file, filename="image.png")
+        # Different send if the message had attachments
+        if ctx.message.attachments:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(ctx.message.attachments[0].url) as r:
+                    image_bytes = await r.read()
+            image_file = io.BytesIO(image_bytes)
+            payload["file"] = discord.File(image_file, filename="image.png")
 
-    #     # And send
-    #     print(f"Sending {snowflake} message {payload['content']}")
-    #     await snowflake.send(**payload)
+        # And send
+        print(f"Sending {snowflake} message {payload['content']}")
+        await snowflake.send(**payload)
 
-    #     # React to (or delete) the command message
-    #     if snowflake == ctx.channel:
-    #         await ctx.message.delete()
-    #     else:
-    #         await ctx.message.add_reaction("👌")
+        # React to (or delete) the command message
+        if snowflake == ctx.channel:
+            await ctx.message.delete()
+        else:
+            await ctx.message.add_reaction("👌")
 
     @utils.command()
     @commands.is_owner()
@@ -166,5 +166,5 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
 
 
 def setup(bot):
-    # bot.remove_command("send")
+    bot.remove_command("send")
     bot.add_cog(MiscCommands(bot))

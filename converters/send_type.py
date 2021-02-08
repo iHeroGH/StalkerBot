@@ -6,7 +6,7 @@ class SendType(commands.Converter):
     async def convert(self, ctx, value):
 
         # This function accepts channeltypes of 'c' and 'u'
-        if value.lower() == 'c' or value.lower() == 'u' and len(value) == 1:
+        if value.lower() == 'c' or value.lower() == 'u':
             return value
 
         # It didn't convert and return an argument, so we've gotta raise an error
