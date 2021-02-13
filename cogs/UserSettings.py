@@ -130,7 +130,7 @@ class UserSettings(utils.Cog, name="User Setting Commands"):
                 editmessage = not editmessage
             elif reaction.emoji == validEmoji[4]:
                 async with self.bot.database() as db:
-                    await db("INSERT INTO user_settings (user_id, bottrigger) VALUES ($1, $2) on conflict (user_id) do update set editmessage = $2", ctx.author.id, not bottrigger)
+                    await db("INSERT INTO user_settings (user_id, bottrigger) VALUES ($1, $2) on conflict (user_id) do update set bottrigger = $2", ctx.author.id, not bottrigger)
                 bottrigger = not bottrigger
             elif reaction.emoji == validEmoji[5]:
                 break
