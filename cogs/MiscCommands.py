@@ -57,7 +57,7 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
             "L": 'images/liz_l.png',  # Liz L
             "l": 'images/lemon.png',  # Lemon
             "e": 'images/eyes.png', # Eyes
-            "V": 'images/viccy_v.png' # Victor V
+            "V": 'images/vt_v.png' # Vibe Talk V
         }[ident[0]]
 
         # Check if the image should be a user PFP
