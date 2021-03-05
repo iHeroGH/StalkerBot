@@ -33,7 +33,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
 
         if message.guild is None:
             return
-        
+
         guild = message.guild
         channel = message.channel
 
@@ -157,7 +157,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
             # Grab the member object
             self.bot.logger.debug(f"Grabbing member {user_id} in guild {guild.id}")
             try:
-                member = guild.get_member(user_id) or await guild.fetch_member(user_id)
+                member = guild.get_member(user_id)  # or await guild.fetch_member(user_id)
                 assert member is not None
             except (AssertionError, discord.HTTPException):
                 self.bot.logger.debug(f"Member {user_id} in guild {guild.id} doesn't exist :/")
@@ -237,11 +237,8 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
 
             # Try and send it to them
             self.bot.logger.info(f"Sending message {message.id} by {message.author.id} to {member.id} for keyword trigger")
-            try:
-                await member.send(**sendable_content)
-            except discord.HTTPException:
-                pass
             already_sent.add(member.id)
+            self.bot.loop.create_task(member.send(**sendable_content))
 
     def create_message_embed(self, message:typing.Union[discord.Message, typing.Tuple[discord.Message]], keyword:str=None) -> discord.Embed:
         """Creates a message embed that can be DMd to a user"""
