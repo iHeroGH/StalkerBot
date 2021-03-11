@@ -116,6 +116,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
 
                     self.bot.logger.info(f"Sending message {message.id} by {message.author.id} to {user_id} for reply trigger")
                     already_sent.add(user_id)
+                    print self.bot.get_user(user_id)
                     await self.bot.get_user(user_id).send(**sendable_content)
                     
 
