@@ -111,7 +111,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
                     if reply_users[user_id]:
                         sendable_content = {'embed': self.create_message_embed(message, reply=True)}
                     else:
-                        sendable_content = {'content': self.create_message_string(message, False, True)}
+                        sendable_content = {'content': self.create_message_string(message, None, False, True)}
 
 
                     self.bot.logger.info(f"Sending message {message.id} by {message.author.id} to {user_id} for reply trigger")
