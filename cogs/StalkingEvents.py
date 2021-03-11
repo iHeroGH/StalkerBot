@@ -100,7 +100,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
             reply_on_rows = await db("SELECT * from user_settings WHERE replymessage = True")
         
         # Create a list of all the user IDs of the people who have reply_rows turned on
-        reply_users = [i['userid'] for i in reply_on_rows]
+        reply_users = [i['user_id'] for i in reply_on_rows]
         reference = message.reference
         if reference:
             for user_id in reply_users:
