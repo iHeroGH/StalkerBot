@@ -111,7 +111,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
                     if reply_users[user_id]:
                         sendable_content = {'embed': self.create_message_embed(reply_message.content, True)}
                     else:
-                        sendable_content = {'content': self.create_message_string(reply_message, True)}
+                        sendable_content = {'content': self.create_message_string(reply_message.content, True)}
 
 
                     self.bot.logger.info(f"Sending message {message.id} by {message.author.id} to {user_id} for reply trigger")
@@ -265,7 +265,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
             already_sent.add(member.id)
             self.bot.loop.create_task(member.send(**sendable_content))
 
-    def create_message_embed(self, message:typing.Union[discord.Message, typing.Tuple[discord.Message]], keyword:str=None, reply:bool=None) -> discord.Embed:
+    def create_message_embed(self, message:typing.Union[discord.Message, typing.Tuple[discord.Message]], keyword:str=None, *, reply:bool=None) -> discord.Embed:
         """Creates a message embed that can be DMd to a user"""
 
         try:
