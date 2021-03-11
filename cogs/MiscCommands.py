@@ -24,6 +24,10 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
 
         # If the message is in DMs, and it isn't a command, and it isn't sent by StalkerBot
         if message.guild is None and not message.content.lower().startswith("s.") and message.author.id != 723813550136754216:
+            async with self.bot.database() as db:
+                blacklist_rows = await db("SELECT * FROM db_blacklist WHERE userid = $1", message.author.id)
+            if blacklist_rows:
+                return
             embed = discord.Embed()
             embed.set_author(name=str(message.author), icon_url=message.author.avatar_url)
             embed.set_footer(text=f"Author: {str(message.author)} ({message.author.id})\nChannel ID: {message.channel.id}\nMessage ID: {message.id}")
