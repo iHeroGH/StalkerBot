@@ -293,6 +293,8 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
             embed.add_field(name="Attatchment Links", value=lines, inline=False)
         if keyword:
             embed.set_footer(text=f"Keyword: {keyword}")
+        if reply:
+            embed.set_footer(text=f"Reply")
         embed.timestamp = message.created_at
         return embed
 
@@ -303,6 +305,8 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
 
         if edited:
             lines = [f"<@!{message.author.id}> ({message.author.name}) has edited their message to include the keyword (`{keyword}`) in <#{message.channel.id}>. They typed `{message.content[:1900]}` <{(message.jump_url)}>."]
+        elif reply:
+            lines = [f"<@!{message.author.id}> ({message.author.name}) has replied to your message in <#{message.channel.id}>. They typed `{message.content[:1900]}` <{(message.jump_url)}>."]
         else:
             lines = [f"<@!{message.author.id}> ({message.author.name}) has typed the keyword (`{keyword}`) in <#{message.channel.id}>. They typed `{message.content[:1900]}` <{(message.jump_url)}>."]
         if len(message.attachments) != 0:
