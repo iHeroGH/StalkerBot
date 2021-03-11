@@ -21,7 +21,7 @@ class FilterCommands(utils.Cog, name="Filter Commands"):
         await ctx.send_help(ctx.command)
 
     @filter_add.command(name="text")
-    async def filter_add_text(self, ctx, filter:str):
+    async def filter_add_text(self, ctx, *, filter:str):
         """
         Adds a text filter.
         """
@@ -34,7 +34,7 @@ class FilterCommands(utils.Cog, name="Filter Commands"):
 
     @filter_add.command(name="channel")
     @commands.guild_only()
-    async def filter_add_channel(self, ctx, filter:discord.TextChannel):
+    async def filter_add_channel(self, ctx, *, filter:discord.TextChannel):
         """
         Adds a channel filter.
         """
@@ -44,7 +44,7 @@ class FilterCommands(utils.Cog, name="Filter Commands"):
         await ctx.send(f"Added {filter.mention} to your channel filter list")
 
     @filter_add.command(name="server")
-    async def filter_add_server(self, ctx, filter:int=None):
+    async def filter_add_server(self, ctx, *, filter:int=None):
         """Adds a server filter"""
 
         if filter is None:
@@ -67,7 +67,7 @@ class FilterCommands(utils.Cog, name="Filter Commands"):
         await ctx.send(f"Added `{filter}` to your server filter list")
 
     @filter_add.command(name="user")
-    async def filter_add_user(self, ctx, filter:utils.converters.UserID):
+    async def filter_add_user(self, ctx, *, filter:utils.converters.UserID):
         """Adds a server filter"""
 
         # Opens a connection and inerts the user filter into the serverfilters database
@@ -122,7 +122,7 @@ class FilterCommands(utils.Cog, name="Filter Commands"):
         await ctx.send_help(ctx.command)
 
     @filter_remove.command(name="text")
-    async def filter_remove_text(self, ctx, filter:str):
+    async def filter_remove_text(self, ctx, *, filter:str):
         """Removes a text filter"""
 
         async with self.bot.database() as db:
