@@ -51,7 +51,7 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
                 await db("DELETE * FROM dm_blacklist WHERE user_id = $1", user.id)
                 await ctx.send(f"Removed {user.mention} ({str(user)}) from the DM blacklist.", allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
             else:
-                await db("INSERT INTO dmb_lacklist (user_id) VALUES ($1)", user.id)
+                await db("INSERT INTO dm_blacklist (user_id) VALUES ($1)", user.id)
                 await ctx.send(f"Inserted {user.mention} ({str(user)}) into the DM blacklist.", allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
 
     @utils.command(aliases=['hero', 'h'], hidden=True)
