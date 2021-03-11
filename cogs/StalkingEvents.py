@@ -302,10 +302,10 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
 
         message = message
 
-        if edited:
-            lines = [f"<@!{message.author.id}> ({message.author.name}) has edited their message to include the keyword (`{keyword}`) in <#{message.channel.id}>. They typed `{message.content[:1900]}` <{(message.jump_url)}>."]
-        elif reply:
+        if reply:
             lines = [f"<@!{message.author.id}> ({message.author.name}) has replied to your message in <#{message.channel.id}>. They typed `{message.content[:1900]}` <{(message.jump_url)}>."]
+        elif edited:
+            lines = [f"<@!{message.author.id}> ({message.author.name}) has edited their message to include the keyword (`{keyword}`) in <#{message.channel.id}>. They typed `{message.content[:1900]}` <{(message.jump_url)}>."]
         else:
             lines = [f"<@!{message.author.id}> ({message.author.name}) has typed the keyword (`{keyword}`) in <#{message.channel.id}>. They typed `{message.content[:1900]}` <{(message.jump_url)}>."]
         if len(message.attachments) != 0:
