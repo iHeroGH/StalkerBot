@@ -109,9 +109,9 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
 
                 if reply_message.author.id == user_id:
                     if reply_users[user_id]:
-                        sendable_content = {'embed': self.create_message_embed(reply_message.content, True)}
+                        sendable_content = {'embed': self.create_message_embed(reply_message.content, reply=True)}
                     else:
-                        sendable_content = {'content': self.create_message_string(reply_message.content, True)}
+                        sendable_content = {'content': self.create_message_string(reply_message.content, False, True)}
 
 
                     self.bot.logger.info(f"Sending message {message.id} by {message.author.id} to {user_id} for reply trigger")
@@ -295,7 +295,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
         embed.timestamp = message.created_at
         return embed
 
-    def create_message_string(self, message:discord.Message, keyword:str, *, edited:bool=False, reply:bool=False) -> str:
+    def create_message_string(self, message:discord.Message, keyword:str, edited:bool=False, reply:bool=False) -> str:
         """Creates a string that can be DMd to a user"""
 
         message = message
