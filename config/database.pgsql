@@ -9,7 +9,8 @@ CREATE TABLE IF NOT EXISTS user_settings(
     quotetrigger boolean default true,
     embedmessage boolean default false,
     editmessage boolean default true,
-    bottrigger boolean default true
+    bottrigger boolean default true,
+    replymessage boolean default false
 );
 
 CREATE TABLE IF NOT EXISTS keywords(
@@ -51,7 +52,6 @@ CREATE TABLE IF NOT EXISTS tempmute(
     time TIMESTAMP
 );
 
-
 CREATE TABLE IF NOT EXISTS role_list(
     guild_id BIGINT,
     role_id BIGINT,
@@ -59,7 +59,6 @@ CREATE TABLE IF NOT EXISTS role_list(
     value VARCHAR(50),
     PRIMARY KEY (guild_id, role_id, key)
 );
-
 
 CREATE TABLE IF NOT EXISTS channel_list(
     guild_id BIGINT,
