@@ -116,7 +116,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
 
                     self.bot.logger.info(f"Sending message {message.id} by {message.author.id} to {user_id} for reply trigger")
                     already_sent.add(user_id)
-                    self.bot.loop.create_task(self.bot.get_user(user_id).send(**sendable_content))
+                    await self.bot.get_user(user_id).send(**sendable_content)
                     
 
         # Get everything (from the users who have had a keyword triggered) from the datbase
