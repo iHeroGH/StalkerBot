@@ -100,16 +100,19 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
             reply_on_rows = await db("SELECT * from user_settings WHERE replymessage = True")
         
         # Create a list of all the user IDs of the people who have reply_rows turned on
-        reply_users = [i['user_id'] for i in reply_on_rows]
+        reply_users = {i['user_id']: (i['embedmessage']) for i in reply_on_rows}
+
         reference = message.reference
         if reference:
-            for user_id in reply_users:
+            for user_id in reply_users.keys():
                 reply_message = await message.channel.fetch_message(reference.message_id)
+
                 if reply_message.author.id == user_id:
-                    if reply_on_rows['embedmessage']:
+                    if reply_users[user_id]:
                         sendable_content = {'embed': self.create_message_embed(reply_message.content, True)}
                     else:
                         sendable_content = {'content': self.create_message_string(reply_message, True)}
+
 
                     self.bot.logger.info(f"Sending message {message.id} by {message.author.id} to {user_id} for reply trigger")
                     already_sent.add(user_id)
