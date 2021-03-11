@@ -94,6 +94,28 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
         #         heart_codepoints = ["❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤎", "🤍"]
         #         #await sent_message.add_reaction(random.choice(heart_codepoints))
 
+        already_sent = set() 
+        # Deal with the reply message stuff
+        async with self.bot.database() as db:
+            reply_on_rows = await db("SELECT * from user_settings WHERE replymessage = True")
+        
+        # Create a list of all the user IDs of the people who have reply_rows turned on
+        reply_users = [i['userid'] for i in reply_on_rows]
+        reference = message.reference
+        if reference:
+            for user_id in reply_users:
+                reply_message = await message.channel.fetch_message(reference.message_id)
+                if reply_message.author.id == user_id:
+                    if reply_on_rows['embedmessage']:
+                        sendable_content = {'embed': self.create_message_embed(reply_message.content, True)}
+                    else:
+                        sendable_content = {'content': self.create_message_string(reply_message, True)}
+
+                    self.bot.logger.info(f"Sending message {message.id} by {message.author.id} to {user_id} for reply trigger")
+                    already_sent.add(user_id)
+                    self.bot.loop.create_task(self.bot.get_user(user_id).send(**sendable_content))
+                    
+
         # Get everything (from the users who have had a keyword triggered) from the datbase
         async with self.bot.database() as db:
 
@@ -240,7 +262,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
             already_sent.add(member.id)
             self.bot.loop.create_task(member.send(**sendable_content))
 
-    def create_message_embed(self, message:typing.Union[discord.Message, typing.Tuple[discord.Message]], keyword:str=None) -> discord.Embed:
+    def create_message_embed(self, message:typing.Union[discord.Message, typing.Tuple[discord.Message]], keyword:str=None, reply:bool=None) -> discord.Embed:
         """Creates a message embed that can be DMd to a user"""
 
         try:
