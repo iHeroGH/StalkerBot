@@ -297,7 +297,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
         embed.timestamp = message.created_at
         return embed
 
-    def create_message_string(self, message:discord.Message, keyword:str, edited:bool=False, reply:bool=False) -> str:
+    def create_message_string(self, message:discord.Message, keyword:str=None, edited:bool=False, reply:bool=False) -> str:
         """Creates a string that can be DMd to a user"""
 
         message = message
