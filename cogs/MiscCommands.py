@@ -39,6 +39,21 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
 
             self.last_dm = message.author.id
 
+    @utils.command(aliases=['dmbl'], hidden=True)
+    @commands.is_owner()
+    async def dmblacklist(self, ctx, user:discord.User=None):
+        """Blacklists a user from being detected by the DM Stalker"""
+        user = user or self.bot.get_user(self.last_dm)
+
+        async with self.bot.database() as db:
+            current_bl = await db("SELECT * FROM dm_blacklist")
+            if current_bl:
+                await db("DELETE * FROM dm_blacklist WHERE user_id = $1", user.id)
+                await ctx.send(f"Removed {user.mention} ({str(user)}) from the DM blacklist.", allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
+            else:
+                await db("INSERT INTO dmb_lacklist (user_id) VALUES ($1)", user.id)
+                await ctx.send(f"Inserted {user.mention} ({str(user)}) into the DM blacklist.", allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
+
     @utils.command(aliases=['hero', 'h'], hidden=True)
     @commands.bot_has_permissions(attach_files=True)
     async def heroify(self, ctx, ident='h', url:typing.Union[discord.User or discord.ClientUser, str]=None):
