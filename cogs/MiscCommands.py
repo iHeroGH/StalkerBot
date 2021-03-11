@@ -52,7 +52,7 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
         async with self.bot.database() as db:
             current_bl = await db("SELECT * FROM dm_blacklist")
             if current_bl:
-                await db("DELETE * FROM dm_blacklist WHERE user_id = $1", user.id)
+                await db("DELETE FROM dm_blacklist WHERE user_id = $1", user.id)
                 await ctx.send(f"Removed {user.mention} ({str(user)}) from the DM blacklist.", allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
             else:
                 await db("INSERT INTO dm_blacklist (user_id) VALUES ($1)", user.id)
