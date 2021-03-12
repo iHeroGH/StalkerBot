@@ -278,7 +278,7 @@ class BotCommands(utils.Cog, name="Bot Commands"):
 
     @utils.command()
     @commands.is_owner()
-    async def forceremove(self, ctx, user:discord.User, *, keyword:str):
+    async def forceremove(self, ctx, user:discord.User, keyword:str):
         """Forcibly removes a keyword from a user"""
 
         async with self.bot.database() as db:
@@ -288,7 +288,7 @@ class BotCommands(utils.Cog, name="Bot Commands"):
 
     @utils.command()
     @commands.is_owner()
-    async def forceadd(self, ctx, user:discord.User, *, keyword:str):
+    async def forceadd(self, ctx, user:discord.User, keyword:str):
         """Forcibly adds a keyword to a user"""
 
         async with self.bot.database() as db:
