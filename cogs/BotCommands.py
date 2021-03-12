@@ -297,4 +297,5 @@ class BotCommands(utils.Cog, name="Bot Commands"):
 
 
 def setup(bot):
+    bot.remove_command("info")
     bot.add_cog(BotCommands(bot))
