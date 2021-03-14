@@ -7,7 +7,7 @@ import io
 from PIL import Image
 import voxelbotutils as utils
 
-from converters import send_type, send_snowflake, reaction_channel
+from converters import send_type, send_snowflake, reaction_channel, message_str
 
 
 class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
@@ -160,7 +160,7 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
 
     @utils.command()
     @commands.is_owner()
-    async def edit(self, ctx, message:discord.Message, new_message:str=None, will_delete:bool=False, delete_time:int=0):
+    async def edit(self, ctx, message:discord.Message, new_message:message_str.MessageStr=None, will_delete:bool=False, delete_time:int=0):
         """Edits/Deletes a message sent by the bot"""
 
         # If the message wasn't sent by the bot, return
