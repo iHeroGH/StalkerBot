@@ -184,7 +184,20 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
                 
         
         await ctx.message.add_reaction("👌") # React to the command with a confirmation
+     
+    @utils.command()
+    async def takegeorgeoutfordinner(self, ctx):
+        """Takes george out to dinner"""
+        
+        #Dont want everyone using this.
+        if ctx.author.id is not 393305855929483264:
+            return
+        
+        with utils.Embed(use_random_colour=True) as embed:
+            embed.description = "You take george out for a nice, romantic date in a fancy restaurant."
 
+        await ctx.send(embed=embed)
+    
 
 def setup(bot):
     bot.remove_command("send")
