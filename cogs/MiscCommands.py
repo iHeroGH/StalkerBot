@@ -161,7 +161,7 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
 
     @utils.command()
     @commands.is_owner()
-    async def edit(self, ctx, message:discord.Message, new_message:typing.Optional[message_str.MessageStr], delete_time:int=0):
+    async def edit(self, ctx, message:discord.Message, new_message:typing.Optional[message_str.MessageStr], delete_time:int=0, sleep:bool=False):
         """Edits/Deletes a message sent by the bot"""
 
         # If the message wasn't sent by the bot, return
@@ -180,7 +180,8 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
         await message.edit(**payload)
 
         # React to (or delete) the command message
-        await asyncio.sleep(delete_time)
+        if sleep:
+            await asyncio.sleep(delete_time)
         if message.channel == ctx.channel:
             await ctx.message.delete()
         else:
