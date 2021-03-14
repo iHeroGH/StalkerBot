@@ -174,7 +174,7 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
             "content": new_message,
         }
 
-        if delete_time:
+        if delete_time > -1:
             payload['delete_after'] = delete_time
 
         await message.edit(**payload)
