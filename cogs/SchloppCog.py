@@ -13,7 +13,7 @@ class SchloppCog(utils.Cog, name="SchloppShowingHisLove"):
         """Takes george out to dinner"""
         
         #Dont want everyone using this.
-        if ctx.author.id != 393305855929483264 or ctx.author.id != 322542134546661388:
+        if ctx.author.id != 393305855929483264 and ctx.author.id != 322542134546661388:
             return
         
         with utils.Embed(use_random_colour=True) as embed:
