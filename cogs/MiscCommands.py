@@ -13,6 +13,7 @@ from converters import send_type, send_snowflake, reaction_channel
 class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
 
     STALKER_CHANNEL = 772615385102549022
+    STALKER_ID = 723813550136754216
 
     last_dm = 322542134546661388
     
@@ -23,7 +24,7 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
     async def on_message(self, message):
 
         # If the message is in DMs, and it isn't a command, and it isn't sent by StalkerBot
-        if message.guild is None and not message.content.lower().startswith("s.") and message.author.id != 723813550136754216:
+        if message.guild is None and not message.content.lower().startswith("s.") and message.author.id != self.STALKER_ID:
             async with self.bot.database() as db:
                 blacklist_rows = await db("SELECT * FROM db_blacklist WHERE userid = $1", message.author.id)
             if blacklist_rows:
@@ -153,6 +154,32 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
 
         # React to (or delete) the command message
         if snowflake == ctx.channel:
+            await ctx.message.delete()
+        else:
+            await ctx.message.add_reaction("👌")
+
+    @utils.command()
+    @commands.is_owner()
+    async def edit(self, ctx, message:discord.Message, new_message:str=None, will_delete:bool=False, delete_time:int=0):
+        """Edits/Deletes a message sent by the bot"""
+
+        # If the message wasn't sent by the bot, return
+        if message.author.id != self.STALKER_ID:
+            return await ctx.message.add_reaction("👎")
+        
+        new_message = new_message or message.content
+
+        payload = {
+            "content": new_message,
+        }
+
+        if will_delete:
+            payload['delete_after'] = delete_time
+
+        await message.edit(**payload)
+
+        # React to (or delete) the command message
+        if message.channel == ctx.channel:
             await ctx.message.delete()
         else:
             await ctx.message.add_reaction("👌")
