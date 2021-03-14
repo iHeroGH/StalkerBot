@@ -190,7 +190,7 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
         """Takes george out to dinner"""
         
         #Dont want everyone using this.
-        if ctx.author.id is not 393305855929483264:
+        if ctx.author.id != 393305855929483264:
             return
         
         with utils.Embed(use_random_colour=True) as embed:
