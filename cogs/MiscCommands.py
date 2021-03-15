@@ -195,8 +195,9 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
         timeout = (float('inf') if timeout == 0.0 else timeout)
 
         # If the bot isn't in the VC
+        voice_client = ctx.guild.voice_client
         try:
-            voice_client = ctx.guild.voice_client.channel
+            voice_channel = voice_client.channel
         except AttributeError:
             await vc.connect(timeout=timeout)
 
