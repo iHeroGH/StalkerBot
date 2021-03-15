@@ -202,7 +202,7 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
             await vc.connect(timeout=timeout)
 
         # If the bot is in the VC
-        await voice_client.voice_disconnect()
+        await voice_client.disconnect()
 
         return await ctx.message.add_reaction("👌")
 
