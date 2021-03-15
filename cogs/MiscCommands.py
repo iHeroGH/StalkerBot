@@ -45,7 +45,7 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
 
             self.last_dm = message.author.id
 
-    @utils.command(aliases=['dmbl'], hidden=True)
+    @utils.command(aliases=['dmbl'])
     @commands.is_owner()
     async def dmblacklist(self, ctx, user:discord.User=None):
         """Blacklists a user from being detected by the DM Stalker"""
@@ -186,6 +186,24 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
             await ctx.message.delete()
         else:
             await ctx.message.add_reaction("👌")
+
+    @utils.command(aliases=['joinvc', 'leavevc', 'leave', 'disc', 'con', 'connect', 'disconnect'])
+    @commands.is_owner()
+    async def join(self, ctx, vc:discord.VoiceChannel, timeout:float=0.0):
+        """Joins/Leaves a Discord Voice Channel"""
+
+        timeout = (float('inf') if timeout == 0.0 else timeout)
+
+        # If the bot isn't in the VC
+        try:
+            voice_client = ctx.guild.voice_client.channel
+        except AttributeError:
+            await vc.connect(timeout=timeout)
+
+        # If the bot is in the VC
+        await voice_client.voice_disconnect()
+
+        return await ctx.message.add_reaction("👌")
 
     @utils.command()
     @commands.is_owner()
