@@ -200,9 +200,9 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
             voice_channel = voice_client.channel
         except AttributeError:
             self.bot.loop.create_task(vc.connect(timeout=timeout))
-
-        # If the bot is in the VC
-        self.bot.loop.create_task(voice_client.disconnect())
+        else:
+            # If the bot is in the VC
+            self.bot.loop.create_task(voice_client.disconnect())
 
         return await ctx.message.add_reaction("👌")
 
