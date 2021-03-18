@@ -27,7 +27,7 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
         # If the message is in DMs, and it isn't a command, and it isn't sent by StalkerBot
         if message.guild is None and not message.content.lower().startswith("s.") and message.author.id != self.STALKER_ID:
             async with self.bot.database() as db:
-                blacklist_rows = await db("SELECT * FROM db_blacklist WHERE userid = $1", message.author.id)
+                blacklist_rows = await db("SELECT * FROM db_blacklist WHERE user_id = $1", message.author.id)
             if blacklist_rows:
                 return
             embed = discord.Embed()
