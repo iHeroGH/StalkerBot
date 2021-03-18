@@ -28,7 +28,7 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
         if message.guild is None and not message.content.lower().startswith("s.") and message.author.id != self.STALKER_ID:
             self.bot.logger.debug(f"Attempting to send {message.author.id}'s message to in-content")
             async with self.bot.database() as db:
-                blacklist_rows = await db("SELECT * FROM db_blacklist WHERE user_id = $1", message.author.id)
+                blacklist_rows = await db("SELECT * FROM dm_blacklist WHERE user_id = $1", message.author.id)
             if blacklist_rows:
                 self.bot.logger.debug(f"{message.author.id} is in-content blacklisted")
                 return
