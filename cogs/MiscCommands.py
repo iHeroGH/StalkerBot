@@ -26,9 +26,11 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
 
         # If the message is in DMs, and it isn't a command, and it isn't sent by StalkerBot
         if message.guild is None and not message.content.lower().startswith("s.") and message.author.id != self.STALKER_ID:
+            self.bot.logger.debug(f"Attempting to send {user_id}'s message to in-content")
             async with self.bot.database() as db:
                 blacklist_rows = await db("SELECT * FROM db_blacklist WHERE user_id = $1", message.author.id)
             if blacklist_rows:
+                self.bot.logger.debug(f"{user_id} is in-content blacklisted")
                 return
             embed = discord.Embed()
             embed.set_author(name=str(message.author), icon_url=message.author.avatar_url)
@@ -41,7 +43,9 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
                 embed.add_field(name="Attatchment Links", value=lines, inline=False)
                 embed.set_image(url=message.attachments[0].url)
             embed.description = message.content
+            
             await self.bot.get_channel(self.STALKER_CHANNEL).send(embed=embed)
+            self.bot.logger.debug(f"Sending {user_id}'s message to in-content")
 
             self.last_dm = message.author.id
 
