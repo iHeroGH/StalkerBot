@@ -297,8 +297,7 @@ class BotCommands(utils.Cog, name="Bot Commands"):
             await db("INSERT INTO keywords VALUES ($1, $2);", user.id, keyword)
         await ctx.send(f"Added `{keyword}` to {user.name}'s list")
 
-    @utils.command()
-    @commands.is_owner()
+    @utils.command(aliases=['max', 'maxkey', 'maxwords', 'maxkeyword', 'maxkeys', 'maxword'])
     async def maxkeywords(self, ctx):
         """Sends the maximum amount of keywords a user can have"""
 
