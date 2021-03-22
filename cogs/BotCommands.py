@@ -89,7 +89,7 @@ class BotCommands(utils.Cog, name="Bot Commands"):
             rows = await db("SELECT * FROM keywords WHERE userid = $1;", ctx.author.id)
             max_keywords = await self.get_max_keywords(ctx.author)
             if len(rows) >= max_keywords:
-                await ctx.send(f"You already have the maximum amount of keywords ({max_keywords})")
+                await ctx.send(f"You already have the maximum amount of keywords ({max_keywords}). Feel free to purchase more from {self.bot.config['command_data']['donate_link']} :)")
                 return
 
             # Adds the keyword into the list
@@ -125,7 +125,7 @@ class BotCommands(utils.Cog, name="Bot Commands"):
             rows = await db("SELECT * FROM serverkeywords WHERE userid = $1;", ctx.author.id)
             max_keywords = await self.get_max_keywords(ctx.author)
             if len(rows) >= max_keywords:
-                await ctx.send(f"You already have the maximum amount of keywords ({max_keywords})")
+                await ctx.send(f"You already have the maximum amount of keywords ({max_keywords}). Feel free to purchase more from {self.bot.config['command_data']['donate_link']} :)")
                 return
 
             # Adds the keyword into the list
