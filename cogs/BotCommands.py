@@ -319,7 +319,7 @@ class BotCommands(utils.Cog, name="Bot Commands"):
                     continue
                 total_purchases += i.quantity
 
-        keyword_max = self.MAXIMUM_ALLOWED_KEYWORDS + (len(total_purchases) * 5)
+        keyword_max = self.MAXIMUM_ALLOWED_KEYWORDS + (total_purchases * 5)
         return keyword_max
 
 
