@@ -297,10 +297,21 @@ class BotCommands(utils.Cog, name="Bot Commands"):
             await db("INSERT INTO keywords VALUES ($1, $2);", user.id, keyword)
         await ctx.send(f"Added `{keyword}` to {user.name}'s list")
 
+    @utils.command()
+    @commands.is_owner()
+    async def maxkeywords(self, ctx):
+        """Sends the maximum amount of keywords a user can have"""
+
+        max_keywords = await self.get_max_keywords(ctx.author)
+
+        await ctx.send(f"You can set {max_keywords} keywords. Buy more at {self.bot.config['command_data']['donate_link']} :)")
+
+
     async def get_max_keywords(self, user:discord.User):
         """Returns the max. amount of keywords a user can have based on upgrade.chat"""
 
         orders = await self.bot.upgrade_chat.get_orders(discord_id=user.id)
+        total_purchases = 0
 
         for p in orders:
             for i in p.order_items:
