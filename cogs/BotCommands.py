@@ -301,8 +301,14 @@ class BotCommands(utils.Cog, name="Bot Commands"):
         """Returns the max. amount of keywords a user can have based on upgrade.chat"""
 
         orders = await self.bot.upgrade_chat.get_orders(discord_id=user.id)
-        extras = [i for i in orders if i.order_item_names[0] == "5x StalkerBot Keywords"]
-        keyword_max = self.MAXIMUM_ALLOWED_KEYWORDS + (len(extras) * 5)
+
+        for p in orders:
+            for i in p.order_items:
+                if i.product_name != "5x StalkerBot Keywords":
+                    continue
+                total_purchases += i.quantity
+
+        keyword_max = self.MAXIMUM_ALLOWED_KEYWORDS + (len(total_purchases) * 5)
         return keyword_max
 
 
