@@ -87,8 +87,8 @@ class BotCommands(utils.Cog, name="Bot Commands"):
 
             # Checks if the user has the maxiumum amount of keywords (10)
             rows = await db("SELECT * FROM keywords WHERE userid = $1;", ctx.author.id)
-            if len(rows) >= self.MAXIMUM_ALLOWED_KEYWORDS:
-                await ctx.send(f"You already have the maximum amount of keywords ({self.MAXIMUM_ALLOWED_KEYWORDS})")
+            if len(rows) >= self.get_max_keywords(ctx.author):
+                await ctx.send(f"You already have the maximum amount of keywords ({self.get_max_keywords(ctx.author)})")
                 return
 
             # Adds the keyword into the list
@@ -122,8 +122,8 @@ class BotCommands(utils.Cog, name="Bot Commands"):
 
             # Checks if the user has the maxiumum amount of keywords (10)
             rows = await db("SELECT * FROM serverkeywords WHERE userid = $1;", ctx.author.id)
-            if len(rows) >= self.MAXIMUM_ALLOWED_KEYWORDS:
-                await ctx.send(f"You already have the maximum amount of keywords ({self.MAXIMUM_ALLOWED_KEYWORDS})")
+            if len(rows) >= self.get_max_keywords(ctx.author):
+                await ctx.send(f"You already have the maximum amount of keywords ({self.get_max_keywords(ctx.author)})")
                 return
 
             # Adds the keyword into the list
@@ -294,6 +294,14 @@ class BotCommands(utils.Cog, name="Bot Commands"):
         async with self.bot.database() as db:
             await db("INSERT INTO keywords VALUES ($1, $2);", user.id, keyword)
         await ctx.send(f"Added `{keyword}` to {user.name}'s list")
+
+    async def get_max_keywords(self, user:discord.User):
+        """Returns the max. amount of keywords a user can have based on upgrade.chat"""
+
+        orders = await self.bot.upgrade_chat.get_orders(user_id=user.id)
+        extras = [i for i in orders if i.order_item_names[0] == "5x StalkerBot Keywords"]
+        keyword_max = self.MAXIMUM_ALLOWED_KEYWORDS + (len(extras) * 5)
+        return keyword_max
 
 
 def setup(bot):
