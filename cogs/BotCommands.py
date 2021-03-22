@@ -300,7 +300,7 @@ class BotCommands(utils.Cog, name="Bot Commands"):
     async def get_max_keywords(self, user:discord.User):
         """Returns the max. amount of keywords a user can have based on upgrade.chat"""
 
-        orders = await self.bot.upgrade_chat.get_orders(user_id=user.id)
+        orders = await self.bot.upgrade_chat.get_orders(discord_id=user.id)
         extras = [i for i in orders if i.order_item_names[0] == "5x StalkerBot Keywords"]
         keyword_max = self.MAXIMUM_ALLOWED_KEYWORDS + (len(extras) * 5)
         return keyword_max
