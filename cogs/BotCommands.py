@@ -209,9 +209,13 @@ class BotCommands(utils.Cog, name="Bot Commands"):
         # If the user isn't given, assume it's the author
         user = user or ctx.author
 
-        # If the author isn't the owner of the bot, list the author's keywords
+        # If the author is the owner, list the user's keywords
         if not (await self.bot.is_owner(ctx.author)):
             user = ctx.author
+        else:
+            if ctx.author != user:
+                return await ctx.send("You can only view your own keywords.")
+
 
         # Get the data from the database
         async with self.bot.database() as db:
