@@ -210,12 +210,8 @@ class BotCommands(utils.Cog, name="Bot Commands"):
         user = user or ctx.author
 
         # If the author is the owner, list the user's keywords
-        if not (await self.bot.is_owner(ctx.author)):
-            user = ctx.author
-        else:
-            if ctx.author != user:
-                return await ctx.send("You can only view your own keywords.")
-
+        if not (await self.bot.is_owner(ctx.author)) and ctx.author != user:
+            return await ctx.send("You can only view your own keywords.")
 
         # Get the data from the database
         async with self.bot.database() as db:
@@ -238,11 +234,8 @@ class BotCommands(utils.Cog, name="Bot Commands"):
         user = user or ctx.author
 
         # If the author is the owner, list the user's keywords
-        if not (await self.bot.is_owner(ctx.author)):
-            user = ctx.author
-        else:
-            if ctx.author != user:
-                return await ctx.send("You can only view your own keywords.")
+        if not (await self.bot.is_owner(ctx.author)) and ctx.author != user:
+            return await ctx.send("You can only view your own keywords.")
 
         async with self.bot.database() as db:
             rows = await db("SELECT * FROM serverkeywords WHERE userid = $1;", user.id)
