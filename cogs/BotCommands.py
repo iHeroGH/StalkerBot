@@ -231,11 +231,21 @@ class BotCommands(utils.Cog, name="Bot Commands"):
         await ctx.send(', '.join(keywordList), allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
 
     @utils.command(aliases=['serverkeywords', 'serverkeywordlist', 'serverkeywordslist', 'serverlist'])
-    async def listserverkeywords(self, ctx):
+    async def listserverkeywords(self, ctx, user:discord.User=None):
         """Lists all your server-specific keywords"""
 
+        # If the user isn't given, assume it's the author
+        user = user or ctx.author
+
+        # If the author is the owner, list the user's keywords
+        if not (await self.bot.is_owner(ctx.author)):
+            user = ctx.author
+        else:
+            if ctx.author != user:
+                return await ctx.send("You can only view your own keywords.")
+
         async with self.bot.database() as db:
-            rows = await db("SELECT * FROM serverkeywords WHERE userid = $1;", ctx.author.id)
+            rows = await db("SELECT * FROM serverkeywords WHERE userid = $1;", user.id)
         if len(rows) == 0:
             await ctx.send(f"You don't have any server-specific keywords. Set some up by running the `{ctx.prefix}addkeyword` command")
             return
