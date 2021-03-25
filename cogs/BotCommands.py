@@ -67,7 +67,7 @@ class BotCommands(utils.Cog, name="Bot Commands"):
         await ctx.send("Unmuted StalkerBot.")
 
     @utils.command(aliases=['keyword', 'add'])
-    async def addkeyword(self, ctx, *, keyword:str):
+    async def addkeyword(self, ctx, keyword:str):
         """Adds a keyword to your list of DM triggers"""
 
         # Checks if the keyword is too short
@@ -97,7 +97,7 @@ class BotCommands(utils.Cog, name="Bot Commands"):
         await ctx.send(f"Added `{keyword}` into <@{ctx.author.id}>'s list")
 
     @utils.command(aliases=['serverkeyword', 'addserver'])
-    async def addserverkeyword(self, ctx, serverid:int, *, keyword:str):
+    async def addserverkeyword(self, ctx, serverid:int, keyword:str):
         """Adds a keyword to your list of server-specific DM triggers"""
 
         # Checks if the server exists
@@ -132,7 +132,7 @@ class BotCommands(utils.Cog, name="Bot Commands"):
         await ctx.send(f"Added `{keyword}` into <@{ctx.author.id}>'s list")
 
     @utils.command(aliases=['keywordremove', 'remove'])
-    async def removekeyword(self, ctx, *, keyword:str):
+    async def removekeyword(self, ctx, keyword:str):
         """Removes a keyword from your list of DM triggers"""
 
         keyword = keyword.lower()
@@ -152,7 +152,7 @@ class BotCommands(utils.Cog, name="Bot Commands"):
         await ctx.send(f"Removed `{keyword}` from <@{ctx.author.id}>'s list")
 
     @utils.command(aliases=['serverkeywordremove', 'removeserver'])
-    async def removeserverkeyword(self, ctx, serverid:int, *, keyword:str):
+    async def removeserverkeyword(self, ctx, serverid:int, keyword:str):
         """Removes a keyword from your list of server-specific DM triggers"""
 
         keyword = keyword.lower()
