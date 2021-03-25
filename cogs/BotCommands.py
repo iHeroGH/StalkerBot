@@ -87,8 +87,9 @@ class BotCommands(utils.Cog, name="Bot Commands"):
 
             # Checks if the user has the maxiumum amount of keywords (10)
             rows = await db("SELECT * FROM keywords WHERE userid = $1;", ctx.author.id)
-            if len(rows) >= self.get_max_keywords(ctx.author):
-                await ctx.send(f"You already have the maximum amount of keywords ({self.get_max_keywords(ctx.author)})")
+            max_keywords = await self.get_max_keywords(ctx.author)
+            if len(rows) >= max_keywords:
+                await ctx.send(f"You already have the maximum amount of keywords ({max_keywords}). Feel free to purchase more from {self.bot.config['command_data']['donate_link']} :)")
                 return
 
             # Adds the keyword into the list
@@ -122,8 +123,9 @@ class BotCommands(utils.Cog, name="Bot Commands"):
 
             # Checks if the user has the maxiumum amount of keywords (10)
             rows = await db("SELECT * FROM serverkeywords WHERE userid = $1;", ctx.author.id)
-            if len(rows) >= self.get_max_keywords(ctx.author):
-                await ctx.send(f"You already have the maximum amount of keywords ({self.get_max_keywords(ctx.author)})")
+            max_keywords = await self.get_max_keywords(ctx.author)
+            if len(rows) >= max_keywords:
+                await ctx.send(f"You already have the maximum amount of keywords ({max_keywords}). Feel free to purchase more from {self.bot.config['command_data']['donate_link']} :)")
                 return
 
             # Adds the keyword into the list
@@ -207,9 +209,9 @@ class BotCommands(utils.Cog, name="Bot Commands"):
         # If the user isn't given, assume it's the author
         user = user or ctx.author
 
-        # If the author isn't the owner of the bot, list the author's keywords
-        if not (await self.bot.is_owner(ctx.author)):
-            user = ctx.author
+        # If the author is the owner, list the user's keywords
+        if not (await self.bot.is_owner(ctx.author)) and ctx.author != user:
+            return await ctx.send("You can only view your own keywords.")
 
         # Get the data from the database
         async with self.bot.database() as db:
@@ -225,11 +227,18 @@ class BotCommands(utils.Cog, name="Bot Commands"):
         await ctx.send(', '.join(keywordList), allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
 
     @utils.command(aliases=['serverkeywords', 'serverkeywordlist', 'serverkeywordslist', 'serverlist'])
-    async def listserverkeywords(self, ctx):
+    async def listserverkeywords(self, ctx, user:discord.User=None):
         """Lists all your server-specific keywords"""
 
+        # If the user isn't given, assume it's the author
+        user = user or ctx.author
+
+        # If the author is the owner, list the user's keywords
+        if not (await self.bot.is_owner(ctx.author)) and ctx.author != user:
+            return await ctx.send("You can only view your own keywords.")
+
         async with self.bot.database() as db:
-            rows = await db("SELECT * FROM serverkeywords WHERE userid = $1;", ctx.author.id)
+            rows = await db("SELECT * FROM serverkeywords WHERE userid = $1;", user.id)
         if len(rows) == 0:
             await ctx.send(f"You don't have any server-specific keywords. Set some up by running the `{ctx.prefix}addkeyword` command")
             return
@@ -295,12 +304,28 @@ class BotCommands(utils.Cog, name="Bot Commands"):
             await db("INSERT INTO keywords VALUES ($1, $2);", user.id, keyword)
         await ctx.send(f"Added `{keyword}` to {user.name}'s list")
 
+    @utils.command(aliases=['max', 'maxkey', 'maxwords', 'maxkeyword', 'maxkeys', 'maxword'])
+    async def maxkeywords(self, ctx):
+        """Sends the maximum amount of keywords a user can have"""
+
+        max_keywords = await self.get_max_keywords(ctx.author)
+
+        await ctx.send(f"You can set {max_keywords} keywords. Buy more at {self.bot.config['command_data']['donate_link']} :)")
+
+
     async def get_max_keywords(self, user:discord.User):
         """Returns the max. amount of keywords a user can have based on upgrade.chat"""
 
-        orders = await self.bot.upgrade_chat.get_orders(user_id=user.id)
-        extras = [i for i in orders if i.order_item_names[0] == "5x StalkerBot Keywords"]
-        keyword_max = self.MAXIMUM_ALLOWED_KEYWORDS + (len(extras) * 5)
+        orders = await self.bot.upgrade_chat.get_orders(discord_id=user.id)
+        total_purchases = 0
+
+        for p in orders:
+            for i in p.order_items:
+                if i.product_name != "5x StalkerBot Keywords":
+                    continue
+                total_purchases += i.quantity
+
+        keyword_max = self.MAXIMUM_ALLOWED_KEYWORDS + (total_purchases * 5)
         return keyword_max
 
 
