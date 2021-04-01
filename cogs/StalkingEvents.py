@@ -94,30 +94,36 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
         #         heart_codepoints = ["❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤎", "🤍"]
         #         #await sent_message.add_reaction(random.choice(heart_codepoints))
 
-        already_sent = set() 
         # Deal with the reply message stuff
         async with self.bot.database() as db:
-            reply_on_rows = await db("SELECT * from user_settings WHERE replymessage = True")
-        
-        # Create a list of all the user IDs of the people who have reply_rows turned on
-        reply_users = {i['user_id']: (i['embedmessage']) for i in reply_on_rows}
+            reply_on_rows = await db("SELECT * from user_settings WHERE replymessage=true")
 
+        # Create a list of all the user IDs of the people who have reply_rows turned on
+        reply_users = {i['user_id']: i['embedmessage'] for i in reply_on_rows}
         reference = message.reference
         if reference:
-            for user_id in reply_users.keys():
+
+            # Get the message
+            reply_message = None
+            for i in self.bot.cached_messages:
+                if i.id == reference.message_id:
+                    reply_message = i
+                    self.bot.logger.info(f"Found reply message {reply_message.id} in cache")
+                    break
+            if reply_message is None:
                 reply_message = await message.channel.fetch_message(reference.message_id)
+                self.bot.logger.info(f"Fetched reply message {reply_message.id} from API")
 
-                if reply_message.author.id == user_id:
-                    if reply_users[user_id]:
-                        sendable_content = {'embed': self.create_message_embed(message, reply=True)}
-                    else:
-                        sendable_content = {'content': self.create_message_string(message, None, False, True)}
-
-
-                    self.bot.logger.info(f"Sending message {message.id} by {message.author.id} to {user_id} for reply trigger")
-                    already_sent.add(user_id)
-                    await self.bot.get_user(user_id).send(**sendable_content)
-                    
+            # Send a DM to the author
+            if reply_message.author.id in reply_users:
+                if reply_users[reply_message.author.id]:
+                    sendable_content = {'embed': self.create_message_embed(message, reply=True)}
+                else:
+                    sendable_content = {'content': self.create_message_string(message, None, False, True)}
+                self.bot.logger.info(f"Sending message {message.id} by {message.author.id} to {reply_message.author.id} for reply trigger")
+                self.bot.loop.create_task(reply_message.author.send(**sendable_content))
+            else:
+                self.bot.logger.info(f"Message reply {reply_message.id} didn't trigger a replymessage")
 
         # Get everything (from the users who have had a keyword triggered) from the datbase
         async with self.bot.database() as db:
