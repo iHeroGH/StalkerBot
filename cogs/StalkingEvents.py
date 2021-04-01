@@ -120,8 +120,8 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
                     sendable_content = {'embed': self.create_message_embed(message, reply=True)}
                 else:
                     sendable_content = {'content': self.create_message_string(message, None, False, True)}
-                self.bot.logger.info(f"Sending message {message.id} by {message.author.id} to {user_id} for reply trigger")
-                self.bot.loop.create_task(self.bot.get_user(user_id).send(**sendable_content))
+                self.bot.logger.info(f"Sending message {message.id} by {message.author.id} to {reply_message.author.id} for reply trigger")
+                self.bot.loop.create_task(reply_message.author.send(**sendable_content))
             else:
                 self.bot.logger.info(f"Message reply {reply_message.id} didn't trigger a replymessage")
 
