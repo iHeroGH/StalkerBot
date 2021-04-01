@@ -108,9 +108,11 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
             for i in self.bot.cached_messages:
                 if i.id == reference.message_id:
                     reply_message = i
+                    self.bot.logger.info(f"Found reply message {reply_message.id} in cache")
                     break
             if reply_message is None:
-                await message.channel.fetch_message(reference.message_id)
+                reply_message = await message.channel.fetch_message(reference.message_id)
+                self.bot.logger.info(f"Fetched reply message {reply_message.id} from API")
 
             # Send a DM to the author
             if reply_message.author.id in reply_users:
@@ -120,6 +122,8 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
                     sendable_content = {'content': self.create_message_string(message, None, False, True)}
                 self.bot.logger.info(f"Sending message {message.id} by {message.author.id} to {user_id} for reply trigger")
                 self.bot.loop.create_task(self.bot.get_user(user_id).send(**sendable_content))
+            else:
+                self.bot.logger.info(f"Message reply {reply_message.id} didn't trigger a replymessage")
 
         # Get everything (from the users who have had a keyword triggered) from the datbase
         async with self.bot.database() as db:
