@@ -154,7 +154,7 @@ class FilterCommands(utils.Cog, name="Filter Commands"):
         async with self.bot.database() as db:
             await db("DELETE FROM serverfilters WHERE userid=$1 AND serverfilter=$2;", ctx.author.id, filter)
 
-        await ctx.send(f"You will now get messages from `{filter}` again")
+        await ctx.send(f"You will now get message triggers from `{filter}`")
 
     @filter_remove.command(name="user")
     async def filter_remove_user(self, ctx, filter:utils.converters.UserID):
@@ -164,17 +164,17 @@ class FilterCommands(utils.Cog, name="Filter Commands"):
         async with self.bot.database() as db:
             await db("DELETE FROM userfilters WHERE userid=$1 AND userfilter=$2;", ctx.author.id, filter)
 
-        await ctx.send(f"You will now get messages from `{filter}` again.")
+        await ctx.send(f"You will now recieve message triggers from `{filter}`.")
 
     @utils.command()
     async def block(self, ctx, user:discord.User):
         """Blocks a given user by invoking filter user"""
-        return await ctx.invoke(self.bot.get_command("filter add user"), user.id)
+        return await ctx.invoke(self.bot.get_command("filter add user"), filter=user.id)
 
     @utils.command()
     async def unblock(self, ctx, user:discord.User):
         """Unblocks a given user by invoking filter remove user"""
-        return await ctx.invoke(self.bot.get_command("filter remove user"), user.id)
+        return await ctx.invoke(self.bot.get_command("filter remove user"), filter=user.id)
 
 
 def setup(bot):
