@@ -119,6 +119,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
                 if reply_message.author.id == message.author.id:
                     if not reply_users[reply_message.author.id][1]:
                         self.bot.logger.info(f"Message reply {reply_message.id} triggered a reply message, but was blocked by owntrigger")
+                        return
                 if reply_users[reply_message.author.id][0]:
                     sendable_content = {'embed': self.create_message_embed(message, reply=True)}
                 else:
