@@ -99,7 +99,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
             reply_on_rows = await db("SELECT * from user_settings WHERE replymessage=true")
 
         # Create a list of all the user IDs of the people who have reply_rows turned on
-        reply_users = {i['user_id']: i['embedmessage'] for i in reply_on_rows}
+        reply_users = {i['user_id']: (i['embedmessage'], i['owntrigger']) for i in reply_on_rows}
         reference = message.reference
         if reference:
 
@@ -116,7 +116,10 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
 
             # Send a DM to the author
             if reply_message.author.id in reply_users:
-                if reply_users[reply_message.author.id]:
+                if reply_message.author.id == message.author.id:
+                    if not reply_users[reply_message.author.id][1]:
+                        self.bot.logger.info(f"Message reply {reply_message.id} triggered a reply message, but was blocked by owntrigger")
+                if reply_users[reply_message.author.id][0]:
                     sendable_content = {'embed': self.create_message_embed(message, reply=True)}
                 else:
                     sendable_content = {'content': self.create_message_string(message, None, False, True)}
