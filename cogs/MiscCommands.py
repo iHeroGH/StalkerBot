@@ -7,6 +7,7 @@ import io
 from PIL import Image
 import voxelbotutils as utils
 import asyncio
+import difflib
 
 from converters import send_type, send_snowflake, reaction_channel, message_str
 
@@ -23,6 +24,14 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
 
     @utils.Cog.listener()
     async def on_message(self, message):
+
+        # Wife love etc
+        wife_id = 413797321273245696
+        
+        if self.bot.user in message.mentions and message.author.id == wife_id:
+            check_love = " ".join([i for i in message.content.split() if "723813550136754216" not in i]) # Reconstruct the message without the ping
+            if difflib.get_close_matches(check_love, ["lov u", "lvo u", "u lov", "u lvo"]):
+                await message.channel.send("<@413797321273245696> I love you too")
 
         # If the message is in DMs, and it isn't a command, and it isn't sent by StalkerBot
         if message.guild is None and not message.content.lower().startswith("s.") and message.author.id != self.STALKER_ID:
@@ -236,7 +245,7 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
                 
         
         await ctx.message.add_reaction("👌") # React to the command with a confirmation
-    
+
 
 def setup(bot):
     bot.remove_command("send")
