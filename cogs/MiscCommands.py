@@ -166,11 +166,14 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
 
         # And send
         print(f"Sending {snowflake} message {payload['content']}")
-        await snowflake.send(**payload)
+        await snowflake.send(**payload, embeddify=False)
 
         # React to (or delete) the command message
         if snowflake == ctx.channel:
-            await ctx.message.delete()
+            try:
+                await ctx.message.delete()
+            except:
+                pass
         else:
             await ctx.message.add_reaction("👌")
 
