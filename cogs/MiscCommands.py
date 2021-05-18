@@ -172,7 +172,7 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
         if snowflake == ctx.channel:
             try:
                 await ctx.message.delete()
-            except:
+            except Exception:
                 pass
         else:
             await ctx.message.add_reaction("👌")
