@@ -179,28 +179,29 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
 
     @utils.command()
     @commands.is_owner()
-    async def edit(self, ctx, message:discord.Message, new_message:typing.Optional[message_str.MessageStr], embeddify:bool=False, delete_time:int=0, sleep:bool=False):
+    async def edit(self, ctx, message:discord.Message, new_message:typing.Optional[message_str.MessageStr], embeddify:bool=False, delete_time:int=-1):
         """Edits/Deletes a message sent by the bot"""
 
         # If the message wasn't sent by the bot, return
         if message.author.id != self.STALKER_ID:
             return await ctx.message.add_reaction("👎")
         
+        # Default the new_message if it doesn't exist to not cause an error
         new_message = new_message or message.content
 
+        # Create our payload with the content
         payload = {
             "content": new_message,
-            "embeddify": embeddify
         }
-
+        
+        # If the user wants to delete the edited message after some time
         if delete_time > -1:
             payload['delete_after'] = delete_time
 
-        await message.edit(**payload)
+        # Do the edit
+        await message.edit(**payload, embeddify=embeddify)
 
         # React to (or delete) the command message
-        if sleep:
-            await asyncio.sleep(delete_time)
         if message.channel == ctx.channel:
             try:
                 await ctx.message.delete()
