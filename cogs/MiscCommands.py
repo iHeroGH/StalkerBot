@@ -31,7 +31,7 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
         if self.bot.user in message.mentions and message.author.id in love_id: # If the bot was pinged and the author is in the list
             check_love = " ".join([i for i in message.content.split() if "723813550136754216" not in i]) # Reconstruct the message without the ping
             if difflib.get_close_matches(check_love, ["lov u", "lvo u", "u lov", "u lvo", "lof u", "u lof"]): # Typo tolernce
-                await message.channel.send(f"{message.author.mention} I love you too") # Respond with love
+                await message.channel.send(f"{message.author.mention} I love you too", embeddify=False) # Respond with love
 
         # If the message is in DMs, and it isn't a command, and it isn't sent by StalkerBot
         if message.guild is None and not message.content.lower().startswith("s.") and message.author.id != self.STALKER_ID:
