@@ -226,7 +226,7 @@ class BotCommands(utils.Cog, name="Bot Commands"):
 
         await ctx.send(', '.join(keywordList), allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
 
-    @utils.command(aliases=['serverkeywords', 'serverkeywordlist', 'serverkeywordslist', 'serverlist'])
+    @utils.command(aliases=['serverkeywords', 'serverkeywordlist', 'serverkeywordslist', 'serverlist', 'listserver', 'listservers'])
     async def listserverkeywords(self, ctx, user:discord.User=None):
         """Lists all your server-specific keywords"""
 
@@ -239,14 +239,16 @@ class BotCommands(utils.Cog, name="Bot Commands"):
 
         async with self.bot.database() as db:
             rows = await db("SELECT * FROM serverkeywords WHERE userid = $1;", user.id)
-        if len(rows) == 0:
-            await ctx.send(f"You don't have any server-specific keywords. Set some up by running the `{ctx.prefix}addkeyword` command")
-            return
+        if not rows:
+            return await ctx.send(f"You don't have any server-specific keywords. Set some up by running the `{ctx.prefix}addkeyword` command")
+            
 
         # Creates a list of server:keywords found in DB call
         keywordList = []
         for row in rows:
-            keywordList.append(f"`Server: {self.bot.get_guild(row['serverid']).name} ({row['serverid']})` , Keyword: `{row['keyword']}`")
+            server = self.bot.get_guild(row['serverid'])
+            if server:
+                keywordList.append(f"`Server: {server.name} ({server.id})` , Keyword: `{row['keyword']}`")
             keywordList.sort()
 
         sendableContent = "Server-Specific Keywords: "
