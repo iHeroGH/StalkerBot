@@ -293,7 +293,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
             embed.add_field(name="After Message Content", value=message.content, inline=False)
         else:
             embed.add_field(name="Message Content", value=message.content, inline=False)
-        embed.add_field(name="Message Channel", value=message.channel.mention, inline=True)
+        embed.add_field(name="Message Channel", value=f"{message.channel.mention}\n({message.server.name}: {message.channel.name})", inline=True)
         embed.add_field(name="Message Link", value=f"[Click here]({message.jump_url})", inline=True)
         if len(message.attachments) != 0:
             url_list = [i.url for i in message.attachments]
@@ -314,11 +314,11 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
         message = message
 
         if reply:
-            lines = [f"<@!{message.author.id}> ({message.author.name}) has replied to your message in <#{message.channel.id}>. They typed `{message.content[:1900]}` <{(message.jump_url)}>."]
+            lines = [f"<@!{message.author.id}> ({message.author.name}) has replied to your message in {message.channel.mention} ({message.server.name}: {message.channel.name}). They typed `{message.content[:1900]}` <{(message.jump_url)}>."]
         elif edited:
-            lines = [f"<@!{message.author.id}> ({message.author.name}) has edited their message to include the keyword (`{keyword}`) in <#{message.channel.id}>. They typed `{message.content[:1900]}` <{(message.jump_url)}>."]
+            lines = [f"<@!{message.author.id}> ({message.author.name}) has edited their message to include the keyword (`{keyword}`) in {message.channel.mention} ({message.server.name}: {message.channel.name}). They typed `{message.content[:1900]}` <{(message.jump_url)}>."]
         else:
-            lines = [f"<@!{message.author.id}> ({message.author.name}) has typed the keyword (`{keyword}`) in <#{message.channel.id}>. They typed `{message.content[:1900]}` <{(message.jump_url)}>."]
+            lines = [f"<@!{message.author.id}> ({message.author.name}) has typed the keyword (`{keyword}`) in {message.channel.mention} ({message.server.name}: {message.channel.name}). They typed `{message.content[:1900]}` <{(message.jump_url)}>."]
         if len(message.attachments) != 0:
             lines.append("Attachment Links:")
             url_list = [i.url for i in message.attachments]
