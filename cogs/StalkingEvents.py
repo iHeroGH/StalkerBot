@@ -293,7 +293,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
             embed.add_field(name="After Message Content", value=message.content, inline=False)
         else:
             embed.add_field(name="Message Content", value=message.content, inline=False)
-        embed.add_field(name="Message Channel", value=f"{message.channel.mention}({message.guild.name}: {message.channel.name})", inline=True)
+        embed.add_field(name="Message Channel", value=f"{message.channel.mention}\n({message.guild.name}: {message.channel.name})", inline=True)
         embed.add_field(name="Message Link", value=f"[Click here]({message.jump_url})", inline=True)
         if len(message.attachments) != 0:
             url_list = [i.url for i in message.attachments]
