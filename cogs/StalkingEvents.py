@@ -94,6 +94,8 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
         #         heart_codepoints = ["❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤎", "🤍"]
         #         #await sent_message.add_reaction(random.choice(heart_codepoints))
 
+        already_sent = set()  # Users who were already sent a DM
+
         # Deal with the reply message stuff
         async with self.bot.database() as db:
             reply_on_rows = await db("SELECT * from user_settings WHERE replymessage=true")
@@ -126,6 +128,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
                     sendable_content = {'content': self.create_message_string(message, None, False, True)}
                 self.bot.logger.info(f"Sending message {message.id} by {message.author.id} to {reply_message.author.id} for reply trigger")
                 self.bot.loop.create_task(reply_message.author.send(**sendable_content, embeddify= (False if "content" in sendable_content else True)))
+                already_sent.add(reply_message.author.id)
             else:
                 self.bot.logger.info(f"Message reply {reply_message.id} didn't trigger a replymessage")
 
@@ -174,7 +177,6 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
         # members_in_guild = {i.id: i for i in await message.guild.query_members(user_ids=id_list)}
 
         # Go through the settings for the users and see if we should bother messaging them
-        already_sent = set()  # Users who were already sent a DM
         for row in keyword_rows + server_keyword_rows:
 
             # Expand out our vars
