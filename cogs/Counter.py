@@ -22,7 +22,7 @@ class Counter(utils.Cog, name="Analytical Counter"):
             distinctRows = await db("SELECT DISTINCT userid FROM keywords;")
             rows = await db("SELECT * FROM keywords;")
 
-        await ctx.send(f"`{len(distinctRows)}` unique users have set up keywords and there are `{len(rows)}` keywords in total.")
+        await ctx.send(f"`{len(distinctRows)}` unique users with `{len(rows)}` keywords in total.")
 
 
 def setup(bot):
