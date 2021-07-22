@@ -1,0 +1,124 @@
+:root {
+    font-family: "Helvetica", "Arial", "sans-serif";
+}
+
+body {
+    margin: 0;
+    width: 100vw;
+    background: linear-gradient(white, black)
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+
+    /*Colors*/
+    background-color: #2D3091;
+
+    /*Size*/
+    width: 100%;
+    height: 30%;
+    border-radius: 50px;
+
+    /*Position*/
+    padding: 10px 0px 10px 0px;
+    border: 10px solid white;
+    
+    box-sizing: border-box;
+    align-items: center;
+}
+
+.navbar .left {
+    margin-left: 20px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.navbar .left a {
+    margin-left: 10px;
+}
+
+.navbar img {
+    /*Size*/
+    width: 50px;
+
+    /*Position*/
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 10px 0px 10px 0px;
+}
+
+.navbar a {   
+    /*Colors*/
+    background-color: transparent;
+    color: white;
+
+    /*Size*/
+    height: auto;
+    width: 200px;
+    border-radius: 10px;
+    border: none;
+    
+    /*Position*/
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    /*! margin-bottom: 5px; */
+
+    padding: 10px;
+
+    /*Font*/
+    text-align: center;
+    font-style: bold;
+    font-size: 16px;
+    text-decoration: none;
+
+    /*Hover*/
+    transition: background 0.3s ease;
+}
+
+.navbar a#home {
+    width: 75px;
+}
+
+.navbar a#commands {
+    width: 125px;
+}
+
+.navbar a#support {
+    width: 100px;
+}
+
+.navbar a:hover {
+    background-color: #2aecfa;
+}
+
+#content {
+    max-width: 800px;
+    margin: auto;
+}
+
+.preamble {
+    text-align: center;
+}
+
+.items {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(1fr);
+    gap: 20px;
+}
+
+.bullet {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.bullet img {
+    height: auto;
+    width: 100px;
+    justify-self: center;
+    align-self: center;
+}
