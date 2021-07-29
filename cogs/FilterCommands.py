@@ -92,7 +92,7 @@ class FilterCommands(utils.Cog, name="Filter Commands"):
 
         textFilters = [i['textfilter'] for i in textRows]
 
-        channelFilters = [o.mention for o in [ctx.guild.get_channel(i['channelfilter']) for i in channelRows] if o is not None]
+        channelFilters = [o.mention for o in [self.bot.get_channel(i['channelfilter']) for i in channelRows] if o is not None]
 
         serverFilters = [i['serverfilter'] for i in serverRows]
         serverObjects = [self.bot.get_guild(o) for o in serverFilters]
