@@ -62,11 +62,12 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
                 await message.add_reaction("<:backwards_eyes:785981504127107112>")
 
         # Check if we're scanning for an embed
-        if not (message.content or embed_content) and message.embeds:
+        print(embed_content) if guild.id == 649715200890765342 else None
+        if not embed_content and message.embeds:
             self.bot.logger.info(f"Embed message found {message.id}")
             return self.message_is_embed(message, edited_message)
 
-        print(embed_content) if message.guild.id == 649715200890765342 else None
+        print(embed_content) if guild.id == 649715200890765342 else None
 
         already_sent = set()  # Users who were already sent a DM
 
