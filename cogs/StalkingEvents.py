@@ -105,6 +105,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
                 self.bot.logger.info(f"Message reply {reply_message.id} didn't trigger a replymessage")
 
         scanned_content = embed_content or message.content
+        print(scanned_content)
 
         # Get everything (from the users who have had a keyword triggered) from the datbase
         async with self.bot.database() as db:
