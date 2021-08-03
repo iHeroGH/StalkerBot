@@ -34,9 +34,9 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
         for embed in message.embeds:
             embed_dict = embed.to_dict()
             embed_str = self.get_dict_string(embed_dict)
-            await self.deal_with_message(message, embed_content = embed_str, edited_message=edited_message)
+            await self.deal_with_message(message, embed_content=embed_str, edited_message=edited_message)
 
-    async def deal_with_message(self, message:discord.Message, embed_content = None, edited_message=None):
+    async def deal_with_message(self, message:discord.Message, embed_content=None, edited_message=None):
 
         # Only run if the bot is ready
         if not self.bot.is_ready():
@@ -235,15 +235,19 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
 
             # Generate the content to be sent to the user
             if settings_dict[member.id]['settings'].get('embedmessage', False):
-                if edited_message:
-                    sendable_content = {'embed': self.create_message_embed((edited_message, message,), keyword, embed_content)}
-                else:
+                if embed_content:
                     sendable_content = {'embed': self.create_message_embed(message, keyword, embed_content)}
-            else:
-                if edited_message:
-                    sendable_content = {'content': self.create_message_string(message, keyword, embed_content, edited=True)}
+                elif edited_message:
+                    sendable_content = {'embed': self.create_message_embed((edited_message, message,), keyword)}
                 else:
-                    sendable_content = {'content': self.create_message_string(message, keyword, embed_content)}
+                    sendable_content = {'embed': self.create_message_embed(message, keyword)}
+            else:
+                if embed_content:
+                    sendable_content = {'embed': self.create_message_embed(message, keyword, embed_content)}
+                elif edited_message:
+                    sendable_content = {'content': self.create_message_string(message, keyword, edited=True)}
+                else:
+                    sendable_content = {'content': self.create_message_string(message, keyword)}
 
             # Try and send it to them
             self.bot.logger.info(f"Sending message {message.id} by {message.author.id} to {member.id} for keyword trigger")
