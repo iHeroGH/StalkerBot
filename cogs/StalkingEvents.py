@@ -35,9 +35,9 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
             embed_dict = embed.to_dict()
             embed_str = self.get_dict_string(embed_dict)
             self.bot.logger.info(f"Embed message scanned {embed_str}")
-            self.deal_with_message(message, embed = embed_str, edited_message=edited_message)
+            self.deal_with_message(message, embed_content = embed_str, edited_message=edited_message)
 
-    async def deal_with_message(self, message:discord.Message, embed = None, edited_message=None):
+    async def deal_with_message(self, message:discord.Message, embed_content = None, edited_message=None):
 
         # Only run if the bot is ready
         if not self.bot.is_ready():
@@ -62,7 +62,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
                 await message.add_reaction("<:backwards_eyes:785981504127107112>")
 
         # Check if we're scanning for an embed
-        if not (message.content or embed) and message.embeds:
+        if not (message.content or embed_content) and message.embeds:
             self.bot.logger.info(f"Embed message found {message.id}")
             return self.message_is_embed(message, edited_message)
 
@@ -188,7 +188,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
                 continue
 
             # Filter out quoted text if the user doesn't want any
-            content = message.content
+            content = embed_content or message.content
             if settings_dict[member.id]['settings'].get('quotetrigger', True) is False:
                 lines = message.content.split('\n')
                 nonQuoted = []
