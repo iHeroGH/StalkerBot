@@ -25,12 +25,23 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
 
         await self.deal_with_message(after, edited_message=before)
 
-    async def deal_with_message(self, message, edited_message=None):
+    def message_is_embed(self, message:discord.Message, edited_message=None):
+        """Scan embedded messages for keywords"""
+
+        if len(message.embeds) < 0:
+            return
+
+        for embed in message.embeds:
+            embed_dict = embed.to_dict()
+            self.deal_with_message(message, embed = self.get_dict_strings(embed_dict), edited_message=edited_message)
+
+    async def deal_with_message(self, message:discord.Message, embed = None, edited_message=None):
 
         # Only run if the bot is ready
         if not self.bot.is_ready():
             return
 
+        # If we're in a guild
         if message.guild is None:
             return
 
@@ -47,6 +58,10 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
                 await message.add_reaction("👀")
             if "reklats" in message.content.lower():
                 await message.add_reaction("<:backwards_eyes:785981504127107112>")
+
+        # Check if we're scanning for an embed
+        if not (message.content or embed) and message.embeds:
+            return self.message_is_embed(message, edited_message)
 
         already_sent = set()  # Users who were already sent a DM
 
@@ -232,7 +247,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
             
             self.bot.loop.create_task(member.send(**sendable_content, embeddify= (False if "content" in sendable_content else True))) # Finally send the message. Turn off embeddify if it's just content
 
-    def create_message_embed(self, message:typing.Union[discord.Message, typing.Tuple[discord.Message]], keyword:str=None, *, reply:bool=False) -> discord.Embed:
+    def create_message_embed(self, message:typing.Union[discord.Message, typing.Tuple[discord.Message]], keyword:str=None, is_embed:bool=False, reply:bool=False) -> discord.Embed:
         """Creates a message embed that can be DMd to a user"""
 
         try:
@@ -264,7 +279,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
         embed.timestamp = message.created_at
         return embed
 
-    def create_message_string(self, message:discord.Message, keyword:str=None, edited:bool=False, reply:bool=False) -> str:
+    def create_message_string(self, message:discord.Message, keyword:str=None, edited:bool=False, reply:bool=False, is_embed:bool=False) -> str:
         """Creates a string that can be DMd to a user"""
 
         message = message
@@ -282,24 +297,40 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
                 lines.append(f"\n<{i}>")
         return '\n'.join(lines)
 
-    def message_is_embed(self, message:discord.Message):
-        """Does things if a message is an embed"""
-
-        if len(message.embeds) < 0:
-            return
-
-        embed_value_list = []
-        for i in message.embeds:
-            embed_values = {
-                'Title': i.title,
-                'Desc': i.description,
-                'Fields': [{j.name: j.value} for j in i.fields],
-                'Author': i.author.name,
-                'Footer': i.footer.text
-            }
-            embed_value_list.append(embed_values)
-
-        return embed_value_list
+    def get_dict_strings(self, embed_dict:dict):
+        """Get all the strings from an embed"""
+        strings = [] 
+        # Embed Author
+        if (author := embed_dict.get("author")):
+            strings.append(author['name'])
+            if (author_icon := embed_dict.get("icon_url")):
+                strings.append(author_icon)
+        # Embed Title
+        if (title := embed_dict.get("title")):
+            strings.append(title)
+        # Embed URL  
+        if (url := embed_dict.get("url")):
+            strings.append(url)
+        # Embed Description
+        if (description := embed_dict.get("description")):
+            strings.append(description)
+        # Embed Thumbnail
+        if (thumbnail := embed_dict.get("thumbnail")):
+            strings.append(thumbnail['url'])   
+        # Embed Fields
+        if (fields := embed_dict.get("fields")):
+            for field in fields:
+                strings.extend([field['name'], field['value']])
+        # Embed Image
+        if (image := embed_dict.get("image")):
+            strings.append(image['url'])
+        # Embed Footer
+        if (footer := embed_dict.get("footer")):
+            strings.append(footer['text'])
+            if (footer_url := footer.get("icon_url")):
+                strings.append(footer_url)
+        
+        return "  ".join(strings)
 
 
 def setup(bot):
