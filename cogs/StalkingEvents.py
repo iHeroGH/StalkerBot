@@ -61,6 +61,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
 
         # Check if we're scanning for an embed
         if not (message.content or embed) and message.embeds:
+            self.bot.logger.info(f"Embed message found {message.id}")
             return self.message_is_embed(message, edited_message)
 
         already_sent = set()  # Users who were already sent a DM
