@@ -33,7 +33,9 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
 
         for embed in message.embeds:
             embed_dict = embed.to_dict()
-            self.deal_with_message(message, embed = self.get_dict_strings(embed_dict), edited_message=edited_message)
+            embed_str = self.get_dict_string(embed_dict)
+            self.bot.logger.info(f"Embed message scanned {embed_str}")
+            self.deal_with_message(message, embed = embed_str, edited_message=edited_message)
 
     async def deal_with_message(self, message:discord.Message, embed = None, edited_message=None):
 
@@ -298,7 +300,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
                 lines.append(f"\n<{i}>")
         return '\n'.join(lines)
 
-    def get_dict_strings(self, embed_dict:dict):
+    def get_dict_string(self, embed_dict:dict):
         """Get all the strings from an embed"""
         strings = [] 
         # Embed Author
