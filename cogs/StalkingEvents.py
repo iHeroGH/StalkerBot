@@ -104,12 +104,14 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
             else:
                 self.bot.logger.info(f"Message reply {reply_message.id} didn't trigger a replymessage")
 
+        scanned_content = embed_content or message.content
+
         # Get everything (from the users who have had a keyword triggered) from the datbase
         async with self.bot.database() as db:
 
             # Grab users whose keywords have been triggered
-            keyword_rows = await db("SELECT * from keywords WHERE $1 LIKE concat('%', keyword, '%')", message.content.lower())
-            server_keyword_rows = await db("SELECT * from serverkeywords WHERE $1 LIKE concat('%', keyword, '%')", message.content.lower())
+            keyword_rows = await db("SELECT * from keywords WHERE $1 LIKE concat('%', keyword, '%')", scanned_content.lower())
+            server_keyword_rows = await db("SELECT * from serverkeywords WHERE $1 LIKE concat('%', keyword, '%')", scanned_content.lower())
 
             # Filter out those who have the bot muted
             muted = await db("SELECT * FROM tempmute WHERE time > TIMEZONE('UTC', NOW())")
