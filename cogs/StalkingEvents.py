@@ -61,13 +61,16 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
             if "reklats" in message.content.lower():
                 await message.add_reaction("<:backwards_eyes:785981504127107112>")
 
+        if guild.id == 649715200890765342:
+            print(embed_content)
+
         # Check if we're scanning for an embed
-        print(embed_content) if guild.id == 649715200890765342 else None
         if not embed_content and message.embeds:
             self.bot.logger.info(f"Embed message found {message.id}")
             return self.message_is_embed(message, edited_message)
-
-        print(embed_content) if guild.id == 649715200890765342 else None
+        
+        if guild.id == 649715200890765342:
+            print(embed_content)
 
         already_sent = set()  # Users who were already sent a DM
 
@@ -108,7 +111,6 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
                 self.bot.logger.info(f"Message reply {reply_message.id} didn't trigger a replymessage")
 
         scanned_content = embed_content or message.content
-        print(scanned_content, embed_content)
 
         # Get everything (from the users who have had a keyword triggered) from the datbase
         async with self.bot.database() as db:
