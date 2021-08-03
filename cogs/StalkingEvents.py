@@ -48,52 +48,6 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
             if "reklats" in message.content.lower():
                 await message.add_reaction("<:backwards_eyes:785981504127107112>")
 
-        # # Send a message to a channel on the StalkerBot test server if "stalkerbot" or the bot's id is in the message
-        # if "stalkerbot" in message.content.lower() or f"{message.guild.me.id}" in message.content.lower():
-        #     embed = discord.Embed()
-        #     embed.set_author(name=str(message.author), icon_url=message.author.avatar_url)
-        #     embed.set_footer(text=f"Author: {str(message.author)} ({message.author.id})\nChannel: {message.channel.name} ({message.channel.id})\nGuild: {message.guild.name} ({message.guild.id})")
-        #     embed.description = message.content
-        #     await self.bot.get_channel(self.STALKER_CHANNEL).send(embed=embed)
-
-        # # Stalk people list
-        # all_message_stalks = {}  #{'megan': 413797321273245696, 'sapnap': 606044593624055820, 'hero': 322542134546661388}
-        # user_id = {
-        #     141231597155385344: ['megan', 'sapnap'],
-        #     322542134546661388: ['megan'],
-        # }
-
-        # # Sends a message to a list of users whenever user_dm_list ID matches with the user_id in the stalk people list :tm: list
-        # user_dm_list = user_id.get(message.author.id, [])
-        # for user_name in user_dm_list:
-
-        #     # Try and grab the member object
-        #     self.bot.logger.debug(f"Trying to send message {message.id} by {message.author.id} to '{user_name}'")
-        #     try:
-        #         user_id = all_message_stalks.get(user_name)
-        #         assert user_id is not None
-        #         user = guild.get_member(user_id) or await guild.fetch_member(user_id)
-        #     except (AssertionError, discord.HTTPException):
-        #         continue
-        #     if user is None:
-        #         continue
-
-        #     # Make sure they can read messages
-        #     if not channel.permissions_for(user).read_messages:
-        #         continue
-
-        #     # Send message
-        #     self.bot.logger.info(f"Sending message {message.id} by {message.author.id} to {user.id} as part of all message stalking")
-        #     try:
-        #         sent_message = await user.send(f"<@!{message.author.id}> ({message.author.name}) has typed in <#{message.channel.id}>. They typed `{message.content[:1900]}` {(message.jump_url)}")
-        #     except discord.HTTPException:
-        #         continue
-
-        #     # We love Megan <3
-        #     if user_name == 'megan':
-        #         heart_codepoints = ["❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤎", "🤍"]
-        #         #await sent_message.add_reaction(random.choice(heart_codepoints))
-
         already_sent = set()  # Users who were already sent a DM
 
         # Deal with the reply message stuff
