@@ -69,13 +69,13 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
         already_sent = set()  # Users who were already sent a DM
 
         # Deal with the reply message stuff
-        async with self.bot.database() as db:
-            reply_on_rows = await db("SELECT * from user_settings WHERE replymessage=true")
-
-        # Create a list of all the user IDs of the people who have reply_rows turned on
-        reply_users = {i['user_id']: (i['embedmessage'], i['owntrigger']) for i in reply_on_rows}
         reference = message.reference
         if reference:
+            async with self.bot.database() as db:
+                reply_on_rows = await db("SELECT * from user_settings WHERE replymessage=true")
+
+            # Create a list of all the user IDs of the people who have reply_rows turned on
+            reply_users = {i['user_id']: (i['embedmessage'], i['owntrigger']) for i in reply_on_rows}
 
             # Get the message
             reply_message = None
