@@ -34,7 +34,6 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
         for embed in message.embeds:
             embed_dict = embed.to_dict()
             embed_str = self.get_dict_string(embed_dict)
-            self.bot.logger.info(f"Embed message scanned {embed_str}")
             await self.deal_with_message(message, embed_content = embed_str, edited_message=edited_message)
 
     async def deal_with_message(self, message:discord.Message, embed_content = None, edited_message=None):
@@ -61,12 +60,10 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
             if "reklats" in message.content.lower():
                 await message.add_reaction("<:backwards_eyes:785981504127107112>")
 
-        if guild.id == 649715200890765342:
-
-            # Check if we're scanning for an embed
-            if not embed_content and message.embeds:
-                self.bot.logger.info(f"Embed message found {message.id}")
-                return await self.message_is_embed(message, edited_message)
+        # Check if we're scanning for an embed
+        if not embed_content and message.embeds:
+            self.bot.logger.info(f"Embed message found {message.id}")
+            return await self.message_is_embed(message, edited_message)
 
         already_sent = set()  # Users who were already sent a DM
 
@@ -239,14 +236,14 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
             # Generate the content to be sent to the user
             if settings_dict[member.id]['settings'].get('embedmessage', False):
                 if edited_message:
-                    sendable_content = {'embed': self.create_message_embed((edited_message, message,), keyword)}
+                    sendable_content = {'embed': self.create_message_embed((edited_message, message,), keyword, embed_content)}
                 else:
-                    sendable_content = {'embed': self.create_message_embed(message, keyword)}
+                    sendable_content = {'embed': self.create_message_embed(message, keyword, embed_content)}
             else:
                 if edited_message:
-                    sendable_content = {'content': self.create_message_string(message, keyword, edited=True)}
+                    sendable_content = {'content': self.create_message_string(message, keyword, embed_content, edited=True)}
                 else:
-                    sendable_content = {'content': self.create_message_string(message, keyword)}
+                    sendable_content = {'content': self.create_message_string(message, keyword, embed_content)}
 
             # Try and send it to them
             self.bot.logger.info(f"Sending message {message.id} by {message.author.id} to {member.id} for keyword trigger")
@@ -254,7 +251,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
             
             self.bot.loop.create_task(member.send(**sendable_content, embeddify= (False if "content" in sendable_content else True))) # Finally send the message. Turn off embeddify if it's just content
 
-    def create_message_embed(self, message:typing.Union[discord.Message, typing.Tuple[discord.Message]], keyword:str=None, is_embed:bool=False, reply:bool=False) -> discord.Embed:
+    def create_message_embed(self, message:typing.Union[discord.Message, typing.Tuple[discord.Message]], keyword:str=None, embed_content:str=None, reply:bool=False) -> discord.Embed:
         """Creates a message embed that can be DMd to a user"""
 
         try:
@@ -270,7 +267,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
             embed.add_field(name="Before Message Content", value=before.content, inline=False)
             embed.add_field(name="After Message Content", value=message.content, inline=False)
         else:
-            embed.add_field(name="Message Content", value=message.content, inline=False)
+            embed.add_field(name="Message Content", value="Keyword was found in an embed" if embed_content else message.content, inline=False)
         embed.add_field(name="Message Channel", value=f"{message.channel.mention}\n({message.guild.name}: {message.channel.name})", inline=True)
         embed.add_field(name="Message Link", value=f"[Click here]({message.jump_url})", inline=True)
         if len(message.attachments) != 0:
@@ -286,7 +283,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
         embed.timestamp = message.created_at
         return embed
 
-    def create_message_string(self, message:discord.Message, keyword:str=None, edited:bool=False, reply:bool=False, is_embed:bool=False) -> str:
+    def create_message_string(self, message:discord.Message, keyword:str=None, embed_content:str=None, edited:bool=False, reply:bool=False) -> str:
         """Creates a string that can be DMd to a user"""
 
         message = message
@@ -295,6 +292,8 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
             lines = [f"<@!{message.author.id}> ({message.author.name}) has replied to your message in {message.channel.mention} ({message.guild.name}: {message.channel.name}). They typed `{message.content[:1900]}` <{(message.jump_url)}>."]
         elif edited:
             lines = [f"<@!{message.author.id}> ({message.author.name}) has edited their message to include the keyword (`{keyword}`) in {message.channel.mention} ({message.guild.name}: {message.channel.name}). They typed `{message.content[:1900]}` <{(message.jump_url)}>."]
+        elif embed_content:
+            lines = [f"<@!{message.author.id}> ({message.author.name}) has send an embedded message containing the keyword (`{keyword}`) in {message.channel.mention} ({message.guild.name}: {message.channel.name}). <{(message.jump_url)}>."]
         else:
             lines = [f"<@!{message.author.id}> ({message.author.name}) has typed the keyword (`{keyword}`) in {message.channel.mention} ({message.guild.name}: {message.channel.name}). They typed `{message.content[:1900]}` <{(message.jump_url)}>."]
         if len(message.attachments) != 0:
