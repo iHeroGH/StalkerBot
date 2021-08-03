@@ -66,6 +66,8 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
             self.bot.logger.info(f"Embed message found {message.id}")
             return self.message_is_embed(message, edited_message)
 
+        print(embed_content) if message.guild.id == 649715200890765342 else None
+
         already_sent = set()  # Users who were already sent a DM
 
         # Deal with the reply message stuff
