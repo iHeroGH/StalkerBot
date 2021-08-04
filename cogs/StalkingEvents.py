@@ -23,8 +23,9 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
         if before.embeds and after.embeds:
             if before.embeds[0].to_dict() == after.embeds[0].to_dict():
                 return
+
         # Checks if the message content has changed
-        if(before.content == after.content):
+        if before.content == after.content:
             return
 
         await self.deal_with_message(after, edited_message=before)
@@ -32,12 +33,13 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
     async def message_is_embed(self, message:discord.Message):
         """Scan embedded messages for keywords"""
 
-        if len(message.embeds) < 0:
+        if not message.embeds:
             return
 
         for embed in message.embeds:
             embed_dict = embed.to_dict()
             embed_str = self.get_dict_string(embed_dict)
+            print(embed_str)
             await self.deal_with_message(message, embed_content=embed_str)
 
     async def deal_with_message(self, message:discord.Message, embed_content=None, edited_message=None):
