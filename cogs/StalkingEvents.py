@@ -39,7 +39,6 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
         for embed in message.embeds:
             embed_dict = embed.to_dict()
             embed_str = self.get_dict_string(embed_dict)
-            print(embed_str)
             await self.deal_with_message(message, embed_content=embed_str)
 
     async def deal_with_message(self, message:discord.Message, embed_content=None, edited_message=None):
