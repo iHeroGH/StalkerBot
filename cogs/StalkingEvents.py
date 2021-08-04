@@ -18,6 +18,8 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
 
     @utils.Cog.listener()
     async def on_message_edit(self, before, after):
+
+        print(before)
         
         # Check if the message's embeds changed
         if before.embeds and after.embeds:
