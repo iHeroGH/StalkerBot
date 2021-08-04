@@ -303,7 +303,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
         elif edited:
             lines = [f"<@!{message.author.id}> ({message.author.name}) has edited their message to include the keyword (`{keyword}`) in {message.channel.mention} ({message.guild.name}: {message.channel.name}). They typed `{message.content[:1900]}` <{(message.jump_url)}>."]
         elif embed_content:
-            lines = [f"<@!{message.author.id}> ({message.author.name}) has sent an embedded message containing the keyword (`{keyword}`) in {message.channel.mention} ({message.guild.name}: {message.channel.name}). The embed content was {embed_content[:1900]} <{(message.jump_url)}>."]
+            lines = [f"<@!{message.author.id}> ({message.author.name}) has sent an embedded message containing the keyword (`{keyword}`) in {message.channel.mention} ({message.guild.name}: {message.channel.name}). The embed content was `{embed_content[:1900]}` <{(message.jump_url)}>."]
         else:
             lines = [f"<@!{message.author.id}> ({message.author.name}) has typed the keyword (`{keyword}`) in {message.channel.mention} ({message.guild.name}: {message.channel.name}). They typed `{message.content[:1900]}` <{(message.jump_url)}>."]
         if len(message.attachments) != 0:
