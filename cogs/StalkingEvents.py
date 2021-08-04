@@ -18,16 +18,14 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
 
     @utils.Cog.listener()
     async def on_message_edit(self, before, after):
-
-        print(before.embeds[0].to_dict(), after.embeds[0].to_dict())
         
         # Check if the message's embeds changed
         if before.embeds and after.embeds:
-            if before.embeds[0].to_dict() == after.embeds[0].to_dict():
-                return
-
+            if len(before.embeds) == len(after.embeds):
+                if before.embeds[0].to_dict() == after.embeds[0].to_dict():
+                    return
         # Checks if the message content has changed
-        if before.content == after.content:
+        elif before.content == after.content:
             return
 
         await self.deal_with_message(after, edited_message=before)
@@ -251,7 +249,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
                     sendable_content = {'embed': self.create_message_embed(message, keyword)}
             else:
                 if embed_content:
-                    sendable_content = {'content': self.create_message_embed(message, keyword, embed_content)}
+                    sendable_content = {'content': self.create_message_string(message, keyword, embed_content)}
                 elif edited_message:
                     sendable_content = {'content': self.create_message_string(message, keyword, edited=True)}
                 else:
