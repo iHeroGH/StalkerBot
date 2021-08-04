@@ -18,14 +18,18 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
 
     @utils.Cog.listener()
     async def on_message_edit(self, before, after):
-
+        
+        # Check if the message's embeds changed
+        if before.embeds and after.embeds:
+            if before.embeds[0].to_dict() == after.embeds[0].to_dict():
+                return
         # Checks if the message content has changed
         if(before.content == after.content):
             return
 
         await self.deal_with_message(after, edited_message=before)
 
-    async def message_is_embed(self, message:discord.Message, edited_message=None):
+    async def message_is_embed(self, message:discord.Message):
         """Scan embedded messages for keywords"""
 
         if len(message.embeds) < 0:
@@ -34,7 +38,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
         for embed in message.embeds:
             embed_dict = embed.to_dict()
             embed_str = self.get_dict_string(embed_dict)
-            await self.deal_with_message(message, embed_content=embed_str, edited_message=edited_message)
+            await self.deal_with_message(message, embed_content=embed_str)
 
     async def deal_with_message(self, message:discord.Message, embed_content=None, edited_message=None):
 
@@ -63,7 +67,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
         # Check if we're scanning for an embed
         if not embed_content and message.embeds:
             self.bot.logger.info(f"Embed message found {message.id}")
-            return await self.message_is_embed(message, edited_message)
+            return await self.message_is_embed(message)
 
         already_sent = set()  # Users who were already sent a DM
 
@@ -243,7 +247,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
                     sendable_content = {'embed': self.create_message_embed(message, keyword)}
             else:
                 if embed_content:
-                    sendable_content = {'embed': self.create_message_embed(message, keyword, embed_content)}
+                    sendable_content = {'content': self.create_message_embed(message, keyword, embed_content)}
                 elif edited_message:
                     sendable_content = {'content': self.create_message_string(message, keyword, edited=True)}
                 else:
