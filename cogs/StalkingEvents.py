@@ -277,7 +277,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
             embed.add_field(name="Before Message Content", value=before.content, inline=False)
             embed.add_field(name="After Message Content", value=message.content, inline=False)
         else:
-            embed.add_field(name="Message Content", value="Keyword was found in an embed" if embed_content else message.content, inline=False)
+            embed.add_field(name="Message Content", value=f"Keyword was found in an embed - {embed_content}" if embed_content else message.content, inline=False)
         embed.add_field(name="Message Channel", value=f"{message.channel.mention}\n({message.guild.name}: {message.channel.name})", inline=True)
         embed.add_field(name="Message Link", value=f"[Click here]({message.jump_url})", inline=True)
         if len(message.attachments) != 0:
@@ -303,7 +303,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
         elif edited:
             lines = [f"<@!{message.author.id}> ({message.author.name}) has edited their message to include the keyword (`{keyword}`) in {message.channel.mention} ({message.guild.name}: {message.channel.name}). They typed `{message.content[:1900]}` <{(message.jump_url)}>."]
         elif embed_content:
-            lines = [f"<@!{message.author.id}> ({message.author.name}) has send an embedded message containing the keyword (`{keyword}`) in {message.channel.mention} ({message.guild.name}: {message.channel.name}). <{(message.jump_url)}>."]
+            lines = [f"<@!{message.author.id}> ({message.author.name}) has sent an embedded message containing the keyword (`{keyword}`) in {message.channel.mention} ({message.guild.name}: {message.channel.name}). {embed_content[:1900]} <{(message.jump_url)}>."]
         else:
             lines = [f"<@!{message.author.id}> ({message.author.name}) has typed the keyword (`{keyword}`) in {message.channel.mention} ({message.guild.name}: {message.channel.name}). They typed `{message.content[:1900]}` <{(message.jump_url)}>."]
         if len(message.attachments) != 0:
