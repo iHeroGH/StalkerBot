@@ -1,6 +1,3 @@
-import io
-from datetime import datetime as dt, timedelta
-
 import discord
 from discord.ext import commands
 import voxelbotutils as utils
@@ -10,48 +7,6 @@ class BotCommands(utils.Cog, name="Bot Commands"):
 
     MAXIMUM_ALLOWED_KEYWORDS = 10
     MINIMUM_KEYWORD_LENGTH = 2
-
-    @utils.command(aliases=['tm', 'mute'])
-    async def tempmute(self, ctx, time:int, unit:str="m"):
-        """Temporarily mutes the bot from sending a user DMs for a specificed amount of time"""
-        unit = unit.lower()
-
-        # Checks that units are valid
-        valid_units = {
-            "s": 1,
-            "m": 60,
-            "h": 60 * 60,
-            "d": 60 * 60 * 24,
-        }
-
-        if unit not in valid_units.keys():
-            return await ctx.send("You didn't provide a valid unit (s, m, h, d)")
-
-        # Checks that time is above 0
-        if time <= 0:
-            return await ctx.send("The time value you provided is under 0 seconds")
-
-        # Change all time into seconds
-        seconded_time = valid_units[unit] * time
-
-        # Add time
-        future = dt.utcnow() + timedelta(seconds=seconded_time)
-
-        # Add to database
-        async with self.bot.database() as db:
-            await db("INSERT INTO tempmute VALUES($1, $2) ON CONFLICT (userid) DO UPDATE SET time = $2;", ctx.author.id, future)
-
-        await ctx.send(f"I won't send you messages for the next `{time}{unit}`")
-
-    @utils.command(aliases=['unm', "um"])
-    async def unmute(self, ctx):
-        """Unmutes StalkerBot from sending a user messages"""
-
-        # Remove the user from the tempmute database
-        async with self.bot.database() as db:
-            await db("DELETE FROM tempmute WHERE userid=$1;", ctx.author.id)
-
-        await ctx.send("Unmuted StalkerBot.")
 
     @utils.command(aliases=['keyword', 'add'])
     async def addkeyword(self, ctx, keyword:str):
@@ -243,55 +198,6 @@ class BotCommands(utils.Cog, name="Bot Commands"):
             sendableContent = sendableContent + f"\n{str(i)}"
 
         await ctx.send(sendableContent, allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
-
-    @utils.command()
-    async def suggest(self, ctx, *, suggestion:str=None):
-        """Sends a suggestion message to the bot creator (@Hero#2313)"""
-
-        channel = self.bot.get_channel(739923715311140955)
-
-        if suggestion is None:
-            await ctx.send_help(ctx.command)
-            return
-        await channel.send(f"<@322542134546661388> New suggestion from <@{ctx.author.id}> (`{ctx.author.id}`): `{suggestion[:1950]}`")
-        await ctx.send(f"Suggested `{suggestion[:1950]}`", )
-
-    @utils.command()
-    @commands.is_owner()
-    async def listall(self, ctx, user:discord.User=None):
-        """Lists either a user's entire list of keywords or the entire database"""
-
-        async with self.bot.database() as db:
-            if user is not None:
-                full = await db("SELECT * FROM keywords WHERE userid = $1;", user.id)
-            else:
-                full = await db("SELECT * FROM keywords;")
-
-        text = list()
-        for x in full:
-            user = self.bot.get_user(x['userid']) or await self.bot.fetch_user(x['userid'])
-            text.append(f"User: {user.name}({user.id}) - Keyword: {x['keyword']}")
-        text = "\n".join(sorted(text)) + "\n"
-        await ctx.send(file=discord.File(io.StringIO(text), filename="AllUsers.txt"))
-
-    @utils.command()
-    @commands.is_owner()
-    async def forceremove(self, ctx, user:discord.User, keyword:str):
-        """Forcibly removes a keyword from a user"""
-
-        async with self.bot.database() as db:
-            await db("DELETE FROM keywords WHERE userid = $1 AND keyword = $2;", user.id, keyword)
-
-        await ctx.send(f"Removed `{keyword}` from {user.name}'s list")
-
-    @utils.command()
-    @commands.is_owner()
-    async def forceadd(self, ctx, user:discord.User, keyword:str):
-        """Forcibly adds a keyword to a user"""
-
-        async with self.bot.database() as db:
-            await db("INSERT INTO keywords VALUES ($1, $2);", user.id, keyword)
-        await ctx.send(f"Added `{keyword}` to {user.name}'s list")
 
     @utils.command(aliases=['max', 'maxkey', 'maxwords', 'maxkeyword', 'maxkeys', 'maxword'])
     async def maxkeywords(self, ctx):
