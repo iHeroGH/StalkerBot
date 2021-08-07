@@ -197,8 +197,11 @@ class BotCommands(utils.Cog, name="Bot Commands"):
         return sendable
 
     @utils.command(aliases=['max', 'maxkey', 'maxwords', 'maxkeyword', 'maxkeys', 'maxword'])
-    async def maxkeywords(self, ctx):
+    async def maxkeywords(self, ctx, user:discord.User=None):
         """Sends the maximum amount of keywords a user can have"""
+
+        # Make sure we got a user
+        user = user or ctx.author
 
         max_keywords = await self.get_max_keywords(ctx.author)
 
