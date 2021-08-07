@@ -153,35 +153,22 @@ class BotCommands(utils.Cog, name="Bot Commands"):
         # Get the data from the database
         async with self.bot.database() as db:
             keyword_rows = await db("SELECT * FROM keywords WHERE userid = $1;", user.id)
+            server_keyword_rows = await db("SELECT * FROM serverkeywords WHERE userid = $1;", user.id)
 
         # Check if the user has any keywords
-        if not keyword_rows:
+        if not keyword_rows and not server_keyword_rows:
             return await ctx.send(f"You don't have any keywords. Set some up by running the `{ctx.prefix}addkeyword` command")
         
         # Set up a sendable list of keywords
         keyword_list = [row['keyword'] for row in keyword_rows]
-        formatted_string = ', '.join(keyword_list)
+        keywords_string = ', '.join(keyword_list)
+        
+        sendable_keyword_string = self.get_server_keywords(server_keyword_rows, True)
 
         # Send it
-        await ctx.send(f"{user.mention}'s Keywords: {formatted_string}", allowed_mentions=discord.AllowedMentions.none())
-
-    @utils.command(aliases=['serverkeywords', 'serverkeywordlist', 'serverkeywordslist', 'serverlist', 'listserver', 'listservers'])
-    async def listserverkeywords(self, ctx, user:discord.User=None):
-        """Lists all your server-specific keywords"""
-
-        # If the user isn't given, assume it's the author
-        user = user or ctx.author
-
-        # If the author is the owner, list the user's keywords
-        if not (await self.bot.is_owner(ctx.author)) and ctx.author != user:
-            return await ctx.send("You can only view your own keywords.")
-
-        # Get the data from the database
-        async with self.bot.database() as db:
-            keyword_rows = await db("SELECT * FROM serverkeywords WHERE userid = $1;", user.id)
-        if not keyword_rows:
-            return await ctx.send(f"You don't have any server-specific keywords. Set some up by running the `{ctx.prefix}addserver` command")
-
+        await ctx.send(f"{user.mention}'s Keywords:\n{keywords_string}\n{user.mention}'s Server Keywords:\n{sendable_keyword_string}", allowed_mentions=discord.AllowedMentions.none())
+    
+    def get_server_keywords(self, keyword_rows, turn_to_string=False):
         # Creates a dict of server_id: keyword_list found in DB call
         keyword_dict = {}
         for row in keyword_rows:
@@ -194,18 +181,21 @@ class BotCommands(utils.Cog, name="Bot Commands"):
                 keyword_dict[server].append(row['keyword'])
             else:
                 keyword_dict[server] = [row['keyword']]
-
-        # Create a string to send
+            
+        if not turn_to_string:
+            return keyword_dict
+        
+        # Turn the dict into a string
         sendable = ""
-        for server, keywords in keyword_dict.items():
+        for server, keywords in keyword_rows.items():
             # Add the server name to the string
             sendable += f"**{server.name}**\n"
 
             # Add the keywords to the string
             sendable += ', '.join(keywords)
             sendable += "\n"
-
-        await ctx.send(f"{user.mention}'s server-keywords\n{sendable}", allowed_mentions=discord.AllowedMentions.none())
+        
+        return sendable
 
     @utils.command(aliases=['max', 'maxkey', 'maxwords', 'maxkeyword', 'maxkeys', 'maxword'])
     async def maxkeywords(self, ctx):
