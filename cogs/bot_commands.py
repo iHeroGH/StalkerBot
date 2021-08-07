@@ -208,7 +208,7 @@ class BotCommands(utils.Cog, name="Bot Commands"):
         if user.id in self.bot.owner_ids:
             max_keywords = 100
 
-        await ctx.send(f"You can set {max_keywords} keywords. Buy more at {self.bot.config['bot_info']['links']['Donate']['url']} :)")
+        await ctx.send(f"{user.mention} can set {max_keywords} keywords. Buy more at {self.bot.config['bot_info']['links']['Donate']['url']} :)", discord.AllowedMentions.none())
 
 
     async def get_max_keywords(self, user:discord.User):
