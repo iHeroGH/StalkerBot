@@ -171,7 +171,7 @@ class BotCommands(utils.Cog, name="Bot Commands"):
         server_keyword_string = self.get_server_keywords(server_keyword_rows, True)
 
         # Make a message
-        final_message = f"{total_keywords_message}\n__{user.mention}'s Keywords__\n{keywords_string}\n\n__{user.mention}'s Server Keywords__\n{server_keyword_string}"
+        final_message = f"{total_keywords_message}\n\n__{user.mention}'s Keywords__\n{keywords_string}\n\n__{user.mention}'s Server Keywords__\n{server_keyword_string}"
 
         # Send it
         await ctx.send(final_message, allowed_mentions=discord.AllowedMentions.none())
@@ -213,9 +213,6 @@ class BotCommands(utils.Cog, name="Bot Commands"):
 
         max_keywords = await self.get_max_keywords(user)
 
-        if user.id in self.bot.owner_ids:
-            max_keywords = 100
-
         await ctx.send(f"{user.mention} can set {max_keywords} keywords. Buy more at {self.bot.config['bot_info']['links']['Donate']['url']} :)", allowed_mentions=discord.AllowedMentions.none())
 
 
@@ -232,6 +229,10 @@ class BotCommands(utils.Cog, name="Bot Commands"):
                 total_purchases += i.quantity
 
         keyword_max = self.MAXIMUM_ALLOWED_KEYWORDS + (total_purchases * 5)
+
+        if user.id in self.bot.owner_ids:
+            keyword_max = 100
+
         return keyword_max
 
 
