@@ -161,12 +161,12 @@ class BotCommands(utils.Cog, name="Bot Commands"):
         
         # Set up a sendable list of keywords
         keyword_list = [row['keyword'] for row in keyword_rows]
-        keywords_string = ', '.join(keyword_list)
+        keywords_string = "`" + '`, `'.join(keyword_list) + "`"
         
         sendable_keyword_string = self.get_server_keywords(server_keyword_rows, True)
 
         # Send it
-        await ctx.send(f"{user.mention}'s Keywords:\n{keywords_string}\n{user.mention}'s Server Keywords:\n{sendable_keyword_string}", allowed_mentions=discord.AllowedMentions.none())
+        await ctx.send(f"{user.mention}'s Keywords:\n{keywords_string}\n\n{user.mention}'s Server Keywords:\n{sendable_keyword_string}", allowed_mentions=discord.AllowedMentions.none())
     
     def get_server_keywords(self, keyword_rows, turn_to_string=False):
         # Creates a dict of server_id: keyword_list found in DB call
@@ -187,12 +187,12 @@ class BotCommands(utils.Cog, name="Bot Commands"):
         
         # Turn the dict into a string
         sendable = ""
-        for server, keywords in keyword_dict.items():
+        for server, keyword_list in keyword_dict.items():
             # Add the server name to the string
             sendable += f"**{server.name}**\n"
 
             # Add the keywords to the string
-            sendable += ', '.join(keywords)
+            sendable += "`" + '`, `'.join(keyword_list) + "`"
             sendable += "\n"
         
         return sendable
