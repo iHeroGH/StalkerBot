@@ -187,7 +187,7 @@ class BotCommands(utils.Cog, name="Bot Commands"):
         
         # Turn the dict into a string
         sendable = ""
-        for server, keywords in keyword_rows.items():
+        for server, keywords in keyword_dict.items():
             # Add the server name to the string
             sendable += f"**{server.name}**\n"
 
