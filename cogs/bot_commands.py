@@ -31,7 +31,7 @@ class BotCommands(utils.Cog, name="Bot Commands"):
             keyword_count = await db("SELECT COUNT(*) FROM keywords WHERE userid = $1;", ctx.author.id)
             max_keywords = await self.get_max_keywords(ctx.author)
             if keyword_count[0]['count'] + server_keyword_count[0]['count'] >= max_keywords:
-                return await ctx.send(f"You already have the maximum amount of keywords ({max_keywords}). Purchase more from {self.bot.config['bot_info']['links']['Donate']} :)")
+                return await ctx.send(f"You already have the maximum amount of keywords ({max_keywords}). Purchase more from {self.bot.config['bot_info']['links']['Donate']['url']} :)")
                 
             # Adds the keyword into the list
             await db("INSERT INTO keywords (userid, keyword) VALUES ($1, $2);", ctx.author.id, keyword)
@@ -66,7 +66,7 @@ class BotCommands(utils.Cog, name="Bot Commands"):
             keyword_count = await db("SELECT COUNT(*) FROM keywords WHERE userid = $1;", ctx.author.id)
             max_keywords = await self.get_max_keywords(ctx.author)
             if keyword_count[0]['count'] + server_keyword_count[0]['count'] >= max_keywords:
-                return await ctx.send(f"You already have the maximum amount of keywords ({max_keywords}). Purchase more from {self.bot.config['bot_info']['links']['Donate']} :)")
+                return await ctx.send(f"You already have the maximum amount of keywords ({max_keywords}). Purchase more from {self.bot.config['bot_info']['links']['Donate']['url']} :)")
 
             # Adds the keyword into the list
             await db("INSERT INTO serverkeywords (userid, serverid, keyword) VALUES ($1, $2, $3);", ctx.author.id, server_id, keyword)
@@ -216,7 +216,7 @@ class BotCommands(utils.Cog, name="Bot Commands"):
         if ctx.author.id in self.bot.owner_ids:
             max_keywords = 100
 
-        await ctx.send(f"You can set {max_keywords} keywords. Buy more at {self.bot.config['bot_info']['links']['Donate']} :)")
+        await ctx.send(f"You can set {max_keywords} keywords. Buy more at {self.bot.config['bot_info']['links']['Donate']['url']} :)")
 
 
     async def get_max_keywords(self, user:discord.User):
