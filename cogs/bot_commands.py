@@ -213,6 +213,9 @@ class BotCommands(utils.Cog, name="Bot Commands"):
 
         max_keywords = await self.get_max_keywords(ctx.author)
 
+        if ctx.author.id in self.bot.owner_ids:
+            max_keywords = 100
+
         await ctx.send(f"You can set {max_keywords} keywords. Buy more at {self.bot.config['command_data']['donate_link']} :)")
 
 
