@@ -155,6 +155,11 @@ class BotCommands(utils.Cog, name="Bot Commands"):
             keyword_rows = await db("SELECT * FROM keywords WHERE userid = $1;", user.id)
             server_keyword_rows = await db("SELECT * FROM serverkeywords WHERE userid = $1;", user.id)
 
+        # Count the keywords
+        keyword_count = len(keyword_rows) + len(server_keyword_rows)
+        max_keywords = await self.get_max_keywords(user)
+        total_keywords_message = f"{user.mention} is using {keyword_count} keywords out of a total {max_keywords}"
+
         # Check if the user has any keywords
         if not keyword_rows and not server_keyword_rows:
             return await ctx.send(f"You don't have any keywords. Set some up by running the `{ctx.prefix}addkeyword` command")
@@ -165,8 +170,15 @@ class BotCommands(utils.Cog, name="Bot Commands"):
         
         sendable_keyword_string = self.get_server_keywords(server_keyword_rows, True)
 
+        # Make a message
+        final_message = f"""{total_keywords_message}\n
+                            __{user.mention}'s Keywords__\n    
+                            {keywords_string}\n\n
+                            __{user.mention}'s Server Keywords__\n
+                            {sendable_keyword_string}"""
+
         # Send it
-        await ctx.send(f"{user.mention}'s Keywords:\n{keywords_string}\n\n{user.mention}'s Server Keywords:\n{sendable_keyword_string}", allowed_mentions=discord.AllowedMentions.none())
+        await ctx.send(final_message, allowed_mentions=discord.AllowedMentions.none())
     
     def get_server_keywords(self, keyword_rows, turn_to_string=False):
         # Creates a dict of server_id: keyword_list found in DB call
