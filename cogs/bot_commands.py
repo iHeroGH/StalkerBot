@@ -9,7 +9,7 @@ class BotCommands(utils.Cog, name="Bot Commands"):
     MINIMUM_KEYWORD_LENGTH = 2
 
     @utils.command(aliases=['keyword', 'addkeyword'])
-    async def add(self, ctx, keyword: str):
+    async def add(self, ctx: utils.Context, keyword: str):
         """Adds a keyword to your list of DM triggers"""
 
         # Checks if the keyword is too short
@@ -39,7 +39,7 @@ class BotCommands(utils.Cog, name="Bot Commands"):
         await ctx.send(f"Added `{keyword}` into <@{ctx.author.id}>'s list")
 
     @utils.command(aliases=['serverkeyword', 'addserverkeyword'])
-    async def addserver(self, ctx, server_id: int, keyword: str):
+    async def addserver(self, ctx: utils.Context, server_id: int, keyword: str):
         """Adds a keyword to your list of server-specific DM triggers"""
 
         # Checks if the server exists
@@ -74,7 +74,7 @@ class BotCommands(utils.Cog, name="Bot Commands"):
         await ctx.send(f"Added `{keyword}` into <@{ctx.author.id}>'s list")
 
     @utils.command(aliases=['keywordremove', 'removekeyword'])
-    async def remove(self, ctx, keyword: str):
+    async def remove(self, ctx: utils.Context, keyword: str):
         """Removes a keyword from your list of DM triggers"""
 
         keyword = keyword.lower()
@@ -93,7 +93,7 @@ class BotCommands(utils.Cog, name="Bot Commands"):
         await ctx.send(f"Removed `{keyword}` from <@{ctx.author.id}>'s list")
 
     @utils.command(aliases=['serverkeywordremove', 'removeserver'])
-    async def removeserverkeyword(self, ctx, server_id: int, keyword: str):
+    async def removeserverkeyword(self, ctx: utils.Context, server_id: int, keyword: str):
         """Removes a keyword from your list of server-specific DM triggers"""
 
         keyword = keyword.lower()
@@ -112,7 +112,7 @@ class BotCommands(utils.Cog, name="Bot Commands"):
         await ctx.send(f"Removed `{keyword}` from <@{ctx.author.id}>'s list")
 
     @utils.command()
-    async def removeall(self, ctx, ident: str=None):
+    async def removeall(self, ctx: utils.Context, ident: str=None):
         """Removes all keywords from your list of DM triggers given an optional type (global/server)"""
 
         if not ident:
@@ -140,7 +140,7 @@ class BotCommands(utils.Cog, name="Bot Commands"):
         await ctx.send(f"Removed {delete_type} keywords from <@{ctx.author.id}>'s list")
 
     @utils.command(aliases=['keywords', 'keywordlist', 'keywordslist', 'listkeywords'])
-    async def list(self, ctx, user:discord.User=None):
+    async def list(self, ctx: utils.Context, user:discord.User=None):
         """Lists all your keywords"""
         
         # If the user isn't given, assume it's the author
@@ -205,7 +205,7 @@ class BotCommands(utils.Cog, name="Bot Commands"):
         return sendable
 
     @utils.command(aliases=['max', 'maxkey', 'maxwords', 'maxkeyword', 'maxkeys', 'maxword'])
-    async def maxkeywords(self, ctx, user:discord.User=None):
+    async def maxkeywords(self, ctx: utils.Context, user:discord.User=None):
         """Sends the maximum amount of keywords a user can have"""
 
         # Make sure we got a user
