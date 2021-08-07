@@ -192,8 +192,7 @@ class BotCommands(utils.Cog, name="Bot Commands"):
             sendable += f"**{server.name}**\n"
 
             # Add the keywords to the string
-            sendable += "`" + '`, `'.join(keyword_list) + "`"
-            sendable += "\n"
+            sendable += "`" + '`, `'.join(keyword_list) + "`" + "\n"
         
         return sendable
 
