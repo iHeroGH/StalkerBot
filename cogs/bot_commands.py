@@ -172,10 +172,10 @@ class BotCommands(utils.Cog, name="Bot Commands"):
 
         # Make a message
         final_message = f"""{total_keywords_message}\n
-                            __{user.mention}'s Keywords__\n    
-                            {keywords_string}\n\n
-                            __{user.mention}'s Server Keywords__\n
-                            {sendable_keyword_string}"""
+        __{user.mention}'s Keywords__\n    
+        {keywords_string}\n\n
+        __{user.mention}'s Server Keywords__\n
+        {sendable_keyword_string}"""
 
         # Send it
         await ctx.send(final_message, allowed_mentions=discord.AllowedMentions.none())
