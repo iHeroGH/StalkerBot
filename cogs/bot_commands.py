@@ -5,7 +5,7 @@ import voxelbotutils as utils
 
 class BotCommands(utils.Cog, name="Bot Commands"):
 
-    MAXIMUM_ALLOWED_KEYWORDS = 10
+    MAXIMUM_ALLOWED_KEYWORDS = 5
     MINIMUM_KEYWORD_LENGTH = 2
 
     @utils.command(aliases=['keyword', 'addkeyword'])
@@ -139,8 +139,8 @@ class BotCommands(utils.Cog, name="Bot Commands"):
 
         await ctx.send(f"Removed {delete_type} keywords from <@{ctx.author.id}>'s list")
 
-    @utils.command(aliases=['keywords', 'keywordlist', 'keywordslist', 'list'])
-    async def listkeywords(self, ctx, user:discord.User=None):
+    @utils.command(aliases=['keywords', 'keywordlist', 'keywordslist', 'listkeywords'])
+    async def list(self, ctx, user:discord.User=None):
         """Lists all your keywords"""
         
         # If the user isn't given, assume it's the author
