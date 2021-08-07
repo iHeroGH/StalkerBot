@@ -168,14 +168,10 @@ class BotCommands(utils.Cog, name="Bot Commands"):
         keyword_list = [row['keyword'] for row in keyword_rows]
         keywords_string = "`" + '`, `'.join(keyword_list) + "`"
         
-        sendable_keyword_string = self.get_server_keywords(server_keyword_rows, True)
+        server_keyword_string = self.get_server_keywords(server_keyword_rows, True)
 
         # Make a message
-        final_message = f"""{total_keywords_message}\n
-        __{user.mention}'s Keywords__\n    
-        {keywords_string}\n\n
-        __{user.mention}'s Server Keywords__\n
-        {sendable_keyword_string}"""
+        final_message = f"{total_keywords_message}\n__{user.mention}'s Keywords__\n{keywords_string}\n\n__{user.mention}'s Server Keywords__\n{server_keyword_string}"
 
         # Send it
         await ctx.send(final_message, allowed_mentions=discord.AllowedMentions.none())
