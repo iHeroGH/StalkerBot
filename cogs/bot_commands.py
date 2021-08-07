@@ -27,9 +27,10 @@ class BotCommands(utils.Cog, name="Bot Commands"):
                 return await ctx.send("You already have that as a keyword")
 
             # Checks if the user has the maxiumum amount of keywords (10)
+            server_keyword_count = await db("SELECT COUNT(*) FROM serverkeywords WHERE userid = $1;", ctx.author.id)
             keyword_count = await db("SELECT COUNT(*) FROM keywords WHERE userid = $1;", ctx.author.id)
             max_keywords = await self.get_max_keywords(ctx.author)
-            if keyword_count[0]['count'] >= max_keywords:
+            if keyword_count[0]['count'] + server_keyword_count[0]['count'] >= max_keywords:
                 return await ctx.send(f"You already have the maximum amount of keywords ({max_keywords}). Purchase more from {self.bot.config['command_data']['donate_link']} :)")
                 
             # Adds the keyword into the list
@@ -61,9 +62,10 @@ class BotCommands(utils.Cog, name="Bot Commands"):
                 return await ctx.send("You already have that as a keyword on this server.")
 
             # Checks if the user has the maxiumum amount of keywords (10)
-            keyword_count = await db("SELECT COUNT(*) FROM serverkeywords WHERE userid = $1;", ctx.author.id)
+            server_keyword_count = await db("SELECT COUNT(*) FROM serverkeywords WHERE userid = $1;", ctx.author.id)
+            keyword_count = await db("SELECT COUNT(*) FROM keywords WHERE userid = $1;", ctx.author.id)
             max_keywords = await self.get_max_keywords(ctx.author)
-            if keyword_count[0]['count'] >= max_keywords:
+            if keyword_count[0]['count'] + server_keyword_count[0]['count'] >= max_keywords:
                 return await ctx.send(f"You already have the maximum amount of keywords ({max_keywords}). Purchase more from {self.bot.config['command_data']['donate_link']} :)")
 
             # Adds the keyword into the list
