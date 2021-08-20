@@ -256,8 +256,8 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
 
             # Try and send it to them
             self.bot.logger.info(f"Sending message {message.id} by {message.author.id} to {member.id} for keyword trigger")
-            if member.id == 322542134546661388:
-                self.bot.logger.debug(f"Adding user to already_sent")
+
+            self.bot.logger.info(f"Adding {member.id} to already_sent")
             already_sent.add(member.id)
 
             self.bot.loop.create_task(member.send(**sendable_content, embeddify= (False if "content" in sendable_content else True))) # Finally send the message. Turn off embeddify if it's just content
