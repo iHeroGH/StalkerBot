@@ -82,7 +82,7 @@ class UserSettings(vbu.Cog, name="User Setting Commands"):
         ]
 
         # Sends the initial message
-        message = await ctx.send("\n".join(options), embeddify=False)
+        message = await ctx.send("\n".join(options))
         # Reacts to the initial message with 1, 2, and check mark
         await message.add_reaction("1\N{COMBINING ENCLOSING KEYCAP}")
         await message.add_reaction("2\N{COMBINING ENCLOSING KEYCAP}")
