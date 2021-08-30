@@ -281,12 +281,11 @@ class StalkingEvents(vbu.Cog, name="Stalking Events (Message Send/Edit)"):
             embed.add_field(name="Message Content", value=f"Keyword was found in an embed: {embed_content}" if embed_content else message.content, inline=False)
         embed.add_field(name="Message Channel", value=f"{message.channel.mention}\n({message.guild.name}: {message.channel.name})", inline=True)
         embed.add_field(name="Message Link", value=f"[Click here]({message.jump_url})", inline=True)
-        if len(message.attachments) != 0:
-            url_list = [i.url for i in message.attachments]
-            lines = ""
-            for i in url_list:
-                lines = lines + f"\n[Click Here]({i})"
-            embed.add_field(name="Attatchment Links", value=lines, inline=False)
+        if len(message.attachments):
+            lines = []
+            for i in message.attachments:
+                lines.append(f"[{i.filename}]({i.url})")
+            embed.add_field(name="Attatchment Links", value="\n".join(lines), inline=False)
         if keyword:
             embed.set_footer(text=f"Keyword: {keyword}")
         if reply:
