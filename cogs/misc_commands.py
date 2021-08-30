@@ -253,6 +253,18 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
                 
         
         await ctx.message.add_reaction("👌") # React to the command with a confirmation
+    
+    @utils.command()
+    async def suggest(self, ctx, *, suggestion:str=None):
+        """Sends a suggestion message to the bot creator (@Hero#2313)"""
+
+        channel = self.bot.get_channel(739923715311140955)
+
+        if suggestion is None:
+            await ctx.send_help(ctx.command)
+            return
+        await channel.send(f"<@322542134546661388> New suggestion from <@{ctx.author.id}> (`{ctx.author.id}`): `{suggestion[:1950]}`")
+        await ctx.send(f"Suggested `{suggestion[:1950]}`", )
 
 
 def setup(bot):

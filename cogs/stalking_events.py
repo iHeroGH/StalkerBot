@@ -18,7 +18,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
 
     @utils.Cog.listener()
     async def on_message_edit(self, before, after):
-        
+
         # Check if the message's embeds changed
         if before.embeds and after.embeds:
             if len(before.embeds) == len(after.embeds):
@@ -217,7 +217,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
                     self.bot.logger.debug(f"Not sending message to {user_id} because of user filter")
                     content = None
             for kw in settings_dict[member.id]['filters']['textfilters']:
-                if kw.lower() in content.lower() and content is not None:
+                if kw.lower() in (embed_content or message.content).lower() and content is not None:
                     content = re.sub(re.escape(kw.lower()), "", content.lower())
 
             # If there's no content to be examined, let's just skip the message
@@ -256,8 +256,10 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
 
             # Try and send it to them
             self.bot.logger.info(f"Sending message {message.id} by {message.author.id} to {member.id} for keyword trigger")
+
+            self.bot.logger.info(f"Adding {member.id} to already_sent")
             already_sent.add(member.id)
-            
+
             self.bot.loop.create_task(member.send(**sendable_content, embeddify= (False if "content" in sendable_content else True))) # Finally send the message. Turn off embeddify if it's just content
 
     def create_message_embed(self, message:typing.Union[discord.Message, typing.Tuple[discord.Message]], keyword:str=None, embed_content:str=None, reply:bool=False) -> discord.Embed:
@@ -314,7 +316,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
 
     def get_dict_string(self, embed_dict:dict):
         """Get all the strings from an embed"""
-        strings = [] 
+        strings = []
         # Embed Author
         if (author := embed_dict.get("author")):
             strings.append(author['name'])
@@ -323,7 +325,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
         # Embed Title
         if (title := embed_dict.get("title")):
             strings.append(title)
-        # Embed URL  
+        # Embed URL
         if (url := embed_dict.get("url")):
             strings.append(url)
         # Embed Description
@@ -331,7 +333,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
             strings.append(description)
         # Embed Thumbnail
         if (thumbnail := embed_dict.get("thumbnail")):
-            strings.append(thumbnail['url'])   
+            strings.append(thumbnail['url'])
         # Embed Fields
         if (fields := embed_dict.get("fields")):
             for field in fields:
@@ -344,7 +346,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
             strings.append(footer['text'])
             if (footer_url := footer.get("icon_url")):
                 strings.append(footer_url)
-        
+
         return "  ".join(strings)
 
 

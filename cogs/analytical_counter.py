@@ -4,7 +4,7 @@ from discord.ext import commands
 import voxelbotutils as utils
 
 
-class Counter(utils.Cog, name="Analytical Counter"):
+class AnalyticalCounter(utils.Cog, name="Analytical Counter"):
 
     @utils.command(aliases=['countservers'])
     @commands.is_owner()
@@ -26,4 +26,4 @@ class Counter(utils.Cog, name="Analytical Counter"):
 
 
 def setup(bot):
-    bot.add_cog(Counter(bot))
+    bot.add_cog(AnalyticalCounter(bot))
