@@ -1,13 +1,13 @@
 from discord.ext import tasks, commands
 
-class MessageCounter(utils.Cog):
+class MessageCounter(vbu.Cog):
 
     def __init__(self, bot):
         self.bot = bot
         self.bot.counter = 0
         self.tell_me_more.start()
 
-    @utils.Cog.listener()
+    @vbu.Cog.listener()
     async def on_message(self, message):
         self.bot.counter += 1
 

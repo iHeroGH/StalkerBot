@@ -1,17 +1,17 @@
 import discord
 from discord.ext import commands
-import voxelbotutils as utils
+import voxelbotutils as vbu
 
 
-class CogName(utils.Cog, name="Help-Command Name"):
+class CogName(vbu.Cog, name="Help-Command Name"):
 
     def __init__(self, bot):
         self.bot = bot
 
-    @utils.command(aliases=[], hidden=False)
+    @vbu.command(aliases=[], hidden=False)
     async def commandName(self, ctx):
         """Command help text"""
-        # async with self.bot.database() as db:
+        # async with vbu.Database() as db:
             # await db("",)
         pass
 

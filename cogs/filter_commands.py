@@ -1,11 +1,11 @@
 import discord
 from discord.ext import commands
-import voxelbotutils as utils
+import voxelbotutils as vbu
 
 
-class FilterCommands(utils.Cog, name="Filter Commands"):
+class FilterCommands(vbu.Cog, name="Filter Commands"):
 
-    @utils.group(invoke_without_command=True)
+    @vbu.group(invoke_without_command=True)
     async def filter(self, ctx):
         """The parent group for the filter commands."""
 
@@ -27,7 +27,7 @@ class FilterCommands(utils.Cog, name="Filter Commands"):
         """
 
         # Opens a connection and inerts the text filter into the textfilters database
-        async with self.bot.database() as db:
+        async with vbu.Database() as db:
             await db("INSERT INTO textfilters (userid, textfilter) VALUES ($1, $2);", ctx.author.id, filter)
 
         await ctx.send(f"Added `{filter}` to your text filter list", allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
@@ -39,7 +39,7 @@ class FilterCommands(utils.Cog, name="Filter Commands"):
         Adds a channel filter.
         """
 
-        async with self.bot.database() as db:
+        async with vbu.Database() as db:
             await db("INSERT INTO channelfilters (userid, channelfilter) VALUES ($1, $2);", ctx.author.id, filter.id)
         await ctx.send(f"Added {filter.mention} to your channel filter list")
 
@@ -61,17 +61,17 @@ class FilterCommands(utils.Cog, name="Filter Commands"):
             return await ctx.send("You didn't provide a valid server ID")
 
         # Opens a connection and inerts the server filter into the serverfilters database
-        async with self.bot.database() as db:
+        async with vbu.Database() as db:
             await db("INSERT INTO serverfilters (userid, serverfilter) VALUES ($1, $2);", ctx.author.id, filter)
 
         await ctx.send(f"Added `{filter}` to your server filter list")
 
     @filter_add.command(name="user")
-    async def filter_add_user(self, ctx, *, filter:utils.converters.UserID):
+    async def filter_add_user(self, ctx, *, filter:vbu.converters.UserID):
         """Adds a server filter"""
 
         # Opens a connection and inerts the user filter into the serverfilters database
-        async with self.bot.database() as db:
+        async with vbu.Database() as db:
             await db("INSERT INTO userfilters (userid, userfilter) VALUES ($1, $2);", ctx.author.id, filter)
 
         await ctx.send(f"Added `{filter}` to your user filter list", allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
@@ -80,7 +80,7 @@ class FilterCommands(utils.Cog, name="Filter Commands"):
     async def filter_list(self, ctx):
         """Lists all your filters"""
 
-        async with self.bot.database() as db:
+        async with vbu.Database() as db:
             textRows = await db("SELECT * FROM textfilters WHERE userid=$1;", ctx.author.id)
             channelRows = await db("SELECT * FROM channelfilters WHERE userid=$1;", ctx.author.id)
             serverRows = await db("SELECT * FROM serverfilters WHERE userid=$1;", ctx.author.id)
@@ -125,7 +125,7 @@ class FilterCommands(utils.Cog, name="Filter Commands"):
     async def filter_remove_text(self, ctx, *, filter:str):
         """Removes a text filter"""
 
-        async with self.bot.database() as db:
+        async with vbu.Database() as db:
             await db("DELETE FROM textfilters WHERE userid=$1 and textfilter=$2;", ctx.author.id, filter)
         return await ctx.send(f"Removed `{filter}` from your text filter list")
 
@@ -134,7 +134,7 @@ class FilterCommands(utils.Cog, name="Filter Commands"):
     async def filter_remove_channel(self, ctx, filter:discord.TextChannel):
         """Removes a channel filter"""
 
-        async with self.bot.database() as db:
+        async with vbu.Database() as db:
             await db("DELETE FROM channelfilters WHERE userid=$1 AND channelfilter=$2;", ctx.author.id, filter.id)
         return await ctx.send(f"Removed `{filter.mention}` from your channel filter list")
 
@@ -151,27 +151,27 @@ class FilterCommands(utils.Cog, name="Filter Commands"):
             return await ctx.send("You didn't provide a valid server ID")
 
         # Opens a connection and inerts the text filter into the serverfilters database
-        async with self.bot.database() as db:
+        async with vbu.Database() as db:
             await db("DELETE FROM serverfilters WHERE userid=$1 AND serverfilter=$2;", ctx.author.id, filter)
 
         await ctx.send(f"You will now get message triggers from `{filter}`")
 
     @filter_remove.command(name="user")
-    async def filter_remove_user(self, ctx, filter:utils.converters.UserID):
+    async def filter_remove_user(self, ctx, filter:vbu.converters.UserID):
         """Adds a server filter"""
 
         # Opens a connection and inerts the user filter into the userfilters database
-        async with self.bot.database() as db:
+        async with vbu.Database() as db:
             await db("DELETE FROM userfilters WHERE userid=$1 AND userfilter=$2;", ctx.author.id, filter)
 
         await ctx.send(f"You will now recieve message triggers from `{filter}`.")
 
-    @utils.command()
+    @vbu.command()
     async def block(self, ctx, user:discord.User):
         """Blocks a given user by invoking filter user"""
         return await ctx.invoke(self.bot.get_command("filter add user"), filter=user.id)
 
-    @utils.command()
+    @vbu.command()
     async def unblock(self, ctx, user:discord.User):
         """Unblocks a given user by invoking filter remove user"""
         return await ctx.invoke(self.bot.get_command("filter remove user"), filter=user.id)

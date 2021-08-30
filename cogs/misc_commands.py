@@ -5,29 +5,29 @@ import typing
 import aiohttp
 import io
 from PIL import Image
-import voxelbotutils as utils
+import voxelbotutils as vbu
 import asyncio
 import difflib
 
 from converters import send_type, send_snowflake, reaction_channel, message_str
 
 
-class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
+class MiscCommands(vbu.Cog, name="Miscellaneous Commands"):
 
     STALKER_CHANNEL = 772615385102549022
     STALKER_ID = 723813550136754216
 
     last_dm = 322542134546661388
-    
+
     def __init__(self, bot):
         super().__init__(bot)
 
-    @utils.Cog.listener()
+    @vbu.Cog.listener()
     async def on_message(self, message):
 
         # Wife love etc
         love_id = [322542134546661388, 413797321273245696] # People to respond to [George, Megan]
-        
+
         if self.bot.user in message.mentions and message.author.id in love_id: # If the bot was pinged and the author is in the list
             check_love = " ".join([i for i in message.content.split() if "723813550136754216" not in i]) # Reconstruct the message without the ping
             if difflib.get_close_matches(check_love, ["lov u", "lvo u", "u lov", "u lvo", "lof u", "u lof"]): # Typo tolernce
@@ -36,7 +36,7 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
         # If the message is in DMs, and it isn't a command, and it isn't sent by StalkerBot
         if message.guild is None and not message.content.lower().startswith("s.") and message.author.id != self.STALKER_ID:
             self.bot.logger.debug(f"Attempting to send {message.author.id}'s message to in-content")
-            async with self.bot.database() as db:
+            async with vbu.Database() as db:
                 blacklist_rows = await db("SELECT * FROM dm_blacklist WHERE user_id = $1", message.author.id)
             if blacklist_rows:
                 self.bot.logger.debug(f"{message.author.id} is in-content blacklisted")
@@ -52,19 +52,19 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
                 embed.add_field(name="Attatchment Links", value=lines, inline=False)
                 embed.set_image(url=message.attachments[0].url)
             embed.description = message.content
-            
+
             await self.bot.get_channel(self.STALKER_CHANNEL).send(embed=embed)
             self.bot.logger.debug(f"Sending {message.author.id}'s message to in-content")
 
             self.last_dm = message.author.id
 
-    @utils.command(aliases=['dmbl'])
+    @vbu.command(aliases=['dmbl'])
     @commands.is_owner()
     async def dmblacklist(self, ctx, user:discord.User=None):
         """Blacklists a user from being detected by the DM Stalker"""
         user = user or self.bot.get_user(self.last_dm)
 
-        async with self.bot.database() as db:
+        async with vbu.Database() as db:
             current_bl = await db("SELECT * FROM dm_blacklist")
             if current_bl:
                 await db("DELETE FROM dm_blacklist WHERE user_id = $1", user.id)
@@ -73,10 +73,10 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
                 await db("INSERT INTO dm_blacklist (user_id) VALUES ($1)", user.id)
                 await ctx.send(f"Inserted {user.mention} ({str(user)}) into the DM blacklist.", allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
 
-    @utils.command(aliases=['hero', 'h'], hidden=True)
+    @vbu.command(aliases=['hero', 'h'], hidden=True)
     @commands.bot_has_permissions(attach_files=True)
     async def heroify(self, ctx, ident='h', url:typing.Union[discord.User or discord.ClientUser, str]=None):
-        
+
         possible = ['h', 'H', 'A', 'a', 'm', 'L', 'l', 'e', 'V']
         if ident == "list":
             return await ctx.send(f"The available identifiers are `{', '.join(possible)}`")
@@ -132,7 +132,7 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
 
         await ctx.send(file=discord.File(sendable_image, filename="heroed.png"))
 
-    @utils.command()
+    @vbu.command()
     @commands.is_owner()
     async def send(self, ctx, channel_type:send_type.SendType, snowflake:typing.Optional[send_snowflake.SendSnowflake], *, message:str=None):
         """Sends a message to a channel or a user through StalkerBot"""
@@ -177,7 +177,7 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
         else:
             await ctx.message.add_reaction("👌")
 
-    @utils.command()
+    @vbu.command()
     @commands.is_owner()
     async def edit(self, ctx, message:discord.Message, new_message:typing.Optional[message_str.MessageStr], embeddify:bool=False, delete_time:int=-1):
         """Edits/Deletes a message sent by the bot"""
@@ -185,7 +185,7 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
         # If the message wasn't sent by the bot, return
         if message.author.id != self.STALKER_ID:
             return await ctx.message.add_reaction("👎")
-        
+
         # Default the new_message if it doesn't exist to not cause an error
         new_message = new_message or message.content
 
@@ -193,7 +193,7 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
         payload = {
             "content": new_message,
         }
-        
+
         # If the user wants to delete the edited message after some time
         if delete_time > -1:
             payload['delete_after'] = delete_time
@@ -210,7 +210,7 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
         else:
             await ctx.message.add_reaction("👌")
 
-    @utils.command(aliases=['joinvc', 'leavevc', 'leave', 'disc', 'con', 'connect', 'disconnect'])
+    @vbu.command(aliases=['joinvc', 'leavevc', 'leave', 'disc', 'con', 'connect', 'disconnect'])
     @commands.is_owner()
     async def join(self, ctx, vc:discord.VoiceChannel, timeout:float=0.0):
         """Joins/Leaves a Discord Voice Channel"""
@@ -226,7 +226,7 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
 
         return await ctx.message.add_reaction("👌")
 
-    @utils.command()
+    @vbu.command()
     @commands.is_owner()
     async def react(self, ctx, message:discord.Message, *reactions):
         """Reacts to a message in a channel with a reaction"""
@@ -250,11 +250,11 @@ class MiscCommands(utils.Cog, name="Miscellaneous Commands"):
             # Go through the reactions
             for r in reaction:
                 await message.add_reaction(r)
-                
-        
+
+
         await ctx.message.add_reaction("👌") # React to the command with a confirmation
-    
-    @utils.command()
+
+    @vbu.command()
     async def suggest(self, ctx, *, suggestion:str=None):
         """Sends a suggestion message to the bot creator (@Hero#2313)"""
 

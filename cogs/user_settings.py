@@ -1,11 +1,11 @@
 import asyncio
 
-import voxelbotutils as utils
+import voxelbotutils as vbu
 
 
-class UserSettings(utils.Cog, name="User Setting Commands"):
+class UserSettings(vbu.Cog, name="User Setting Commands"):
 
-    @utils.command(aliases=['qs', 'quicksettings', 'quicksetup'])
+    @vbu.command(aliases=['qs', 'quicksettings', 'quicksetup'])
     async def quickswitch(self, ctx, setting:str=None):
         """Allows users to change individual settings quickly"""
 
@@ -47,12 +47,12 @@ class UserSettings(utils.Cog, name="User Setting Commands"):
         # Tell the user it's done :D
         await ctx.send(f"Updated `{setting}` - now {'enabled' if updated_settings[setting] else 'disabled'}.")
 
-    @utils.command(aliases=['setup', 'usersettings'])
+    @vbu.command(aliases=['setup', 'usersettings'])
     async def settings(self, ctx):
         """Allows users to change their settings"""
 
         # Get the current settings for a user
-        async with self.bot.database() as db:
+        async with vbu.Database() as db:
             existing_settings = await db("SELECT * FROM user_settings WHERE user_id = $1;", ctx.author.id)
 
         # Checks to see if existing settings for the user actually exist. If not, defaults to True
@@ -119,27 +119,27 @@ class UserSettings(utils.Cog, name="User Setting Commands"):
 
             # Checks which emoji was reacted and does the stuff
             if reaction.emoji == valid_emoji[0]:
-                async with self.bot.database() as db:
+                async with vbu.Database() as db:
                     await db("INSERT INTO user_settings (user_id, owntrigger) VALUES ($1, $2) on conflict (user_id) do update set owntrigger = $2", ctx.author.id, not owntrigger)
                 owntrigger = not owntrigger
             elif reaction.emoji == valid_emoji[1]:
-                async with self.bot.database() as db:
+                async with vbu.Database() as db:
                     await db("INSERT INTO user_settings (user_id, quotetrigger) VALUES ($1, $2) on conflict (user_id) do update set quotetrigger = $2", ctx.author.id, not quotetrigger)
                 quotetrigger = not quotetrigger
             elif reaction.emoji == valid_emoji[2]:
-                async with self.bot.database() as db:
+                async with vbu.Database() as db:
                     await db("INSERT INTO user_settings (user_id, embedmessage) VALUES ($1, $2) on conflict (user_id) do update set embedmessage = $2", ctx.author.id, not embedmessage)
                 embedmessage = not embedmessage
             elif reaction.emoji == valid_emoji[3]:
-                async with self.bot.database() as db:
+                async with vbu.Database() as db:
                     await db("INSERT INTO user_settings (user_id, editmessage) VALUES ($1, $2) on conflict (user_id) do update set editmessage = $2", ctx.author.id, not editmessage)
                 editmessage = not editmessage
             elif reaction.emoji == valid_emoji[4]:
-                async with self.bot.database() as db:
+                async with vbu.Database() as db:
                     await db("INSERT INTO user_settings (user_id, bottrigger) VALUES ($1, $2) on conflict (user_id) do update set bottrigger = $2", ctx.author.id, not bottrigger)
                 bottrigger = not bottrigger
             elif reaction.emoji == valid_emoji[5]:
-                async with self.bot.database() as db:
+                async with vbu.Database() as db:
                     await db("INSERT INTO user_settings (user_id, replymessage) VALUES ($1, $2) on conflict (user_id) do update set replymessage = $2", ctx.author.id, not replymessage)
                 replymessage = not replymessage
             elif reaction.emoji == valid_emoji[6]:

@@ -4,19 +4,19 @@ import re
 import typing
 
 import discord
-import voxelbotutils as utils
+import voxelbotutils as vbu
 
 
-class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
+class StalkingEvents(vbu.Cog, name="Stalking Events (Message Send/Edit)"):
 
     STALKER_CHANNEL = 772615385102549022
 
-    @utils.Cog.listener()
+    @vbu.Cog.listener()
     async def on_message(self, message):
 
         await self.deal_with_message(message)
 
-    @utils.Cog.listener()
+    @vbu.Cog.listener()
     async def on_message_edit(self, before, after):
 
         # Check if the message's embeds changed
@@ -75,7 +75,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
         # Deal with the reply message stuff
         reference = message.reference
         if reference:
-            async with self.bot.database() as db:
+            async with vbu.Database() as db:
                 reply_on_rows = await db("SELECT * from user_settings WHERE replymessage=true")
 
             # Create a list of all the user IDs of the people who have reply_rows turned on
@@ -111,7 +111,7 @@ class StalkingEvents(utils.Cog, name="Stalking Events (Message Send/Edit)"):
         scanned_content = embed_content or message.content
 
         # Get everything (from the users who have had a keyword triggered) from the datbase
-        async with self.bot.database() as db:
+        async with vbu.Database() as db:
 
             # Grab users whose keywords have been triggered
             keyword_rows = await db("SELECT * from keywords WHERE $1 LIKE concat('%', keyword, '%')", scanned_content.lower())

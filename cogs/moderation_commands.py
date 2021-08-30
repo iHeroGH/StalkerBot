@@ -2,20 +2,20 @@ import io
 
 import discord
 from discord.ext import commands
-import voxelbotutils as utils
+import voxelbotutils as vbu
 
 
-class ModerationCommands(utils.Cog, name="Moderation Commands"):
+class ModerationCommands(vbu.Cog, name="Moderation Commands"):
 
     def __init__(self, bot):
         self.bot = bot
 
-    @utils.command()
+    @vbu.command()
     @commands.is_owner()
     async def listall(self, ctx, user:discord.User=None):
         """Lists either a user's entire list of keywords or the entire database"""
 
-        async with self.bot.database() as db:
+        async with vbu.Database() as db:
             if user:
                 full = await db("SELECT * FROM keywords WHERE userid = $1;", user.id)
             else:
@@ -28,22 +28,22 @@ class ModerationCommands(utils.Cog, name="Moderation Commands"):
         text = "\n".join(sorted(text)) + "\n"
         await ctx.send(file=discord.File(io.StringIO(text), filename="AllUsers.txt"))
 
-    @utils.command()
+    @vbu.command()
     @commands.is_owner()
     async def forceremove(self, ctx, user:discord.User, keyword:str):
         """Forcibly removes a keyword from a user"""
 
-        async with self.bot.database() as db:
+        async with vbu.Database() as db:
             await db("DELETE FROM keywords WHERE userid = $1 AND keyword = $2;", user.id, keyword)
 
         await ctx.send(f"Removed `{keyword}` from {user.name}'s list")
 
-    @utils.command()
+    @vbu.command()
     @commands.is_owner()
     async def forceadd(self, ctx, user:discord.User, keyword:str):
         """Forcibly adds a keyword to a user"""
 
-        async with self.bot.database() as db:
+        async with vbu.Database() as db:
             await db("INSERT INTO keywords VALUES ($1, $2);", user.id, keyword)
         await ctx.send(f"Added `{keyword}` to {user.name}'s list")
 

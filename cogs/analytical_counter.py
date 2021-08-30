@@ -1,24 +1,24 @@
 import aiohttp
 import discord
 from discord.ext import commands
-import voxelbotutils as utils
+import voxelbotutils as vbu
 
 
-class AnalyticalCounter(utils.Cog, name="Analytical Counter"):
+class AnalyticalCounter(vbu.Cog, name="Analytical Counter"):
 
-    @utils.command(aliases=['countservers'])
+    @vbu.command(aliases=['countservers'])
     @commands.is_owner()
     async def countguilds(self, ctx):
         """Counts how many guilds have the bot"""
 
         await ctx.send(f"The bot is in `{len(self.bot.guilds)}` guilds.")
 
-    @utils.command()
+    @vbu.command()
     @commands.is_owner()
     async def countusers(self, ctx):
         """Counts how many unique user IDs there are"""
 
-        async with self.bot.database() as db:
+        async with vbu.Database() as db:
             distinctRows = await db("SELECT DISTINCT userid FROM keywords;")
             rows = await db("SELECT * FROM keywords;")
 

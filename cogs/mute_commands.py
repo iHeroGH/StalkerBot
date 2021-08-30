@@ -1,15 +1,15 @@
 from discord.ext import commands
-import voxelbotutils as utils
+import voxelbotutils as vbu
 
 from datetime import datetime as dt, timedelta
 
 
-class MuteCommands(utils.Cog, name="Mute Commands"):
+class MuteCommands(vbu.Cog, name="Mute Commands"):
 
     def __init__(self, bot):
         self.bot = bot
 
-    @utils.command(aliases=['tm', 'mute'])
+    @vbu.command(aliases=['tm', 'mute'])
     async def tempmute(self, ctx, time:int, unit:str="m"):
         """Temporarily mutes the bot from sending a user DMs for a specificed amount of time"""
         unit = unit.lower()
@@ -36,17 +36,17 @@ class MuteCommands(utils.Cog, name="Mute Commands"):
         future = dt.utcnow() + timedelta(seconds=seconded_time)
 
         # Add to database
-        async with self.bot.database() as db:
+        async with vbu.Database() as db:
             await db("INSERT INTO tempmute VALUES($1, $2) ON CONFLICT (userid) DO UPDATE SET time = $2;", ctx.author.id, future)
 
         await ctx.send(f"I won't send you messages for the next `{time}{unit}`")
 
-    @utils.command(aliases=['unm', "um"])
+    @vbu.command(aliases=['unm', "um"])
     async def unmute(self, ctx):
         """Unmutes StalkerBot from sending a user messages"""
 
         # Remove the user from the tempmute database
-        async with self.bot.database() as db:
+        async with vbu.Database() as db:
             await db("DELETE FROM tempmute WHERE userid=$1;", ctx.author.id)
 
         await ctx.send("Unmuted StalkerBot.")
