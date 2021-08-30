@@ -12,7 +12,7 @@ class FilterCommands(utils.Cog, name="Filter Commands"):
         await ctx.send_help(ctx.command)
 
 
-    @filter.subcommand_group(name="add", invoke_without_command=True)
+    @filter.group(name="add", invoke_without_command=True)
     async def filter_add(self, ctx):
         """
         Sets a filter provided a type (can be "list" which lists all your filters).
@@ -115,7 +115,7 @@ class FilterCommands(utils.Cog, name="Filter Commands"):
 
         await ctx.send(f"Text Filters: `{', '.join(textFilters)}` \n Channel Filters: {', '.join(channelFilters)} \n Server Filters: `{', '.join(serverNames)}` \n User Filters: `{', '.join(userNames)}`", allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
 
-    @filter.subcommand_group(name="remove", invoke_without_command=True)
+    @filter.group(name="remove", invoke_without_command=True)
     async def filter_remove(self, ctx):
         """Removes a filter (text or channel)"""
 
