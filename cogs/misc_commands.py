@@ -42,7 +42,7 @@ class MiscCommands(vbu.Cog, name="Miscellaneous Commands"):
                 self.bot.logger.debug(f"{message.author.id} is in-content blacklisted")
                 return
             embed = discord.Embed()
-            embed.set_author(name=str(message.author), icon_url=message.author.avatar_url)
+            embed.set_author(name=str(message.author), icon_url=message.author.avatar.url)
             embed.set_footer(text=f"Author: {str(message.author)} ({message.author.id})\nChannel ID: {message.channel.id}\nMessage ID: {message.id}")
             if message.attachments:
                 url_list = [i.url for i in message.attachments]
