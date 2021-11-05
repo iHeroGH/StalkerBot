@@ -58,6 +58,15 @@ class StalkingEvents(vbu.Cog, name="Stalking Events (Message Send/Edit)"):
         if message.author == message.guild.me:
             return
 
+        # Get the users who are opted out
+        async with vbu.Database() as db:
+            opt_outs = await db("SELECT * FROM user_opt")
+        opt_outs = [i['user_id'] for i in opt_outs]
+
+        # Make the author isn't opted out
+        if message.author.id in opt_outs:
+            return
+
         # React with eyes if message contains "Stalker" lol (only on Voxel Fox)
         if guild.id == 208895639164026880:
             if "stalker" in message.content.lower():
@@ -167,6 +176,10 @@ class StalkingEvents(vbu.Cog, name="Stalking Events (Message Send/Edit)"):
 
             # Don't DM the user if we already sent them something
             if user_id in already_sent:
+                continue
+
+            # Don't DM the user if they opted out
+            if user_id in opt_outs:
                 continue
 
             # Grab the member object

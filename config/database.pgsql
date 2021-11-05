@@ -71,3 +71,7 @@ CREATE TABLE IF NOT EXISTS channel_list(
 CREATE TABLE IF NOT EXISTS dm_blacklist(
     user_id BIGINT
 );
+
+CREATE TABLE IF NOT EXISTS user_opt(
+    user_id BIGINT
+);

@@ -65,7 +65,7 @@ class MiscCommands(vbu.Cog, name="Miscellaneous Commands"):
         user = user or self.bot.get_user(self.last_dm)
 
         async with vbu.Database() as db:
-            current_bl = await db("SELECT * FROM dm_blacklist")
+            current_bl = await db("SELECT * FROM dm_blacklist WHERE user_id = $1", user.id)
             if current_bl:
                 await db("DELETE FROM dm_blacklist WHERE user_id = $1", user.id)
                 await ctx.send(f"Removed {user.mention} ({str(user)}) from the DM blacklist.", allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
