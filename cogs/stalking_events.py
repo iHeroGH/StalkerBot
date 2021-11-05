@@ -62,7 +62,6 @@ class StalkingEvents(vbu.Cog, name="Stalking Events (Message Send/Edit)"):
         async with vbu.Database() as db:
             opt_outs = await db("SELECT * FROM user_opt")
         opt_outs = [i['user_id'] for i in opt_outs]
-        print(opt_outs)
 
         # Make the author isn't opted out
         if message.author.id in opt_outs:
