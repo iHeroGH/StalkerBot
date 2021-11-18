@@ -101,6 +101,10 @@ class StalkingEvents(vbu.Cog, name="Stalking Events (Message Send/Edit)"):
                 reply_message = await message.channel.fetch_message(reference.message_id)
                 self.bot.logger.info(f"Fetched reply message {reply_message.id} from API")
 
+            # If the author of the replied-to message already left the server
+            if reply_message.author not in reply_message.guild.members:
+                return
+
             # Send a DM to the author
             if reply_message.author.id in reply_users:
                 if reply_message.author.id == message.author.id:
