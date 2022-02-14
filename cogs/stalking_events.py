@@ -290,7 +290,12 @@ class StalkingEvents(vbu.Cog, name="Stalking Events (Message Send/Edit)"):
         embed = discord.Embed()
         color = abs(hash(keyword)) & 0xffffff  #random.randint(0, 0xffffff)
         embed.color = color
-        embed.set_author(name=str(message.author), icon_url=message.author.avatar.url)
+        author_payload = {
+                "name": str(message.author),
+            }
+        if (avatar:=message.author.avatar):
+                author_payload["icon_url"] = avatar.ur
+        embed.set_author(**author_payload)
         if before:
             embed.add_field(name="Before Message Content", value=before.content, inline=False)
             embed.add_field(name="After Message Content", value=message.content, inline=False)
