@@ -294,7 +294,7 @@ class StalkingEvents(vbu.Cog, name="Stalking Events (Message Send/Edit)"):
                 "name": str(message.author),
             }
         if (avatar:=message.author.avatar):
-                author_payload["icon_url"] = avatar.ur
+                author_payload["icon_url"] = avatar.url
         embed.set_author(**author_payload)
         if before:
             embed.add_field(name="Before Message Content", value=before.content, inline=False)
