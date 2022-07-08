@@ -233,8 +233,8 @@ class BotCommands(vbu.Cog, name="Bot Commands"):
             keyword_max = 100
 
         manual_overrides = {
-            '342529068907888643': 5,
-            '322542134546661388': -5
+            342529068907888643: 5,
+            322542134546661388: -5
         }
         if user.id in manual_overrides:
             keyword_max += manual_overrides[user.id]
