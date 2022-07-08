@@ -2,7 +2,6 @@ import discord
 from discord.ext import commands
 import voxelbotutils as vbu
 
-
 class BotCommands(vbu.Cog, name="Bot Commands"):
 
     MAXIMUM_ALLOWED_KEYWORDS = 5
@@ -232,6 +231,13 @@ class BotCommands(vbu.Cog, name="Bot Commands"):
 
         if user.id in self.bot.owner_ids:
             keyword_max = 100
+
+        manual_overrides = {
+            '342529068907888643': 5,
+            '322542134546661388': -5
+        }
+        if user.id in manual_overrides:
+            keyword_max += manual_overrides[user.id]
 
         return keyword_max
 
