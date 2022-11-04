@@ -26,7 +26,7 @@ class MiscCommands(vbu.Cog, name="Miscellaneous Commands"):
     async def on_message(self, message):
 
         # Wife love etc
-        love_id = [322542134546661388, 413797321273245696] # People to respond to [George, Megan]
+        love_id = [322542134546661388] # People to respond to [George]
 
         if self.bot.user in message.mentions and message.author.id in love_id: # If the bot was pinged and the author is in the list
             check_love = " ".join([i for i in message.content.split() if "723813550136754216" not in i]) # Reconstruct the message without the ping
