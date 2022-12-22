@@ -31,7 +31,7 @@ class FilterCommands(vbu.Cog, name="Filter Commands"):
             curr_filter_rows = await db("SELECT FROM textfilters WHERE userid = $1 AND textfilter = $2", ctx.author.id, filter)
 
             if curr_filter_rows: # Text filter is already in list
-                return await ctx.send((f"{filter} is already in your filters list!"))
+                return await ctx.send((f"`{filter}` is already in your filters list!"))
 
             await db("INSERT INTO textfilters (userid, textfilter) VALUES ($1, $2);", ctx.author.id, filter)
 
@@ -48,7 +48,7 @@ class FilterCommands(vbu.Cog, name="Filter Commands"):
             curr_filter_rows = await db("SELECT FROM channelfilters WHERE userid = $1 AND channelfilter = $2", ctx.author.id, filter)
 
             if curr_filter_rows: # Channel filter is already in list
-                return await ctx.send((f"{filter} is already in your filters list!"))
+                return await ctx.send((f"`{filter}` is already in your filters list!"))
 
             await db("INSERT INTO channelfilters (userid, channelfilter) VALUES ($1, $2);", ctx.author.id, filter.id)
         await ctx.send(f"Added {filter.mention} to your channel filter list")
@@ -75,7 +75,7 @@ class FilterCommands(vbu.Cog, name="Filter Commands"):
             curr_filter_rows = await db("SELECT FROM serverfilters WHERE userid = $1 AND serverfilter = $2", ctx.author.id, filter)
 
             if curr_filter_rows: # Server filter is already in list
-                return await ctx.send((f"{filter} is already in your filters list!"))\
+                return await ctx.send((f"`{filter}` is already in your filters list!"))\
 
             await db("INSERT INTO serverfilters (userid, serverfilter) VALUES ($1, $2);", ctx.author.id, filter)
 
@@ -149,7 +149,7 @@ class FilterCommands(vbu.Cog, name="Filter Commands"):
             curr_filter_rows = await db("SELECT FROM textfilters WHERE userid = $1 AND textfilter = $2", ctx.author.id, filter)
 
             if not curr_filter_rows: # Text filter is already not in list
-                return await ctx.send((f"{filter} is not a filter in your list!"))
+                return await ctx.send((f"`{filter}` is not a filter in your list!"))
 
             await db("DELETE FROM textfilters WHERE userid=$1 and textfilter=$2;", ctx.author.id, filter)
         return await ctx.send(f"Removed `{filter}` from your text filter list")
@@ -163,7 +163,7 @@ class FilterCommands(vbu.Cog, name="Filter Commands"):
             curr_filter_rows = await db("SELECT FROM channelfilters WHERE userid = $1 AND channelfilter = $2", ctx.author.id, filter)
 
             if not curr_filter_rows: # Channel filter is already not in list
-                return await ctx.send((f"{filter} is not a filter in your list!"))
+                return await ctx.send((f"`{filter}` is not a filter in your list!"))
 
             await db("DELETE FROM channelfilters WHERE userid=$1 AND channelfilter=$2;", ctx.author.id, filter.id)
         return await ctx.send(f"Removed `{filter.mention}` from your channel filter list")
@@ -185,7 +185,7 @@ class FilterCommands(vbu.Cog, name="Filter Commands"):
             curr_filter_rows = await db("SELECT FROM serverfilters WHERE userid = $1 AND serverfilter = $2", ctx.author.id, filter)
 
             if not curr_filter_rows: # Server filter is already not in list
-                return await ctx.send((f"{filter} is not a filter in your list!"))
+                return await ctx.send((f"`{filter}` is not a filter in your list!"))
 
             await db("DELETE FROM serverfilters WHERE userid=$1 AND serverfilter=$2;", ctx.author.id, filter)
 
@@ -200,7 +200,7 @@ class FilterCommands(vbu.Cog, name="Filter Commands"):
             curr_filter_rows = await db("SELECT FROM userfilters WHERE userid = $1 AND userfilter = $2", ctx.author.id, filter)
 
             if not curr_filter_rows: # User filter is already not in list
-                return await ctx.send((f"{filter} is not a filter in your list!"))
+                return await ctx.send((f"`{filter}` is not a filter in your list!"))
 
             await db("DELETE FROM userfilters WHERE userid=$1 AND userfilter=$2;", ctx.author.id, filter)
 
