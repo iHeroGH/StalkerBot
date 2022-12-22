@@ -28,7 +28,7 @@ class FilterCommands(vbu.Cog, name="Filter Commands"):
 
         # Opens a connection and inerts the text filter into the textfilters database
         async with vbu.Database() as db:
-            curr_filter_rows = await db("SELECT FROM textfilters WHERE userid == $1 AND textfilter == $2", ctx.author.id, filter)
+            curr_filter_rows = await db("SELECT FROM textfilters WHERE userid = $1 AND textfilter = $2", ctx.author.id, filter)
 
             if curr_filter_rows: # Text filter is already in list
                 return await ctx.send((f"{filter} is already in your filters list!"))
@@ -45,7 +45,7 @@ class FilterCommands(vbu.Cog, name="Filter Commands"):
         """
 
         async with vbu.Database() as db:
-            curr_filter_rows = await db("SELECT FROM channelfilters WHERE userid == $1 AND channelfilter == $2", ctx.author.id, filter)
+            curr_filter_rows = await db("SELECT FROM channelfilters WHERE userid = $1 AND channelfilter = $2", ctx.author.id, filter)
 
             if curr_filter_rows: # Channel filter is already in list
                 return await ctx.send((f"{filter} is already in your filters list!"))
@@ -72,7 +72,7 @@ class FilterCommands(vbu.Cog, name="Filter Commands"):
 
         # Opens a connection and inerts the server filter into the serverfilters database
         async with vbu.Database() as db:
-            curr_filter_rows = await db("SELECT FROM serverfilters WHERE userid == $1 AND serverfilter == $2", ctx.author.id, filter)
+            curr_filter_rows = await db("SELECT FROM serverfilters WHERE userid = $1 AND serverfilter = $2", ctx.author.id, filter)
 
             if curr_filter_rows: # Server filter is already in list
                 return await ctx.send((f"{filter} is already in your filters list!"))\
@@ -87,7 +87,7 @@ class FilterCommands(vbu.Cog, name="Filter Commands"):
 
         # Opens a connection and inerts the user filter into the serverfilters database
         async with vbu.Database() as db:
-            curr_filter_rows = await db("SELECT FROM userfilters WHERE userid == $1 AND userfilter == $2", ctx.author.id, filter)
+            curr_filter_rows = await db("SELECT FROM userfilters WHERE userid = $1 AND userfilter = $2", ctx.author.id, filter)
 
             if curr_filter_rows: # User filter is already in list
                 return await ctx.send((f"{filter} is already in your filters list!"))
@@ -146,7 +146,7 @@ class FilterCommands(vbu.Cog, name="Filter Commands"):
         """Removes a text filter"""
 
         async with vbu.Database() as db:
-            curr_filter_rows = await db("SELECT FROM textfilters WHERE userid == $1 AND textfilter == $2", ctx.author.id, filter)
+            curr_filter_rows = await db("SELECT FROM textfilters WHERE userid = $1 AND textfilter = $2", ctx.author.id, filter)
 
             if not curr_filter_rows: # Text filter is already not in list
                 return await ctx.send((f"{filter} is not a filter in your list!"))
@@ -160,7 +160,7 @@ class FilterCommands(vbu.Cog, name="Filter Commands"):
         """Removes a channel filter"""
 
         async with vbu.Database() as db:
-            curr_filter_rows = await db("SELECT FROM channelfilters WHERE userid == $1 AND channelfilter == $2", ctx.author.id, filter)
+            curr_filter_rows = await db("SELECT FROM channelfilters WHERE userid = $1 AND channelfilter = $2", ctx.author.id, filter)
 
             if not curr_filter_rows: # Channel filter is already not in list
                 return await ctx.send((f"{filter} is not a filter in your list!"))
@@ -182,7 +182,7 @@ class FilterCommands(vbu.Cog, name="Filter Commands"):
 
         # Opens a connection and inerts the text filter into the serverfilters database
         async with vbu.Database() as db:
-            curr_filter_rows = await db("SELECT FROM serverfilters WHERE userid == $1 AND serverfilter == $2", ctx.author.id, filter)
+            curr_filter_rows = await db("SELECT FROM serverfilters WHERE userid = $1 AND serverfilter = $2", ctx.author.id, filter)
 
             if not curr_filter_rows: # Server filter is already not in list
                 return await ctx.send((f"{filter} is not a filter in your list!"))
@@ -197,7 +197,7 @@ class FilterCommands(vbu.Cog, name="Filter Commands"):
 
         # Opens a connection and inerts the user filter into the userfilters database
         async with vbu.Database() as db:
-            curr_filter_rows = await db("SELECT FROM userfilters WHERE userid == $1 AND userfilter == $2", ctx.author.id, filter)
+            curr_filter_rows = await db("SELECT FROM userfilters WHERE userid = $1 AND userfilter = $2", ctx.author.id, filter)
 
             if not curr_filter_rows: # User filter is already not in list
                 return await ctx.send((f"{filter} is not a filter in your list!"))
