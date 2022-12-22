@@ -90,7 +90,7 @@ class FilterCommands(vbu.Cog, name="Filter Commands"):
             curr_filter_rows = await db("SELECT FROM userfilters WHERE userid = $1 AND userfilter = $2", ctx.author.id, filter)
 
             if curr_filter_rows: # User filter is already in list
-                return await ctx.send((f"{filter} is already in your filters list!"))
+                return await ctx.send((f"`{filter}` is already in your filters list!"))
 
             await db("INSERT INTO userfilters (userid, userfilter) VALUES ($1, $2);", ctx.author.id, filter)
 
