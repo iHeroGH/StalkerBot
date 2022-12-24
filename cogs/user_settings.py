@@ -1,6 +1,6 @@
 import asyncio
 
-import voxelbotutils as vbu
+from discord.ext import vbu
 
 
 class UserSettings(vbu.Cog, name="User Setting Commands"):

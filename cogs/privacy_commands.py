@@ -1,7 +1,5 @@
 import discord
-from discord.ext import commands
-import voxelbotutils as vbu
-
+from discord.ext import commands, vbu
 
 class PrivacyCommands(vbu.Cog, name="Privacy Commands"):
 

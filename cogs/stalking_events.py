@@ -4,8 +4,7 @@ import re
 import typing
 
 import discord
-import voxelbotutils as vbu
-
+from discord.ext import vbu
 
 class StalkingEvents(vbu.Cog, name="Stalking Events (Message Send/Edit)"):
 

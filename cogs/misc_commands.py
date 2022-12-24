@@ -1,11 +1,10 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, vbu
 
 import typing
 import aiohttp
 import io
 from PIL import Image
-import voxelbotutils as vbu
 import asyncio
 import difflib
 
