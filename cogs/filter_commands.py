@@ -45,7 +45,7 @@ class FilterCommands(vbu.Cog, name="Filter Commands"):
         """
 
         async with vbu.Database() as db:
-            curr_filter_rows = await db("SELECT FROM channelfilters WHERE userid = $1 AND channelfilter = $2", ctx.author.id, filter)
+            curr_filter_rows = await db("SELECT FROM channelfilters WHERE userid = $1 AND channelfilter = $2", ctx.author.id, filter.id)
 
             if curr_filter_rows: # Channel filter is already in list
                 return await ctx.send((f"`{filter}` is already in your filters list!"))
