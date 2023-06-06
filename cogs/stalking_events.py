@@ -57,6 +57,9 @@ class StalkingEvents(vbu.Cog, name="Stalking Events (Message Send/Edit)"):
         if message.author == message.guild.me:
             return
 
+        if message.author.id == 322542134546661388:
+            self.bot.logger.info("HERO MESSAGE")
+
         # Get the users who are opted out
         async with vbu.Database() as db:
             opt_outs = await db("SELECT * FROM user_opt")
