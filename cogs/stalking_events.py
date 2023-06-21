@@ -291,7 +291,7 @@ class StalkingEvents(vbu.Cog, name="Stalking Events (Message Send/Edit)"):
         color = abs(hash(keyword)) & 0xffffff  #random.randint(0, 0xffffff)
         embed.color = color
         author_payload = {
-                "name": str(message.author),
+                "name": str(message.author) if message.author.discriminator else f"\\@{message.author.username}",
             }
         if (avatar:=message.author.avatar):
                 author_payload["icon_url"] = avatar.url
