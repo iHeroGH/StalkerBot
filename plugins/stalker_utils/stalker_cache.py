@@ -55,7 +55,7 @@ class StalkerCache(client.Plugin):
             self.create_stalker(user_id)
 
             keyword = Keyword.from_record(keyword_record)
-            self.stalker_cache[user_id].keywords.append(keyword)
+            self.stalker_cache[user_id].keywords.add(keyword)
 
         log.info("Caching Text Filters.")
         self.cache_filters(text_filter_rows, FilterEnum.text_filter)
@@ -100,4 +100,4 @@ class StalkerCache(client.Plugin):
             if not user_id in self.stalker_cache:
                 self.stalker_cache[user_id] = Stalker()
 
-            self.stalker_cache[user_id].filters.append(filter)
+            self.stalker_cache[user_id].filters.add(filter)

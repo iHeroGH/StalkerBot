@@ -30,6 +30,18 @@ class Keyword:
         self.keyword = keyword
         self.server_id = server_id
 
+    def __eq__(self, other: object) -> bool:
+         return (
+                isinstance(other, Keyword)
+                and
+                self.keyword == other.keyword
+                and
+                self.server_id == other.server_id
+            )
+
+    def __hash__(self) -> int:
+        return self.__repr__().__hash__()
+
     @classmethod
     def from_record(cls, record) -> Keyword:
         try:
@@ -73,6 +85,18 @@ class Filter:
         """Initializes a Filter object"""
         self.filter = filter
         self.filter_type  = filter_type
+
+    def __eq__(self, other: object) -> bool:
+         return (
+                isinstance(other, Filter)
+                and
+                self.filter == other.filter
+                and
+                self.filter_type == other.filter_type
+            )
+
+    def __hash__(self) -> int:
+        return self.__repr__().__hash__()
 
     def __repr__(self) -> str:
         return f"Filter(filter={self.filter}, filter_type={self.filter_type})"
@@ -144,8 +168,8 @@ class Stalker:
 
     def __init__(
                 self,
-                keywords: list[Keyword] = [],
-                filters: list[Filter] = [],
+                keywords: set[Keyword] = set(),
+                filters: set[Filter] = set(),
                 settings: Settings = Settings.default(),
                 mute_until: dt | None = None,
                 is_opted: bool = False
