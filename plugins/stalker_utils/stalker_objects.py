@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 from datetime import datetime as dt, timedelta as td
@@ -28,6 +30,24 @@ class Keyword:
         self.keyword = keyword
         self.server_id = server_id
 
+    @classmethod
+    def from_record(cls, record) -> Keyword:
+        try:
+            return cls(
+                keyword = record['keyword'],
+                server_id = record['server_id']
+            )
+        except KeyError:
+            raise KeyError("Invalid Keyword record passed to `from_record`.")
+
+    def __repr__(self) -> str:
+        return f"Keyword(keyword={self.keyword}, server_id={self.server_id})"
+
+    def __str__(self) -> str:
+        return ("Global" if not self.server_id else "Server-Specific"
+                + f" Keyword `{self.keyword}`"
+                + f" at {self.server_id}" if self.server_id else "")
+
 class FilterEnum(Enum):
     """
     An Enum class to keep track of the different types of filters.
@@ -54,6 +74,12 @@ class Filter:
         self.filter = filter
         self.filter_type  = filter_type
 
+    def __repr__(self) -> str:
+        return f"Filter(filter={self.filter}, filter_type={self.filter_type})"
+
+    def __str__(self) -> str:
+        return self.__repr__()
+
 class Settings(Flags):
     """The Settings class keeps track of a user's settings as Flags."""
 
@@ -74,6 +100,40 @@ class Settings(Flags):
         "embed_message": 1 << 5, # Messages sent to the user are embedded
     }
 
+    def __str__(self) -> str:
+
+        flag_strings = [
+            f"{flag}={self.__getattribute__(flag)}, "
+            for flag in self.VALID_FLAGS
+            ]
+
+        return f"Settings({''.join(flag_strings)})"
+
+    @classmethod
+    def default(cls) -> Settings:
+        return cls(
+            self_trigger = False,
+            quote_trigger = True,
+            reply_trigger = True,
+            bot_trigger = False,
+            edit_trigger = True,
+            embed_message = True
+        )
+
+    @classmethod
+    def from_record(cls, record) -> Settings:
+        try:
+            return cls(
+                self_trigger = record['self_trigger'],
+                quote_trigger = record['quote_trigger'],
+                reply_trigger = record['reply_trigger'],
+                bot_trigger = record['bot_trigger'],
+                edit_trigger = record['edit_trigger'],
+                embed_message = record['embed_message']
+            )
+        except KeyError:
+            raise KeyError("Invalid Settings record passed to `from_record`.")
+
 class Stalker:
     """
     A Stalker object is a user who uses StalkerBot!
@@ -82,11 +142,11 @@ class Stalker:
     and opting out.
     """
 
-    def _init__(
+    def __init__(
                 self,
-                keywords: list[Keyword],
-                filters: list[Filter],
-                settings: Settings,
+                keywords: list[Keyword] = [],
+                filters: list[Filter] = [],
+                settings: Settings = Settings.default(),
                 mute_until: dt | None = None,
                 is_opted: bool = False
             ) -> None:
@@ -97,6 +157,14 @@ class Stalker:
         self.mute_until = mute_until
         self.is_opted = is_opted
 
-    @classmethod
-    def from_records(cls):
-        ...
+    def __repr__(self) -> str:
+        return (f"Stalker("+
+                f"keywords={self.keywords}, "
+                f"filters={self.filters}, "
+                f"settings={self.settings}, "
+                f"mute_until={self.mute_until}, "
+                f"is_opted={self.is_opted})"
+            )
+
+    def __str__(self) -> str:
+        return self.__repr__()
