@@ -11,7 +11,7 @@ class KeywordCommands(client.Plugin):
     MAX_KEYWORD_LENGTH = 150
 
     @client.command(
-        name="add keyword",
+        name="keyword add",
         options = [
             n.ApplicationCommandOption(
                 name="keyword",
@@ -52,7 +52,7 @@ class KeywordCommands(client.Plugin):
         await ctx.send(f"Added {keyword}" + (f" to {server.id}" if server else ""))
 
     @client.command(
-        name="remove keyword",
+        name="keyword remove",
         options = [
             n.ApplicationCommandOption(
                 name="keyword",
@@ -82,7 +82,7 @@ class KeywordCommands(client.Plugin):
 
         await ctx.send(f"Removed {keyword}" + (f" from {server.id}" if server else ""))
 
-    @client.command(name="list keywords")
+    @client.command(name="keyword list")
     async def list_keywords(self, ctx: t.CommandI) -> None:
         """Lists a user's keywords"""
         await ctx.send("Listed")
