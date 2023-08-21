@@ -8,6 +8,7 @@ class KeywordCommands(client.Plugin):
 
     MAX_KEYWORDS = 5
     MIN_KEYWORD_LENGTH = 2
+    MAX_KEYWORD_LENGTH = 150
 
     @client.command(
         name="add",
@@ -36,7 +37,11 @@ class KeywordCommands(client.Plugin):
 
         if len(keyword) < self.MIN_KEYWORD_LENGTH:
             return await ctx.send(
-                f"Keywords must be at least {self.MIN_KEYWORD_LENGTH} long."
+                f"Keywords must be at least {self.MIN_KEYWORD_LENGTH} characters long."
+            )
+        if len(keyword) > self.MAX_KEYWORD_LENGTH:
+            return await ctx.send(
+                f"Keywords cannot exceed {self.MAX_KEYWORD_LENGTH} characters long."
             )
         keyword.lower()
 
@@ -76,7 +81,6 @@ class KeywordCommands(client.Plugin):
             return await ctx.send("Couldn't find a valid guild.")
 
         await ctx.send(f"Removed {keyword}" + (f" from {server.id}" if server else ""))
-
 
     @client.command(name="list")
     async def list_keywords(self, ctx: t.CommandI) -> None:
