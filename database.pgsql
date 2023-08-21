@@ -1,41 +1,65 @@
-CREATE TABLE IF NOT EXISTS guild_settings(
-    guild_id BIGINT PRIMARY KEY,
-    prefix TEXT
-);
--- A default guild settings table.
--- This is required for VBU and should not be deleted.
--- You can add more columns to this table should you want to add more guild-specific
--- settings.
-
-
+-- The user_settings table keeps track of various adjustable settings
 CREATE TABLE IF NOT EXISTS user_settings(
+    user_id BIGINT PRIMARY KEY,
+    self_trigger BOOLEAN default False,
+    quote_trigger BOOLEAN default True,
+    reply_trigger BOOLEAN default True,
+    bot_trigger BOOLEAN default False,
+    edit_trigger BOOLEAN default True,
+    embed_message BOOLEAN default True
+);
+
+-- The keywords table keeps track of all users and their keywords
+-- If server_id is 0, then it is a global keyword
+-- Otherwise, it is a server-specific keyword
+-- The same user cannot have the same keyword multiple times in the same server
+CREATE TABLE IF NOT EXISTS keywords(
+    user_id BIGINT,
+    keyword TEXT NOT NULL,
+    server_id BIGINT NOT NULL,
+
+    PRIMARY KEY (user_id, keyword, server_id)
+);
+
+-- Filters all follow the general format of the user_id and the filter
+CREATE TABLE IF NOT EXISTS text_filters(
+    user_id BIGINT NOT NULL,
+    filter TEXT NOT NULL
+
+    PRIMARY KEY (user_id, filter)
+);
+
+CREATE TABLE IF NOT EXISTS user_filters(
+    user_id BIGINT NOT NULL,
+    filter BIGINT NOT NULL
+
+    PRIMARY KEY (user_id, filter)
+);
+
+CREATE TABLE IF NOT EXISTS channel_filters(
+    user_id BIGINT NOT NULL,
+    filter BIGINT NOT NULL
+
+    PRIMARY KEY (user_id, filter)
+);
+
+CREATE TABLE IF NOT EXISTS server_filters(
+    user_id BIGINT NOT NULL,
+    filter BIGINT NOT NULL
+
+    PRIMARY KEY (user_id, filter)
+);
+
+-- The temp_mute table keeps track of users who have muted the bot until
+-- a certain timestamp
+CREATE TABLE IF NOT EXISTS temp_mute(
+    user_id BIGINT PRIMARY KEY,
+    unmute_at TIMESTAMP
+);
+
+-- The user_opt_out table keeps track of users who have opted out
+-- of the bot's features (their messages will not be sent to others, and other
+-- people's messages will not get sent to them)
+CREATE TABLE IF NOT EXISTS user_opt_out(
     user_id BIGINT PRIMARY KEY
 );
--- A default guild settings table.
--- This is required for VBU and should not be deleted.
--- You can add more columns to this table should you want to add more user-specific
--- settings.
--- This table is not suitable for member-specific settings as there's no
--- guild ID specified.
-
-
--- CREATE TABLE IF NOT EXISTS role_list(
---     guild_id BIGINT,
---     role_id BIGINT,
---     key TEXT,
---     value TEXT,
---     PRIMARY KEY (guild_id, role_id, key)
--- );
--- A list of role: value mappings should you need one.
--- This is not required for VBU, so is commented out by default.
-
-
--- CREATE TABLE IF NOT EXISTS channel_list(
---     guild_id BIGINT,
---     channel_id BIGINT,
---     key TEXT,
---     value TEXT,
---     PRIMARY KEY (guild_id, channel_id, key)
--- );
--- A list of channel: value mappings should you need one.
--- This is not required for VBU, so is commented out by default.
