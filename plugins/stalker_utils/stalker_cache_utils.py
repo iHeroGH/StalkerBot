@@ -53,13 +53,13 @@ async def load_data() -> None:
         )
 
     log.info("Caching Text Filters.")
-    cache_filters(text_filter_rows, FilterEnum.text_filter)
+    await cache_filters(text_filter_rows, FilterEnum.text_filter)
     log.info("Caching User Filters.")
-    cache_filters(user_filter_rows, FilterEnum.user_filter)
+    await cache_filters(user_filter_rows, FilterEnum.user_filter)
     log.info("Caching Channel Filters.")
-    cache_filters(channel_filter_rows, FilterEnum.channel_filter)
+    await cache_filters(channel_filter_rows, FilterEnum.channel_filter)
     log.info("Caching Server Filters.")
-    cache_filters(server_filter_rows, FilterEnum.server_filter)
+    await cache_filters(server_filter_rows, FilterEnum.server_filter)
 
     log.info("Caching Mutes.")
     for mute_record in temp_mute_rows:
@@ -83,19 +83,18 @@ def create_stalker(user_id: int) -> None:
     if not user_id in stalker_cache:
         stalker_cache[user_id] = Stalker()
 
-def cache_filters(filter_rows, filter_type: FilterEnum) -> None:
+async def cache_filters(filter_rows, filter_type: FilterEnum) -> None:
     """
     Since filter caching is generally the same each time, we only
     deal with a changing filter_type
     """
     for filter_record in filter_rows:
-        user_id = filter_record['user_id']
-        filter = Filter(filter_record['filter'], filter_type)
-
-        if not user_id in stalker_cache:
-            stalker_cache[user_id] = Stalker()
-
-        stalker_cache[user_id].filters.add(filter)
+        await filter_modify_cache_db(
+            True,
+            filter_record['user_id'],
+            filter_record['filter'],
+            filter_type
+        )
 
 async def keyword_modify_cache_db(
             is_add: bool,
@@ -184,5 +183,95 @@ async def keyword_modify_cache_db(
         # If a database connection was given, add it to the db as well
         if conn:
             await conn.fetch(DB_QUERY, user_id, keyword_text, server_id)
+
+    return CACHE_CHECK
+
+async def filter_modify_cache_db(
+            is_add: bool,
+            user_id: int,
+            filter_value: str | int,
+            filter_type: FilterEnum,
+            conn: Connection | None = None,
+        ) -> bool:
+    """
+    Preforms an operation on the cache and optionally updates the database
+
+    Parameters
+    ----------
+    is_add : bool
+        Whether we are adding or removing from the cache/db
+    user_id : int
+        The user_id of the Stalker to update
+    filter_value : str | int
+        The value of the filter to add/remove
+    filter_type : FilterEnum
+        The type of filter to add/remove
+    conn : Connection | None
+        An optional DB connection. If given, a query will be run to add the
+        given data to the database in addition to the cache
+
+    Returns
+    -------
+    success : bool
+        A state of sucess for the requested operation. If adding, return if
+        the item was not already found. If removing, return if the item was
+        present.
+    """
+    # Make sure we have a Stalker object in cache and create a keyword
+    create_stalker(user_id)
+    filter = Filter(filter_value, filter_type)
+
+    FILTER_TABLE = {
+        FilterEnum.text_filter: "text_filters",
+        FilterEnum.user_filter: "user_filters",
+        FilterEnum.channel_filter: "channel_filters",
+        FilterEnum.server_filter: "server_filters",
+    }[filter_type]
+
+    # DB_QUERY[0] is what to use for remove
+    # DB_QUERY[1] is what to use for add
+    DB_QUERY = [
+        """DELETE FROM
+            $1
+            WHERE
+            user_id = $2
+            AND
+            filter = $3
+        """,
+
+        """INSERT INTO
+            $1
+            (
+                user_id,
+                filter,
+            )
+            VALUES
+            (
+                $2,
+                $3
+            )
+        """
+    ][int(is_add)]
+
+    # CACHE_OPERATION[0] is what to use for remove
+    # CACHE_OPERATION[1] is what to use for add
+    CACHE_CHECK, CACHE_OPERATION = [
+        (
+            filter in stalker_cache[user_id].filters,
+            stalker_cache[user_id].filters.remove
+        ),
+        (
+            filter not in stalker_cache[user_id].filters,
+            stalker_cache[user_id].filters.add
+        ),
+    ][int(is_add)]
+
+    # Perfrom the operation
+    if CACHE_CHECK:
+        CACHE_OPERATION(filter)
+
+        # If a database connection was given, add it to the db as well
+        if conn:
+            await conn.fetch(DB_QUERY, FILTER_TABLE, user_id, filter_value)
 
     return CACHE_CHECK
