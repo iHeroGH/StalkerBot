@@ -1,12 +1,18 @@
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from asyncpg.connection import Connection
 
 from novus.ext import database as db
 
 from .stalker_objects import Stalker, Filter, FilterEnum, Keyword, Settings
 
 log = logging.getLogger("plugins.stalker_utils.stalker_cache_utils")
-
 stalker_cache: dict[int, Stalker] = {}
+
 async def load_data() -> None:
     """Loads all the data from the database into the cache."""
 
@@ -39,11 +45,12 @@ async def load_data() -> None:
 
     log.info("Caching Keywords.")
     for keyword_record in keyword_rows:
-        user_id = keyword_record['user_id']
-        create_stalker(user_id)
-
-        keyword = Keyword.from_record(keyword_record)
-        stalker_cache[user_id].keywords.add(keyword)
+        await keyword_modify_cache_db(
+            True,
+            keyword_record['user_id'],
+            keyword_record['keyword'],
+            keyword_record['server_id']
+        )
 
     log.info("Caching Text Filters.")
     cache_filters(text_filter_rows, FilterEnum.text_filter)
@@ -89,3 +96,93 @@ def cache_filters(filter_rows, filter_type: FilterEnum) -> None:
             stalker_cache[user_id] = Stalker()
 
         stalker_cache[user_id].filters.add(filter)
+
+async def keyword_modify_cache_db(
+            is_add: bool,
+            user_id: int,
+            keyword_text: str,
+            server_id: int,
+            conn: Connection | None = None,
+        ) -> bool:
+    """
+    Preforms an operation on the cache and optionally updates the database
+
+    Parameters
+    ----------
+    is_add : bool
+        Whether we are adding or removing from the cache/db
+    user_id : int
+        The user_id of the Stalker to update
+    keyword_text : str
+        The keyword to add/remove
+    server_id : int
+        The server_id for a server-specific keyword (or 0 for global)
+        The server_id should be validated beforehand
+    conn : Connection | None
+        An optional DB connection. If given, a query will be run to add the
+        given data to the database in addition to the cache
+
+    Returns
+    -------
+    success : bool
+        A state of sucess for the requested operation. If adding, return if
+        the item was not already found. If removing, return if the item was
+        present.
+    """
+    # Make sure we have a Stalker object in cache and create a keyword
+    create_stalker(user_id)
+    keyword = Keyword.from_record(
+        {'keyword': keyword_text, 'server_id': server_id}
+    )
+
+    # DB_QUERY[0] is what to use for remove
+    # DB_QUERY[1] is what to use for add
+    DB_QUERY = [
+        """DELETE FROM
+            keywords
+            WHERE
+            user_id = $1
+            AND
+            keyword = $2
+            AND
+            server_id = $3
+        """,
+
+        """INSERT INTO
+            keywords
+            (
+                user_id,
+                keyword,
+                server_id
+            )
+            VALUES
+            (
+                $1,
+                $2,
+                $3
+            )
+        """
+    ][int(is_add)]
+
+    # CACHE_OPERATION[0] is what to use for remove
+    # CACHE_OPERATION[1] is what to use for add
+    CACHE_CHECK, CACHE_OPERATION = [
+        (
+            keyword in stalker_cache[user_id].keywords,
+            stalker_cache[user_id].keywords.remove
+        ),
+        (
+            keyword not in stalker_cache[user_id].keywords,
+            stalker_cache[user_id].keywords.add
+        ),
+    ][int(is_add)]
+
+    # Perfrom the operation
+    if CACHE_CHECK:
+        CACHE_OPERATION(keyword)
+
+        # If a database connection was given, add it to the db as well
+        if conn:
+            await conn.fetch(DB_QUERY, user_id, keyword_text, server_id)
+
+    return CACHE_CHECK
