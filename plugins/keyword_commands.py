@@ -3,7 +3,9 @@ from novus import types as t
 from novus.utils import Localization as LC
 from novus.ext import client, database as db
 
-from .stalker_utils.stalker_cache_utils import stalker_cache, keyword_modify_cache_db
+from .stalker_utils.stalker_cache_utils import stalker_cache, \
+                                            keyword_modify_cache_db
+from .stalker_utils.misc import get_guild_from_cache
 
 class KeywordCommands(client.Plugin):
 
@@ -48,7 +50,7 @@ class KeywordCommands(client.Plugin):
         keyword.lower()
 
         # Get a server if it's server-specific
-        server = self.get_guild_from_cache(ctx, server_id)
+        server = get_guild_from_cache(self.bot, ctx, server_id)
         if not server and server_id != "0":
             return await ctx.send("Couldn't find a valid guild.")
 
@@ -102,7 +104,7 @@ class KeywordCommands(client.Plugin):
         keyword.lower()
 
         # Get a server if it's server-specific
-        server = self.get_guild_from_cache(ctx, server_id)
+        server = get_guild_from_cache(self.bot, ctx, server_id)
         if not server and server_id != "0":
             return await ctx.send("Couldn't find a valid guild.")
 
@@ -131,48 +133,3 @@ class KeywordCommands(client.Plugin):
     async def list_keywords(self, ctx: t.CommandI) -> None:
         """Lists a user's keywords"""
         await ctx.send(str(stalker_cache[ctx.user.id].keywords))
-
-    def get_guild_from_cache(
-                self,
-                ctx: t.CommandI,
-                server_id: str | int
-            ) -> n.BaseGuild | None:
-        """
-        Retrieves a Guild from the bot's cache given its ID
-
-        If "1" is passed as the ID, return the guild in which the command
-        was run
-
-        Parameters
-        ----------
-        ctx : t.CommandI
-            The command interaction to find the guild from
-        server_id : str
-            The ID of the guild to find
-
-        Returns
-        -------
-        guild : n.BaseGuild | None
-            The guild, if it was found
-
-        """
-        # If the user enters something that is not a digit, we couldn't
-        # get a guild
-        if isinstance(server_id, str):
-            if server_id.isdigit():
-                server_id = int(server_id)
-            else:
-                return None
-
-        # If server_id is 0, it is a global keyword
-        # If server_id is 1, it is the current guild
-        # Otherwise, try to find a guild
-        guild = None
-        if server_id == 0:
-            pass
-        elif server_id == 1:
-            guild = ctx.guild
-        elif server_id and server_id in self.bot.cache.guild_ids:
-            guild = self.bot.cache.guilds[server_id]
-
-        return guild
