@@ -120,7 +120,7 @@ class Settings(Flags):
         "quote_trigger": 1 << 1, # Keywords in a "> text" quote are triggered
         "reply_trigger": 1 << 2, # The user recieves a DM for replies
         "bot_trigger": 1 << 3, # Bots and webhooks trigger user keywords
-        "edit_trigger": 1 << 4, # Messages with a keyword that get edited re-trigger
+        "edit_trigger": 1 << 4, # Messages that get edited re-trigger
         "embed_message": 1 << 5, # Messages sent to the user are embedded
     }
 

@@ -41,11 +41,13 @@ class KeywordCommands(client.Plugin):
         # Constrain keyword
         if len(keyword) < self.MIN_KEYWORD_LENGTH:
             return await ctx.send(
-                f"Keywords must be at least {self.MIN_KEYWORD_LENGTH} characters long."
+                f"Keywords must be at least, " +
+                f"{self.MIN_KEYWORD_LENGTH} characters long."
             )
         if len(keyword) > self.MAX_KEYWORD_LENGTH:
             return await ctx.send(
-                f"Keywords cannot exceed {self.MAX_KEYWORD_LENGTH} characters long."
+                f"Keywords cannot exceed, " +
+                f"{self.MAX_KEYWORD_LENGTH} characters long."
             )
         keyword.lower()
 
