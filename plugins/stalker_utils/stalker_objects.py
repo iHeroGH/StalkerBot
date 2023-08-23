@@ -8,10 +8,12 @@ from novus.enums.utils import Enum
 from vfflags import Flags
 
 if TYPE_CHECKING:
+    import novus as n
     from novus import types as t
     from novus.ext import client
 
-from .misc import get_guild_from_cache
+from .misc import get_guild_from_cache, get_user_from_cache, \
+                                    get_channel_from_cache
 
 class Keyword:
     """
@@ -32,7 +34,7 @@ class Keyword:
                 keyword: str,
                 server_id: int = 0
             ) -> None:
-        """Initializes a Keyword object (default Global)"""
+        """Initializes a Keyword object (default global)"""
         self.keyword = keyword
         self.server_id = server_id
 
@@ -60,9 +62,7 @@ class Keyword:
         return f"Keyword(keyword={self.keyword}, server_id={self.server_id})"
 
     def __str__(self) -> str:
-        return ("Global" if not self.server_id else "Server-Specific"
-                + f" Keyword `{self.keyword}`"
-                + f" at {self.server_id}" if self.server_id else "")
+        return f"`{self.keyword}`"
 
 class FilterEnum(Enum):
     """
@@ -80,6 +80,8 @@ class Filter:
     The Filter class keeps track of a filter and its type (via the
     FilterEnum class)
     """
+
+    bot: client.Client | None = None
 
     def __init__(
                 self,
@@ -106,7 +108,32 @@ class Filter:
         return f"Filter(filter={self.filter}, filter_type={self.filter_type})"
 
     def __str__(self) -> str:
-        return self.__repr__()
+
+        match self.filter_type:
+            case FilterEnum.user_filter:
+                user = get_user_from_cache(self.bot, self.filter)
+                return self.get_object_identifier(user)
+
+            case FilterEnum.channel_filter:
+                channel = get_channel_from_cache(self.bot, self.filter)
+                return self.get_object_identifier(channel)
+
+            case FilterEnum.server_filter:
+                server = get_guild_from_cache(self.bot, self.filter)
+                return self.get_object_identifier(server)
+
+            case _:
+                return f"`{self.filter}`"
+
+    def get_object_identifier(
+                self,
+                object: n.Channel | n.User | n.BaseGuild | None
+            ) -> str:
+        """A simple method to get a formatted str for a Channel, User or Guild"""
+        if object:
+            return f"`{str(object)}` ({object.id})"
+        else:
+            return f"`{self.filter}`"
 
 class Settings(Flags):
     """The Settings class keeps track of a user's settings as Flags."""
@@ -192,7 +219,7 @@ class Stalker:
         self.mute_until = mute_until
         self.is_opted = is_opted
 
-    def format_keywords(self, bot: client.Client, ctx: t.CommandI) -> str:
+    def format_keywords(self, bot: client.Client) -> str:
         """Returns a formatted string listing a user's keywords"""
 
         add_command = bot.get_command("keyword add")
@@ -211,33 +238,36 @@ class Stalker:
             f"{self.used_keywords}/{self.max_keywords} keywords"
         )
 
-        formatted_keywords_dict: dict[int, list[str]] = {
-            0: ["*No Global Keywords*"] if not self.keywords[0]
-                else [f"`{keyword.keyword}`" for keyword in self.keywords[0]]
-        }
-        for server_id, keyword_set in self.keywords.items():
-            if not server_id:
-                continue
-
-            formatted_keywords_dict[server_id] = [
-                f"`{keyword.keyword}`" for keyword in keyword_set
-            ]
-
         # Having a 0 key is guaranteed
         output += "\n\n**Global Keywords**\n"
-        output += ', '.join(formatted_keywords_dict[0])
+        if self.keywords[0]:
+            output += ', '.join(map(str, self.keywords[0]))
+        else:
+            output += "*No Global Keywords*"
 
         output += "\n\n**Server-Specific Keywords**\n"
-        for server_id, formatted_keywords in formatted_keywords_dict.items():
+        has_server_specific = False
+        for server_id, keywords in self.keywords.items():
+
+            # Skip the global keywords
             if not server_id:
                 continue
 
+            # If they don't have any server-specific keywords, change text later
+            if keywords:
+                has_server_specific = True
+
+            # If we can't find the guild in cache, let the user know
             server = get_guild_from_cache(bot, server_id)
             output += (
                 f"__{server.name}__ ({server.id})" if server else
                 f"__{server_id}__ (StalkerBot may not be in this server)"
             ) + "\n"
-            output += ', '.join(formatted_keywords) + "\n"
+
+            output += ', '.join(map(str, keywords)) + "\n"
+
+        if not has_server_specific:
+            output += "*No Server-Specific Keywords"
 
         return output
 
@@ -258,21 +288,20 @@ class Stalker:
             FilterEnum.server_filter: "filter add server"
         }
 
+        # So we can check cache later
+        Filter.bot = bot
+
         output = ""
         for filter_type, title in FILTER_TITLES.items():
             output += f"\n\n**{title}**\n"
 
-            formatted_filters = [
-                            f'`{filter.filter}`'
-                            for filter in self.filters[filter_type]
-                        ]
-
+            # Get the command mention for easy access for the user
             filter_mention = f"`{FILTER_COMMAND_NAMES[filter_type]}`"
             filter_command = bot.get_command(FILTER_COMMAND_NAMES[filter_type])
             if filter_command:
                 filter_mention = filter_command.mention
 
-            output += ', '.join(formatted_filters) \
+            output += ', '.join(map(str, self.filters[filter_type])) \
                         if self.filters[filter_type] else \
                         (f"You don't have any {title.lower()}! " +
                         f"Set some up by running the {filter_mention} command.")

@@ -141,7 +141,8 @@ async def keyword_modify_cache_db(
     # DB_QUERY[0] is what to use for remove
     # DB_QUERY[1] is what to use for add
     DB_QUERY = [
-        """DELETE FROM
+        """
+        DELETE FROM
             keywords
             WHERE
             user_id = $1
@@ -151,7 +152,8 @@ async def keyword_modify_cache_db(
             server_id = $3
         """,
 
-        """INSERT INTO
+        """
+        INSERT INTO
             keywords
             (
                 user_id,
@@ -236,7 +238,8 @@ async def filter_modify_cache_db(
     # DB_QUERY[0] is what to use for remove
     # DB_QUERY[1] is what to use for add
     DB_QUERY = [
-        """DELETE FROM
+        """
+        DELETE FROM
             {}
             WHERE
             user_id = $1
@@ -244,7 +247,8 @@ async def filter_modify_cache_db(
             filter = $2
         """,
 
-        """INSERT INTO
+        """
+        INSERT INTO
             {}
             (
                 user_id,
@@ -277,7 +281,6 @@ async def filter_modify_cache_db(
 
         # If a database connection was given, add it to the db as well
         if conn:
-            log.info(DB_QUERY.format(FILTER_TABLE) + " " + str(user_id) + " " + str(filter_value))
             await conn.fetch(
                 DB_QUERY.format(FILTER_TABLE),
                 user_id,

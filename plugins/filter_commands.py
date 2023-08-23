@@ -136,7 +136,9 @@ class FilterCommands(client.Plugin):
         # The bot needs to be in the server
         server = get_guild_from_cache(self.bot, filter, ctx)
         if not server:
-            return await ctx.send("Couldn't find a valid guild.")
+            return await ctx.send(
+                "Couldn't find a valid guild. The bot may not be in that guild"
+            )
 
         async with db.Database.acquire() as conn:
             success = await filter_modify_cache_db(
@@ -153,7 +155,7 @@ class FilterCommands(client.Plugin):
                 " it may already be in your list."
             )
 
-        await ctx.send(f"Filtered **{filter}**!")
+        await ctx.send(f"Filtered **{server.name}**!")
 
     @client.command(
         name="filter remove text",
@@ -274,16 +276,15 @@ class FilterCommands(client.Plugin):
             ) -> None:
         """Removes a server filter"""
 
-        # The bot needs to be in the server
-        server = get_guild_from_cache(self.bot, filter, ctx)
-        if not server:
-            return await ctx.send("Couldn't find a valid guild.")
+        # Won't check if the bot is in the server already, because it is
+        # valid that a user would remove a server filter after the bot is
+        # removed from it
 
         async with db.Database.acquire() as conn:
             success = await filter_modify_cache_db(
                 True,
                 ctx.user.id,
-                server.id,
+                filter,
                 FilterEnum.server_filter,
                 conn
             )
