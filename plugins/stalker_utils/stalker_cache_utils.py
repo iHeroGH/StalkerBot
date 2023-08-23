@@ -175,7 +175,8 @@ async def keyword_modify_cache_db(
             stalker_cache[user_id].keywords[server_id].remove
         ),
         (
-            keyword not in stalker_cache[user_id].keywords[server_id],
+            keyword not in stalker_cache[user_id].keywords[server_id] and
+            keyword not in stalker_cache[user_id].keywords[0],
             stalker_cache[user_id].keywords[server_id].add
         ),
     ][int(is_add)]

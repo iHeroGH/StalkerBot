@@ -41,12 +41,10 @@ class Keyword:
                 isinstance(other, Keyword)
                 and
                 self.keyword == other.keyword
-                and
-                self.server_id == other.server_id
             )
 
     def __hash__(self) -> int:
-        return self.__repr__().__hash__()
+        return hash(self.keyword)
 
     @classmethod
     def from_record(cls, record) -> Keyword:
@@ -176,7 +174,7 @@ class Stalker:
 
     def __init__(
                 self,
-                keywords: dict[int, set[Keyword]] = {},
+                keywords: dict[int, set[Keyword]] = {0: set()},
                 filters: set[Filter] = set(),
                 settings: Settings = Settings.default(),
                 mute_until: dt | None = None,
@@ -197,7 +195,7 @@ class Stalker:
         if add_command:
             command_mention = add_command.mention
 
-        if not self.keywords:
+        if not self.used_keywords:
             return (
                 "You don't have any keywords! " +
                 f"Set some up by running the {command_mention} command."
@@ -209,9 +207,13 @@ class Stalker:
         )
 
         formatted_keywords_dict: dict[int, list[str]] = {
-            0: ["*No Global Keywords*"]
+            0: ["*No Global Keywords*"] if not self.keywords[0]
+                else [f"`{keyword.keyword}`" for keyword in self.keywords[0]]
         }
         for server_id, keyword_set in self.keywords.items():
+            if not server_id:
+                continue
+
             formatted_keywords_dict[server_id] = [
                 f"`{keyword.keyword}`" for keyword in keyword_set
             ]
