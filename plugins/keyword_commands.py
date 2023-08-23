@@ -145,5 +145,5 @@ class KeywordCommands(client.Plugin):
         stalker = get_stalker(ctx.user.id)
 
         await ctx.send(
-            stalker.format_keywords(self.bot, ctx)
+            stalker.format_keywords(self.bot)
         )
