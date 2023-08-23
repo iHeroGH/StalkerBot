@@ -38,7 +38,7 @@ async def load_data() -> None:
     log.info("Caching Settings.")
     for settings_record in settings_rows:
         user_id = settings_record['user_id']
-        create_stalker(user_id)
+        get_stalker(user_id)
 
         chosen_settings = Settings.from_record(settings_record)
         stalker_cache[user_id].settings = chosen_settings
@@ -64,24 +64,26 @@ async def load_data() -> None:
     log.info("Caching Mutes.")
     for mute_record in temp_mute_rows:
         user_id = mute_record['user_id']
-        create_stalker(user_id)
+        get_stalker(user_id)
 
         stalker_cache[user_id].mute_until = mute_record['unmute_at']
 
     log.info("Caching Opt-Outs.")
     for opt_record in user_opt_out_rows:
         user_id = opt_record['user_id']
-        create_stalker(user_id)
+        get_stalker(user_id)
 
         stalker_cache[user_id].is_opted = True
 
     log.info("Caching Complete!")
     log.info(stalker_cache)
 
-def create_stalker(user_id: int) -> None:
+def get_stalker(user_id: int) -> Stalker:
     """Creates an empty Stalker object if one is not found for a User ID"""
     if not user_id in stalker_cache:
         stalker_cache[user_id] = Stalker()
+
+    return stalker_cache[user_id]
 
 async def cache_filters(filter_rows, filter_type: FilterEnum) -> None:
     """
@@ -129,10 +131,12 @@ async def keyword_modify_cache_db(
         present.
     """
     # Make sure we have a Stalker object in cache and create a keyword
-    create_stalker(user_id)
+    stalker = get_stalker(user_id)
     keyword = Keyword.from_record(
         {'keyword': keyword_text, 'server_id': server_id}
     )
+    if server_id not in stalker.keywords:
+        stalker.keywords[server_id] = set()
 
     # DB_QUERY[0] is what to use for remove
     # DB_QUERY[1] is what to use for add
@@ -167,12 +171,12 @@ async def keyword_modify_cache_db(
     # CACHE_OPERATION[1] is what to use for add
     CACHE_CHECK, CACHE_OPERATION = [
         (
-            keyword in stalker_cache[user_id].keywords,
-            stalker_cache[user_id].keywords.remove
+            keyword in stalker_cache[user_id].keywords[server_id],
+            stalker_cache[user_id].keywords[server_id].remove
         ),
         (
-            keyword not in stalker_cache[user_id].keywords,
-            stalker_cache[user_id].keywords.add
+            keyword not in stalker_cache[user_id].keywords[server_id],
+            stalker_cache[user_id].keywords[server_id].add
         ),
     ][int(is_add)]
 
@@ -218,7 +222,7 @@ async def filter_modify_cache_db(
         present.
     """
     # Make sure we have a Stalker object in cache and create a keyword
-    create_stalker(user_id)
+    get_stalker(user_id)
     filter = Filter(filter_value, filter_type)
 
     FILTER_TABLE = {

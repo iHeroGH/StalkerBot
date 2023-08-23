@@ -4,12 +4,11 @@ from novus.utils import Localization as LC
 from novus.ext import client, database as db
 
 from .stalker_utils.stalker_cache_utils import stalker_cache, \
-                                            keyword_modify_cache_db
+                                            keyword_modify_cache_db, get_stalker
 from .stalker_utils.misc import get_guild_from_cache
 
 class KeywordCommands(client.Plugin):
 
-    MAX_KEYWORDS = 5
     MIN_KEYWORD_LENGTH = 2
     MAX_KEYWORD_LENGTH = 150
 
@@ -41,18 +40,26 @@ class KeywordCommands(client.Plugin):
         # Constrain keyword
         if len(keyword) < self.MIN_KEYWORD_LENGTH:
             return await ctx.send(
-                f"Keywords must be at least, " +
+                f"Keywords must be at least " +
                 f"{self.MIN_KEYWORD_LENGTH} characters long."
             )
         if len(keyword) > self.MAX_KEYWORD_LENGTH:
             return await ctx.send(
-                f"Keywords cannot exceed, " +
+                f"Keywords cannot exceed " +
                 f"{self.MAX_KEYWORD_LENGTH} characters long."
             )
         keyword.lower()
 
+        # Constrain keyword count
+        stalker = get_stalker(ctx.user.id)
+        max_keywords = stalker.max_keywords
+        if stalker.used_keywords >= max_keywords:
+            return await ctx.send(
+                f"You cannot add more than {max_keywords} keywords"
+            )
+
         # Get a server if it's server-specific
-        server = get_guild_from_cache(self.bot, ctx, server_id)
+        server = get_guild_from_cache(self.bot, server_id, ctx)
         if not server and server_id != "0":
             return await ctx.send("Couldn't find a valid guild.")
 
@@ -106,7 +113,7 @@ class KeywordCommands(client.Plugin):
         keyword.lower()
 
         # Get a server if it's server-specific
-        server = get_guild_from_cache(self.bot, ctx, server_id)
+        server = get_guild_from_cache(self.bot, server_id, ctx)
         if not server and server_id != "0":
             return await ctx.send("Couldn't find a valid guild.")
 
@@ -134,4 +141,9 @@ class KeywordCommands(client.Plugin):
     @client.command(name="keyword list")
     async def list_keywords(self, ctx: t.CommandI) -> None:
         """Lists a user's keywords"""
-        await ctx.send(str(stalker_cache[ctx.user.id].keywords))
+
+        stalker = get_stalker(ctx.user.id)
+
+        await ctx.send(
+            stalker.format_keywords(self.bot, ctx)
+        )

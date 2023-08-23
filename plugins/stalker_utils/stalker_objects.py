@@ -7,6 +7,12 @@ from datetime import datetime as dt, timedelta as td
 from novus.enums.utils import Enum
 from vfflags import Flags
 
+if TYPE_CHECKING:
+    from novus import types as t
+    from novus.ext import client
+
+from .misc import get_guild_from_cache
+
 class Keyword:
     """
     The Keyword class keeps track of a user's keywords. It also stores
@@ -166,9 +172,11 @@ class Stalker:
     and opting out.
     """
 
+    MAX_KEYWORDS = 5
+
     def __init__(
                 self,
-                keywords: set[Keyword] = set(),
+                keywords: dict[int, set[Keyword]] = {},
                 filters: set[Filter] = set(),
                 settings: Settings = Settings.default(),
                 mute_until: dt | None = None,
@@ -180,6 +188,59 @@ class Stalker:
         self.settings = settings
         self.mute_until = mute_until
         self.is_opted = is_opted
+
+    def format_keywords(self, bot: client.Client, ctx: t.CommandI) -> str:
+        """Returns a formatted string listing a user's keywords"""
+
+        add_command = bot.get_command("keyword add")
+        command_mention = "`keyword add`"
+        if add_command:
+            command_mention = add_command.mention
+
+        if not self.keywords:
+            return (
+                "You don't have any keywords! " +
+                f"Set some up by running the {command_mention} command."
+            )
+
+        output = (
+            f"You are using " +
+            f"{self.used_keywords}/{self.max_keywords} keywords"
+        )
+
+        formatted_keywords_dict: dict[int, list[str]] = {
+            0: ["*No Global Keywords*"]
+        }
+        for server_id, keyword_set in self.keywords.items():
+            formatted_keywords_dict[server_id] = [
+                f"`{keyword.keyword}`" for keyword in keyword_set
+            ]
+
+        # Having a 0 key is guaranteed
+        output += "\n\n**Global Keywords**\n"
+        output += ', '.join(formatted_keywords_dict[0])
+
+        output += "\n\n**Server-Specific Keywords**\n"
+        for server_id, formatted_keywords in formatted_keywords_dict.items():
+            if not server_id:
+                continue
+
+            server = get_guild_from_cache(bot, server_id)
+            output += (
+                f"__{server.name}__ ({server.id})" if server else
+                f"__{server_id}__ (StalkerBot may not be in this server)"
+            ) + "\n"
+            output += ', '.join(formatted_keywords) + "\n"
+
+        return output
+
+    @property
+    def used_keywords(self) -> int:
+        return sum([len(i) for i in self.keywords.values()])
+
+    @property
+    def max_keywords(self) -> int:
+        return self.MAX_KEYWORDS
 
     def __repr__(self) -> str:
         return (f"Stalker("+

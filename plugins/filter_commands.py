@@ -3,7 +3,7 @@ import logging
 import novus as n
 from novus import types as t
 from novus.utils import Localization as LC
-from novus.ext import client
+from novus.ext import client, database as db
 
 from .stalker_utils.stalker_cache_utils import stalker_cache, \
                                                 filter_modify_cache_db
@@ -31,12 +31,14 @@ class FilterCommands(client.Plugin):
             ) -> None:
         """Adds a text filter"""
 
-        success = await filter_modify_cache_db(
-            True,
-            ctx.user.id,
-            filter,
-            FilterEnum.text_filter
-        )
+        async with db.Database.acquire() as conn:
+            success = await filter_modify_cache_db(
+                True,
+                ctx.user.id,
+                filter,
+                FilterEnum.text_filter,
+                conn
+            )
 
         if not success:
             return await ctx.send(
@@ -63,12 +65,14 @@ class FilterCommands(client.Plugin):
             ) -> None:
         """Adds a user filter"""
 
-        success = await filter_modify_cache_db(
-            True,
-            ctx.user.id,
-            filter.id,
-            FilterEnum.user_filter
-        )
+        async with db.Database.acquire() as conn:
+            success = await filter_modify_cache_db(
+                True,
+                ctx.user.id,
+                filter.id,
+                FilterEnum.user_filter,
+                conn
+            )
 
         if not success:
             return await ctx.send(
@@ -95,12 +99,14 @@ class FilterCommands(client.Plugin):
             ) -> None:
         """Adds a channel filter"""
 
-        success = await filter_modify_cache_db(
-            True,
-            ctx.user.id,
-            filter.id,
-            FilterEnum.channel_filter
-        )
+        async with db.Database.acquire() as conn:
+            success = await filter_modify_cache_db(
+                True,
+                ctx.user.id,
+                filter.id,
+                FilterEnum.channel_filter,
+                conn
+            )
 
         if not success:
             return await ctx.send(
@@ -128,16 +134,18 @@ class FilterCommands(client.Plugin):
         """Adds a server filter"""
 
         # The bot needs to be in the server
-        server = get_guild_from_cache(self.bot, ctx, filter)
+        server = get_guild_from_cache(self.bot, filter, ctx)
         if not server:
             return await ctx.send("Couldn't find a valid guild.")
 
-        success = await filter_modify_cache_db(
-            True,
-            ctx.user.id,
-            server.id,
-            FilterEnum.server_filter
-        )
+        async with db.Database.acquire() as conn:
+            success = await filter_modify_cache_db(
+                True,
+                ctx.user.id,
+                server.id,
+                FilterEnum.server_filter,
+                conn
+            )
 
         if not success:
             return await ctx.send(
@@ -164,12 +172,14 @@ class FilterCommands(client.Plugin):
             ) -> None:
         """Removes a text filter"""
 
-        success = await filter_modify_cache_db(
-            False,
-            ctx.user.id,
-            filter,
-            FilterEnum.text_filter
-        )
+        async with db.Database.acquire() as conn:
+            success = await filter_modify_cache_db(
+                False,
+                ctx.user.id,
+                filter,
+                FilterEnum.text_filter,
+                conn
+            )
 
         if not success:
             return await ctx.send(
@@ -196,12 +206,14 @@ class FilterCommands(client.Plugin):
             ) -> None:
         """Removes a user filter"""
 
-        success = await filter_modify_cache_db(
-            False,
-            ctx.user.id,
-            filter.id,
-            FilterEnum.user_filter
-        )
+        async with db.Database.acquire() as conn:
+            success = await filter_modify_cache_db(
+                False,
+                ctx.user.id,
+                filter.id,
+                FilterEnum.user_filter,
+                conn
+            )
 
         if not success:
             return await ctx.send(
@@ -228,12 +240,14 @@ class FilterCommands(client.Plugin):
             ) -> None:
         """Removes a channel filter"""
 
-        success = await filter_modify_cache_db(
-            False,
-            ctx.user.id,
-            filter.id,
-            FilterEnum.channel_filter
-        )
+        async with db.Database.acquire() as conn:
+            success = await filter_modify_cache_db(
+                False,
+                ctx.user.id,
+                filter.id,
+                FilterEnum.channel_filter,
+                conn
+            )
 
         if not success:
             return await ctx.send(
@@ -261,16 +275,18 @@ class FilterCommands(client.Plugin):
         """Removes a server filter"""
 
         # The bot needs to be in the server
-        server = get_guild_from_cache(self.bot, ctx, filter)
+        server = get_guild_from_cache(self.bot, filter, ctx)
         if not server:
             return await ctx.send("Couldn't find a valid guild.")
 
-        success = await filter_modify_cache_db(
-            True,
-            ctx.user.id,
-            server.id,
-            FilterEnum.server_filter
-        )
+        async with db.Database.acquire() as conn:
+            success = await filter_modify_cache_db(
+                True,
+                ctx.user.id,
+                server.id,
+                FilterEnum.server_filter,
+                conn
+            )
 
         if not success:
             return await ctx.send(
