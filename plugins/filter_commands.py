@@ -6,7 +6,7 @@ from novus.utils import Localization as LC
 from novus.ext import client, database as db
 
 from .stalker_utils.stalker_cache_utils import stalker_cache, \
-                                                filter_modify_cache_db
+                                            filter_modify_cache_db, get_stalker
 from .stalker_utils.stalker_objects import FilterEnum
 from .stalker_utils.misc import get_guild_from_cache
 
@@ -295,3 +295,13 @@ class FilterCommands(client.Plugin):
             )
 
         await ctx.send(f"Removed **{filter}**!")
+
+    @client.command(name="filter list")
+    async def list_filters(self, ctx: t.CommandI) -> None:
+        """Lists a user's filters"""
+
+        stalker = get_stalker(ctx.user.id)
+
+        await ctx.send(
+            stalker.format_filters(self.bot)
+        )

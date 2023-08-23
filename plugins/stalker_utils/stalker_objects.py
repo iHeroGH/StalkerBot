@@ -175,7 +175,12 @@ class Stalker:
     def __init__(
                 self,
                 keywords: dict[int, set[Keyword]] = {0: set()},
-                filters: set[Filter] = set(),
+                filters: dict[FilterEnum, set[Filter]] = {
+                    FilterEnum.text_filter: set(),
+                    FilterEnum.user_filter: set(),
+                    FilterEnum.channel_filter: set(),
+                    FilterEnum.server_filter: set()
+                },
                 settings: Settings = Settings.default(),
                 mute_until: dt | None = None,
                 is_opted: bool = False
@@ -233,6 +238,44 @@ class Stalker:
                 f"__{server_id}__ (StalkerBot may not be in this server)"
             ) + "\n"
             output += ', '.join(formatted_keywords) + "\n"
+
+        return output
+
+    def format_filters(self, bot: client.Client) -> str:
+        """Returns a formatted string listing a user's filters"""
+
+        FILTER_TITLES = {
+            FilterEnum.text_filter: "Text Filters",
+            FilterEnum.user_filter: "User Filters",
+            FilterEnum.channel_filter: "Channel Filters",
+            FilterEnum.server_filter: "Server Filters",
+        }
+
+        FILTER_COMMAND_NAMES = {
+            FilterEnum.text_filter: "filter add text",
+            FilterEnum.user_filter: "filter add user",
+            FilterEnum.channel_filter: "filter add channel",
+            FilterEnum.server_filter: "filter add server"
+        }
+
+        output = ""
+        for filter_type, title in FILTER_TITLES.items():
+            output += f"\n\n**{title}**\n"
+
+            formatted_filters = [
+                            f'`{filter.filter}`'
+                            for filter in self.filters[filter_type]
+                        ]
+
+            filter_mention = f"`{FILTER_COMMAND_NAMES[filter_type]}`"
+            filter_command = bot.get_command(FILTER_COMMAND_NAMES[filter_type])
+            if filter_command:
+                filter_mention = filter_command.mention
+
+            output += ', '.join(formatted_filters) \
+                        if self.filters[filter_type] else \
+                        (f"You don't have any {title.lower()}! " +
+                        f"Set some up by running the {filter_mention} command.")
 
         return output
 

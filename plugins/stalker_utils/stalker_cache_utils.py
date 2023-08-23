@@ -237,23 +237,23 @@ async def filter_modify_cache_db(
     # DB_QUERY[1] is what to use for add
     DB_QUERY = [
         """DELETE FROM
-            $1
+            {}
             WHERE
-            user_id = $2
+            user_id = $1
             AND
-            filter = $3
+            filter = $2
         """,
 
         """INSERT INTO
-            $1
+            {}
             (
                 user_id,
-                filter,
+                filter
             )
             VALUES
             (
-                $2,
-                $3
+                $1,
+                $2
             )
         """
     ][int(is_add)]
@@ -262,12 +262,12 @@ async def filter_modify_cache_db(
     # CACHE_OPERATION[1] is what to use for add
     CACHE_CHECK, CACHE_OPERATION = [
         (
-            filter in stalker_cache[user_id].filters,
-            stalker_cache[user_id].filters.remove
+            filter in stalker_cache[user_id].filters[filter_type],
+            stalker_cache[user_id].filters[filter_type].remove
         ),
         (
-            filter not in stalker_cache[user_id].filters,
-            stalker_cache[user_id].filters.add
+            filter not in stalker_cache[user_id].filters[filter_type],
+            stalker_cache[user_id].filters[filter_type].add
         ),
     ][int(is_add)]
 
@@ -277,6 +277,11 @@ async def filter_modify_cache_db(
 
         # If a database connection was given, add it to the db as well
         if conn:
-            await conn.fetch(DB_QUERY, FILTER_TABLE, user_id, filter_value)
+            log.info(DB_QUERY.format(FILTER_TABLE) + " " + str(user_id) + " " + str(filter_value))
+            await conn.fetch(
+                DB_QUERY.format(FILTER_TABLE),
+                user_id,
+                filter_value
+            )
 
     return CACHE_CHECK
