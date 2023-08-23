@@ -13,3 +13,7 @@ class MuteCommands(client.Plugin):
     @client.command(name="opt_out")
     async def opt_out(self, ctx: t.CommandI) -> None:
         ...
+
+    @client.command(name="opt_in")
+    async def opt_in(self, ctx: t.CommandI) -> None:
+        ...
