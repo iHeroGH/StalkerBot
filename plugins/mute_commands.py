@@ -5,7 +5,8 @@ from novus.ext import client, database as db
 
 from datetime import datetime as dt
 
-from .stalker_utils.stalker_cache_utils import mute_modify_cache_db
+from .stalker_utils.stalker_cache_utils import mute_modify_cache_db, \
+                                                opt_modify_cache_db
 from .stalker_utils.misc import get_datetime_until
 
 class MuteCommands(client.Plugin):
@@ -27,7 +28,7 @@ class MuteCommands(client.Plugin):
 
         async with db.Database.acquire() as conn:
             success = await mute_modify_cache_db(
-                ctx.user.id, dt.utcnow() + mute_until, conn
+                dt.utcnow() + mute_until, ctx.user.id, conn
             )
 
         if not success:
@@ -43,7 +44,7 @@ class MuteCommands(client.Plugin):
         """Unmutes the bot if it was already muted."""
 
         async with db.Database.acquire() as conn:
-            success = await mute_modify_cache_db(ctx.user.id, None, conn)
+            success = await mute_modify_cache_db(None, ctx.user.id, conn)
 
         if not success:
             return await ctx.send(
@@ -56,9 +57,29 @@ class MuteCommands(client.Plugin):
     @client.command(name="opt_out")
     async def opt_out(self, ctx: t.CommandI) -> None:
         """Opts-Out of the bot's features."""
-        ...
+
+        async with db.Database.acquire() as conn:
+            success = await opt_modify_cache_db(True, ctx.user.id, conn)
+
+        if not success:
+            return await ctx.send(
+                "Something went wrong trying to opt-out, " +
+                "you may already be opted-out of the bot's features."
+            )
+
+        await ctx.send("Successfuly opted-out!")
 
     @client.command(name="opt_in")
     async def opt_in(self, ctx: t.CommandI) -> None:
         """Opts-In to the bot's features."""
-        ...
+
+        async with db.Database.acquire() as conn:
+            success = await opt_modify_cache_db(False, ctx.user.id, conn)
+
+        if not success:
+            return await ctx.send(
+                "Something went wrong trying to opt-in, " +
+                "you may already be opted-in to the bot's features."
+            )
+
+        await ctx.send("Successfuly opted-in!")

@@ -361,8 +361,8 @@ async def opt_modify_cache_db(
     return CACHE_CHECK
 
 async def mute_modify_cache_db(
-            user_id: int,
             mute_until: dt | None,
+            user_id: int,
             conn: Connection | None = None,
         ) -> bool:
     """
@@ -370,10 +370,10 @@ async def mute_modify_cache_db(
 
     Parameters
     ----------
-    user_id : int
-        The user_id of the Stalker to update
     mute_until : dt | None
         A datetime of when to mute the bot until. If None, then we are unmuting
+    user_id : int
+        The user_id of the Stalker to update
     conn : Connection | None
         An optional DB connection. If given, a query will be run to add the
         given data to the database in addition to the cache
