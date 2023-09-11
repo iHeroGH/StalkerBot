@@ -52,7 +52,7 @@ class MuteCommands(client.Plugin):
                 "the bot may have already been unmuted."
             )
 
-        await ctx.send("Successfuly unmuted!")
+        await ctx.send("Successfully unmuted!")
 
     @client.command(name="opt_out")
     async def opt_out(self, ctx: t.CommandI) -> None:
@@ -67,7 +67,7 @@ class MuteCommands(client.Plugin):
                 "you may already be opted-out of the bot's features."
             )
 
-        await ctx.send("Successfuly opted-out!")
+        await ctx.send("Successfully opted-out!")
 
     @client.command(name="opt_in")
     async def opt_in(self, ctx: t.CommandI) -> None:
@@ -82,4 +82,4 @@ class MuteCommands(client.Plugin):
                 "you may already be opted-in to the bot's features."
             )
 
-        await ctx.send("Successfuly opted-in!")
+        await ctx.send("Successfully opted-in!")
