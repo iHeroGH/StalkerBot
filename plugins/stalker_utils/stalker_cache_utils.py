@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 from typing import TYPE_CHECKING
+from datetime import datetime as dt
 
 if TYPE_CHECKING:
     from asyncpg.connection import Connection
@@ -38,10 +39,10 @@ async def load_data() -> None:
     log.info("Caching Settings.")
     for settings_record in settings_rows:
         user_id = settings_record['user_id']
-        get_stalker(user_id)
+        stalker = get_stalker(user_id)
 
         chosen_settings = Settings.from_record(settings_record)
-        stalker_cache[user_id].settings = chosen_settings
+        stalker.settings = chosen_settings
 
     log.info("Caching Keywords.")
     for keyword_record in keyword_rows:
@@ -64,16 +65,16 @@ async def load_data() -> None:
     log.info("Caching Mutes.")
     for mute_record in temp_mute_rows:
         user_id = mute_record['user_id']
-        get_stalker(user_id)
+        stalker = get_stalker(user_id)
 
-        stalker_cache[user_id].mute_until = mute_record['unmute_at']
+        stalker.mute_until = mute_record['unmute_at']
 
     log.info("Caching Opt-Outs.")
     for opt_record in user_opt_out_rows:
         user_id = opt_record['user_id']
-        get_stalker(user_id)
+        stalker = get_stalker(user_id)
 
-        stalker_cache[user_id].is_opted = True
+        stalker.opted_out = True
 
     log.info("Caching Complete!")
     log.info(stalker_cache)
@@ -106,7 +107,7 @@ async def keyword_modify_cache_db(
             conn: Connection | None = None,
         ) -> bool:
     """
-    Preforms an operation on the cache and optionally updates the database
+    Performs an operation on the cache and optionally updates the database
 
     Parameters
     ----------
@@ -144,11 +145,11 @@ async def keyword_modify_cache_db(
         """
         DELETE FROM
             keywords
-            WHERE
+        WHERE
             user_id = $1
-            AND
+        AND
             keyword = $2
-            AND
+        AND
             server_id = $3
         """,
 
@@ -160,7 +161,7 @@ async def keyword_modify_cache_db(
                 keyword,
                 server_id
             )
-            VALUES
+        VALUES
             (
                 $1,
                 $2,
@@ -173,13 +174,13 @@ async def keyword_modify_cache_db(
     # CACHE_OPERATION[1] is what to use for add
     CACHE_CHECK, CACHE_OPERATION = [
         (
-            keyword in stalker_cache[user_id].keywords[server_id],
-            stalker_cache[user_id].keywords[server_id].remove
+            keyword in stalker.keywords[server_id],
+            stalker.keywords[server_id].remove
         ),
         (
-            keyword not in stalker_cache[user_id].keywords[server_id] and
-            keyword not in stalker_cache[user_id].keywords[0],
-            stalker_cache[user_id].keywords[server_id].add
+            keyword not in stalker.keywords[server_id] and
+            keyword not in stalker.keywords[0],
+            stalker.keywords[server_id].add
         ),
     ][int(is_add)]
 
@@ -189,7 +190,7 @@ async def keyword_modify_cache_db(
 
         # If a database connection was given, add it to the db as well
         if conn:
-            await conn.fetch(DB_QUERY, user_id, keyword_text, server_id)
+            await conn.execute(DB_QUERY, user_id, keyword_text, server_id)
 
     return CACHE_CHECK
 
@@ -201,7 +202,7 @@ async def filter_modify_cache_db(
             conn: Connection | None = None,
         ) -> bool:
     """
-    Preforms an operation on the cache and optionally updates the database
+    Performs an operation on the cache and optionally updates the database
 
     Parameters
     ----------
@@ -225,8 +226,11 @@ async def filter_modify_cache_db(
         present.
     """
     # Make sure we have a Stalker object in cache and create a keyword
-    get_stalker(user_id)
+    stalker = get_stalker(user_id)
     filter = Filter(filter_value, filter_type)
+
+    if filter_type not in stalker.filters:
+        stalker.filters[filter_type] = set()
 
     FILTER_TABLE = {
         FilterEnum.text_filter: "text_filters",
@@ -241,9 +245,9 @@ async def filter_modify_cache_db(
         """
         DELETE FROM
             {}
-            WHERE
+        WHERE
             user_id = $1
-            AND
+        AND
             filter = $2
         """,
 
@@ -254,7 +258,7 @@ async def filter_modify_cache_db(
                 user_id,
                 filter
             )
-            VALUES
+        VALUES
             (
                 $1,
                 $2
@@ -266,12 +270,12 @@ async def filter_modify_cache_db(
     # CACHE_OPERATION[1] is what to use for add
     CACHE_CHECK, CACHE_OPERATION = [
         (
-            filter in stalker_cache[user_id].filters[filter_type],
-            stalker_cache[user_id].filters[filter_type].remove
+            filter in stalker.filters[filter_type],
+            stalker.filters[filter_type].remove
         ),
         (
-            filter not in stalker_cache[user_id].filters[filter_type],
-            stalker_cache[user_id].filters[filter_type].add
+            filter not in stalker.filters[filter_type],
+            stalker.filters[filter_type].add
         ),
     ][int(is_add)]
 
@@ -281,10 +285,155 @@ async def filter_modify_cache_db(
 
         # If a database connection was given, add it to the db as well
         if conn:
-            await conn.fetch(
+            await conn.execute(
                 DB_QUERY.format(FILTER_TABLE),
                 user_id,
                 filter_value
             )
+
+    return CACHE_CHECK
+
+async def opt_modify_cache_db(
+            opting_out: bool,
+            user_id: int,
+            conn: Connection | None = None,
+        ) -> bool:
+    """
+    Performs an operation on the cache and optionally updates the database
+
+    Parameters
+    ----------
+    opting_out : bool
+        Whether the user is opting out
+    user_id : int
+        The user_id of the Stalker to update
+    conn : Connection | None
+        An optional DB connection. If given, a query will be run to add the
+        given data to the database in addition to the cache
+
+    Returns
+    -------
+    success : bool
+        A state of sucess for the requested operation. If opting-in, if the user
+        was opted out. If opting out, if the user was opted in.
+    """
+    # Make sure we have a Stalker object in cache
+    stalker = get_stalker(user_id)
+
+    # DB_QUERY[0] is what to use for opting in
+    # DB_QUERY[1] is what to use for opting out
+    DB_QUERY = [
+        """
+        DELETE FROM
+            user_opt_out
+        WHERE
+            user_id = $1
+        """,
+
+        """
+        INSERT INTO
+            user_opt_out
+            (
+                user_id
+            )
+        VALUES
+            (
+                $1
+            )
+        """
+    ][int(opting_out)]
+
+    # CACHE_OPERATION[0] is what to use for opting in
+    # CACHE_OPERATION[1] is what to use for opting out
+    CACHE_CHECK = [
+            stalker.opted_out,
+            not stalker.opted_out,
+    ][int(opting_out)]
+
+    # Perfrom the operation
+    if CACHE_CHECK:
+        stalker.opted_out = opting_out
+
+        # If a database connection was given, add it to the db as well
+        if conn:
+            await conn.execute(DB_QUERY, user_id)
+
+    return CACHE_CHECK
+
+async def mute_modify_cache_db(
+            user_id: int,
+            mute_until: dt | None,
+            conn: Connection | None = None,
+        ) -> bool:
+    """
+    Performs an operation on the cache and optionally updates the database
+
+    Parameters
+    ----------
+    user_id : int
+        The user_id of the Stalker to update
+    mute_until : dt | None
+        A datetime of when to mute the bot until. If None, then we are unmuting
+    conn : Connection | None
+        An optional DB connection. If given, a query will be run to add the
+        given data to the database in addition to the cache
+
+    Returns
+    -------
+    success : bool
+        A state of sucess for the requested operation. If unmuting, if the user
+        had the bot muted in the first place. If muting, True regardless.
+    """
+    # Make sure we have a Stalker object in cache
+    stalker = get_stalker(user_id)
+
+    # DB_QUERY[0] is what to use for unmuting
+    # DB_QUERY[1] is what to use for muting
+    DB_QUERY = [
+        (
+            """
+            DELETE FROM
+                temp_mute
+            WHERE
+                user_id = $1
+            AND
+                unmute_at IS NOT NULL
+            """, user_id
+        ),
+        (
+            """
+            INSERT INTO
+                temp_mute
+                (
+                    user_id,
+                    unmute_at
+                )
+            VALUES
+                (
+                    $1,
+                    $2
+                )
+            ON CONFLICT (user_id)
+            DO UPDATE
+            SET
+                unmute_at = $2
+            """, user_id, mute_until
+        )
+    ][int(mute_until is not None)]
+
+    # CACHE_OPERATION[0] is what to use for unmuting
+    # CACHE_OPERATION[1] is what to use for muting
+    CACHE_CHECK = [
+            stalker.mute_until,
+            True,
+    ][int(mute_until is not None)]
+
+    # Perfrom the operation
+    if CACHE_CHECK:
+        stalker.mute_until = mute_until
+
+        # If a database connection was given, add it to the db as well
+        if conn:
+            await conn.execute(*DB_QUERY)
 
     return CACHE_CHECK

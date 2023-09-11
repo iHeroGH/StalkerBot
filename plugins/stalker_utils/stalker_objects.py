@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from datetime import datetime as dt, timedelta as td
+from datetime import datetime as dt
 
 from novus.enums.utils import Enum
 from vfflags import Flags
@@ -210,14 +210,14 @@ class Stalker:
                 },
                 settings: Settings = Settings.default(),
                 mute_until: dt | None = None,
-                is_opted: bool = False
+                opted_out: bool = False
             ) -> None:
         """Initializes a Stalker object"""
         self.keywords = keywords
         self.filters = filters
         self.settings = settings
         self.mute_until = mute_until
-        self.is_opted = is_opted
+        self.opted_out = opted_out
 
     def format_keywords(self, bot: client.Client) -> str:
         """Returns a formatted string listing a user's keywords"""
@@ -322,7 +322,7 @@ class Stalker:
                 f"filters={self.filters}, "
                 f"settings={self.settings}, "
                 f"mute_until={self.mute_until}, "
-                f"is_opted={self.is_opted})"
+                f"opted_out={self.opted_out})"
             )
 
     def __str__(self) -> str:
