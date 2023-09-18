@@ -7,7 +7,7 @@ from novus.ext import client, database as db
 
 from .stalker_utils.stalker_cache_utils import stalker_cache, \
                                             filter_modify_cache_db, get_stalker
-from .stalker_utils.stalker_objects import FilterEnum
+from .stalker_utils.stalker_objects import Filter, FilterEnum
 from .stalker_utils.misc import get_guild_from_cache, get_users_from_cache
 
 log = logging.getLogger("plugins.filter_commands")
@@ -126,7 +126,8 @@ class FilterCommands(client.Plugin):
             n.ApplicationCommandOption(
                 name="filter",
                 type=n.ApplicationOptionType.string,
-                description="The filter you want to add"
+                description="The filter you want to add",
+                autocomplete=True
             ),
         ]
     )
@@ -334,7 +335,7 @@ class FilterCommands(client.Plugin):
 
         choices = [
             n.ApplicationCommandChoice(
-                name=await filter.get_list_identifier(guild_id, md=""),
+                name=await filter.get_list_identifier(guild_id, md="", mention=False),
                 value=f"{filter_type} {filter.filter}"
             )
             for filter in stalker.filters[filter_type]
@@ -371,7 +372,7 @@ class FilterCommands(client.Plugin):
 
         choices = [
             n.ApplicationCommandChoice(
-                name= user.username if isinstance(user, n.GuildMember) else str(user),
+                name=user.username if isinstance(user, n.GuildMember) else str(user),
                 value=f"{FilterEnum.user_filter} {user}"
             )
             for user in users
@@ -394,3 +395,24 @@ class FilterCommands(client.Plugin):
             ) -> list[n.ApplicationCommandChoice]:
         """Retrieves autocomplete options for server filters"""
         return await self.filter_autocomplete(ctx, FilterEnum.server_filter)
+
+    @add_server_filter.autocomplete
+    async def current_server_filter_autocomplete(
+                self,
+                ctx: t.CommandI
+            ) -> list[n.ApplicationCommandChoice]:
+        """Retrieves an option for the current guild"""
+        Filter.bot = self.bot
+
+        if not ctx.guild:
+            return []
+
+        fake_filter = Filter(ctx.guild.id, FilterEnum.server_filter)
+        choices = [
+            n.ApplicationCommandChoice(
+                name=await fake_filter.get_list_identifier(md="", mention=False),
+                value=str(ctx.guild.id)
+            )
+        ]
+
+        return choices

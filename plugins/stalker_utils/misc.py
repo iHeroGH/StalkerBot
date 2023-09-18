@@ -34,7 +34,6 @@ def get_guild_from_cache(
         guild : n.BaseGuild | None
             The guild, if it was found
         """
-
         if not bot:
             return None
 

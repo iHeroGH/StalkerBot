@@ -135,7 +135,7 @@ class Filter:
             self,
             guild_id: int | None = None,
             user: n.GuildMember | int | None = None,
-            md: str = "`") -> str:
+            md: str = "`", mention: bool = True) -> str:
 
         match self.filter_type:
             case FilterEnum.user_filter:
@@ -143,15 +143,15 @@ class Filter:
                         self.bot, [self.filter], guild_id
                     ))[0]
 
-                return self.get_object_identifier(user, md)
+                return self.get_object_identifier(user, md, mention)
 
             case FilterEnum.channel_filter:
                 channel = get_channel_from_cache(self.bot, self.filter)
-                return self.get_object_identifier(channel, md)
+                return self.get_object_identifier(channel, md, mention)
 
             case FilterEnum.server_filter:
                 server = get_guild_from_cache(self.bot, self.filter)
-                return self.get_object_identifier(server, md)
+                return self.get_object_identifier(server, md, mention)
 
             case _: # Text filters
                 return f"{md}{self.filter}{md}"
@@ -159,11 +159,11 @@ class Filter:
     def get_object_identifier(
                 self,
                 object: n.Channel | n.GuildMember | n.BaseGuild | int | None,
-                md: str = "`"
+                md: str = "`", mention: bool = True
             ) -> str:
         """Gets a formatted str for a Channel, Member, or Guild"""
         if object and not isinstance(object, int):
-            if isinstance(object, n.BaseGuild):
+            if not mention or isinstance(object, n.BaseGuild):
                 return f"{md}{str(object)}{md} ({object.id})"
             else:
                 return f"{object.mention} ({object.id})"
