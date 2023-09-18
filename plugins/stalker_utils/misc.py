@@ -60,33 +60,47 @@ def get_guild_from_cache(
 
         return guild
 
-def get_user_from_cache(
+async def get_users_from_cache(
                 bot: client.Client | None,
-                user_id: str | int,
-            ) -> n.User | None:
+                user_id_values: list[str | int],
+                guild_id: str | int | None = None
+            ) -> list[int] | list[n.GuildMember | int]:
         """
-        Retrieves a User from the bot's cache given its ID
+        Fetches a list of users and returns their associated user objects or
+        their ID
 
         Parameters
         ----------
         bot : Client | None
             The Client object to check cache from. If not given, we just return
             None
-        user_id : str
-            The ID of the user to find
+        user_id_values : list[str | int]
+            The IDs of the users to find
+        guild_id : str | int | None
+            The guild to find the user in (default None, in which case we cannot
+            find a user)
 
         Returns
         -------
-        user : n.User | None
-            The user, if it was found
+        users_idents : list[int] | list[n.GuildMember | int]
+            A list of user IDs or a mixture of members or IDs if the user was not
+            found
         """
+        user_ids = list(map(int, user_id_values))
 
-        if not bot:
-            return
+        if not bot or not guild_id or guild_id not in bot.cache.guilds:
+            return user_ids
 
-        user = get_object_from_cache(user_id, bot.cache.users)
-        assert not user or isinstance(user, n.User)
-        return user
+        guild = bot.cache.guilds[guild_id]
+        users = await guild.chunk_members(user_ids=user_ids)
+
+        user_idents: dict[int, n.GuildMember | int] = {
+            user_id: user_id for user_id in user_ids
+        }
+        for user in users:
+            user_idents[user.id] = user
+
+        return list(user_idents.values())
 
 def get_channel_from_cache(
                 bot: client.Client | None,

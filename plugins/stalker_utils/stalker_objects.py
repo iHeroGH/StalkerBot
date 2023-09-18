@@ -5,14 +5,15 @@ from typing import TYPE_CHECKING
 from datetime import datetime as dt
 
 from novus.enums.utils import Enum
+from novus import Embed
 from vfflags import Flags
 
+import novus as n
 if TYPE_CHECKING:
-    import novus as n
     from novus import types as t
     from novus.ext import client
 
-from .misc import get_guild_from_cache, get_user_from_cache, \
+from .misc import get_guild_from_cache, get_users_from_cache, \
                                     get_channel_from_cache
 
 class Keyword:
@@ -75,6 +76,20 @@ class FilterEnum(Enum):
     channel_filter = 3
     server_filter = 4
 
+    def __str__(self) -> str:
+        match self:
+            case FilterEnum.text_filter:
+                return f"(Text)"
+
+            case FilterEnum.user_filter:
+                return f"(User)"
+
+            case FilterEnum.channel_filter:
+                return f"(Channel)"
+
+            case FilterEnum.server_filter:
+                return f"(Server)"
+
 class Filter:
     """
     The Filter class keeps track of a filter and its type (via the
@@ -101,39 +116,59 @@ class Filter:
                 self.filter_type == other.filter_type
             )
 
+    def __lt__(self, other: object) -> bool:
+         return (
+                isinstance(other, Filter)
+                and
+                type(self.filter) == type(other.filter)
+                and
+                self.filter < other.filter # type: ignore
+            )
+
     def __hash__(self) -> int:
         return self.__repr__().__hash__()
 
     def __repr__(self) -> str:
-        return f"Filter(filter={self.filter}, filter_type={self.filter_type})"
+        return str(self.filter) + " " + str(self.filter_type)
 
-    def __str__(self) -> str:
+    async def get_list_identifier(
+            self,
+            guild_id: int | None = None,
+            user: n.GuildMember | int | None = None,
+            md: str = "`") -> str:
 
         match self.filter_type:
             case FilterEnum.user_filter:
-                user = get_user_from_cache(self.bot, self.filter)
-                return self.get_object_identifier(user)
+                user = user or (await get_users_from_cache(
+                        self.bot, [self.filter], guild_id
+                    ))[0]
+
+                return self.get_object_identifier(user, md)
 
             case FilterEnum.channel_filter:
                 channel = get_channel_from_cache(self.bot, self.filter)
-                return self.get_object_identifier(channel)
+                return self.get_object_identifier(channel, md)
 
             case FilterEnum.server_filter:
                 server = get_guild_from_cache(self.bot, self.filter)
-                return self.get_object_identifier(server)
+                return self.get_object_identifier(server, md)
 
-            case _:
-                return f"`{self.filter}`"
+            case _: # Text filters
+                return f"{md}{self.filter}{md}"
 
     def get_object_identifier(
                 self,
-                object: n.Channel | n.User | n.BaseGuild | None
+                object: n.Channel | n.GuildMember | n.BaseGuild | int | None,
+                md: str = "`"
             ) -> str:
-        """A simple method to get a formatted str for a Channel, User or Guild"""
-        if object:
-            return f"`{str(object)}` ({object.id})"
-        else:
-            return f"`{self.filter}`"
+        """Gets a formatted str for a Channel, Member, or Guild"""
+        if object and not isinstance(object, int):
+            if isinstance(object, n.BaseGuild):
+                return f"{md}{str(object)}{md} ({object.id})"
+            else:
+                return f"{object.mention} ({object.id})"
+        else: # Object not in cache
+            return f"{md}{self.filter}{md}"
 
 class Settings(Flags):
     """The Settings class keeps track of a user's settings as Flags."""
@@ -158,8 +193,8 @@ class Settings(Flags):
     def __str__(self) -> str:
 
         flag_strings = [
-            f"{flag}={self.__getattribute__(flag)}, "
-            for flag in self.VALID_FLAGS
+                f"{flag}={self.__getattribute__(flag)}, "
+                for flag in self.VALID_FLAGS
             ]
 
         return f"Settings({''.join(flag_strings)})"
@@ -271,8 +306,12 @@ class Stalker:
 
         return output
 
-    def format_filters(self, bot: client.Client) -> str:
-        """Returns a formatted string listing a user's filters"""
+    async def format_filters(
+                self,
+                bot: client.Client,
+                guild_id: int | None = None
+            ) -> Embed:
+        """Returns a formatted embed listing a user's filters"""
 
         FILTER_TITLES = {
             FilterEnum.text_filter: "Text Filters",
@@ -291,9 +330,8 @@ class Stalker:
         # So we can check cache later
         Filter.bot = bot
 
-        output = ""
+        embed = Embed(title="Filters", color=0xFEE75C)
         for filter_type, title in FILTER_TITLES.items():
-            output += f"\n\n**{title}**\n"
 
             # Get the command mention for easy access for the user
             filter_mention = f"`{FILTER_COMMAND_NAMES[filter_type]}`"
@@ -301,12 +339,33 @@ class Stalker:
             if filter_command:
                 filter_mention = filter_command.mention
 
-            output += ', '.join(map(str, self.filters[filter_type])) \
-                        if self.filters[filter_type] else \
-                        (f"You don't have any {title.lower()}! " +
-                        f"Set some up by running the {filter_mention} command.")
+            filter_list = sorted(list(self.filters[filter_type]))
+            if filter_type == FilterEnum.user_filter:
+                users = await get_users_from_cache(
+                    bot,
+                    [filter.filter for filter in filter_list],
+                    guild_id
+                )
+                filter_list = list(zip(filter_list, users))
+            else:
+                filter_list = list(zip(filter_list, [None] * len(filter_list)))
 
-        return output
+            sep = '\n' if not filter_type == FilterEnum.text_filter else ', '
+
+            embed.add_field(
+                name=f"__{title}__",
+                value= sep.join(
+                                [
+                                    await f.get_list_identifier(guild_id, user_o)
+                                    for f, user_o in filter_list
+                            ]
+                        ) if self.filters[filter_type] else \
+                        (f"You don't have any {title.lower()}! " +
+                        f"Set some up by running the {filter_mention} command."),
+                inline=False
+            )
+
+        return embed
 
     @property
     def used_keywords(self) -> int:

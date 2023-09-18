@@ -8,7 +8,7 @@ from novus.ext import client, database as db
 from .stalker_utils.stalker_cache_utils import stalker_cache, \
                                             filter_modify_cache_db, get_stalker
 from .stalker_utils.stalker_objects import FilterEnum
-from .stalker_utils.misc import get_guild_from_cache
+from .stalker_utils.misc import get_guild_from_cache, get_users_from_cache
 
 log = logging.getLogger("plugins.filter_commands")
 
@@ -163,7 +163,8 @@ class FilterCommands(client.Plugin):
             n.ApplicationCommandOption(
                 name="filter",
                 type=n.ApplicationOptionType.string,
-                description="The filter you want to remove"
+                description="The filter you want to remove",
+                autocomplete=True
             ),
         ]
     )
@@ -196,32 +197,33 @@ class FilterCommands(client.Plugin):
         options = [
             n.ApplicationCommandOption(
                 name="filter",
-                type=n.ApplicationOptionType.user,
-                description="The filter you want to add"
+                type=n.ApplicationOptionType.string,
+                description="The filter you want to add",
+                autocomplete=True
             ),
         ]
     )
     async def remove_user_filter(
                 self,
                 ctx: t.CommandI,
-                filter: n.User
+                filter: str
             ) -> None:
         """Removes a user filter"""
 
-        async with db.Database.acquire() as conn:
-            success = await filter_modify_cache_db(
-                False,
-                ctx.user.id,
-                filter.id,
-                FilterEnum.user_filter,
-                conn
-            )
+        # async with db.Database.acquire() as conn:
+        #     success = await filter_modify_cache_db(
+        #         False,
+        #         ctx.user.id,
+        #         filter.id,
+        #         FilterEnum.user_filter,
+        #         conn
+        #     )
 
-        if not success:
-            return await ctx.send(
-                "Ran into some trouble removing that filter, " +
-                " it may not already be in your list."
-            )
+        # if not success:
+        #     return await ctx.send(
+        #         "Ran into some trouble removing that filter, " +
+        #         " it may not already be in your list."
+        #     )
 
         await ctx.send(f"Removed **{filter}**!")
 
@@ -230,32 +232,33 @@ class FilterCommands(client.Plugin):
         options = [
             n.ApplicationCommandOption(
                 name="filter",
-                type=n.ApplicationOptionType.channel,
-                description="The filter you want to add"
+                type=n.ApplicationOptionType.string,
+                description="The filter you want to add",
+                autocomplete=True
             ),
         ]
     )
     async def remove_channel_filter(
                 self,
                 ctx: t.CommandI,
-                filter: n.Channel
+                filter: str
             ) -> None:
         """Removes a channel filter"""
 
-        async with db.Database.acquire() as conn:
-            success = await filter_modify_cache_db(
-                False,
-                ctx.user.id,
-                filter.id,
-                FilterEnum.channel_filter,
-                conn
-            )
+        # async with db.Database.acquire() as conn:
+        #     success = await filter_modify_cache_db(
+        #         False,
+        #         ctx.user.id,
+        #         filter.id,
+        #         FilterEnum.channel_filter,
+        #         conn
+        #     )
 
-        if not success:
-            return await ctx.send(
-                "Ran into some trouble removing that filter, " +
-                " it may not already be in your list."
-            )
+        # if not success:
+        #     return await ctx.send(
+        #         "Ran into some trouble removing that filter, " +
+        #         " it may not already be in your list."
+        #     )
 
         await ctx.send(f"Removed **{filter}**!")
 
@@ -265,7 +268,8 @@ class FilterCommands(client.Plugin):
             n.ApplicationCommandOption(
                 name="filter",
                 type=n.ApplicationOptionType.string,
-                description="The filter you want to add"
+                description="The filter you want to add",
+                autocomplete=True
             ),
         ]
     )
@@ -303,6 +307,86 @@ class FilterCommands(client.Plugin):
 
         stalker = get_stalker(ctx.user.id)
 
+        guild_id = None
+        if ctx.guild:
+            guild_id = ctx.guild.id
+
         await ctx.send(
-            stalker.format_filters(self.bot)
+            embeds=[await stalker.format_filters(self.bot, guild_id)]
         )
+
+    async def filter_autocomplete(
+                self,
+                ctx: t.CommandI,
+                filter_type: FilterEnum
+            ) -> list[n.ApplicationCommandChoice]:
+        """Retrieves the autocomplete options for a given filter type"""
+
+        stalker = get_stalker(ctx.user.id)
+
+        guild_id = None
+        if ctx.guild:
+            guild_id = ctx.guild.id
+
+        choices = [
+            n.ApplicationCommandChoice(
+                name=await filter.get_list_identifier(guild_id, md=""),
+                value=f"{filter_type} {filter.filter}"
+            )
+            for filter in stalker.filters[filter_type]
+        ]
+
+        return choices
+
+    @remove_text_filter.autocomplete
+    async def text_filter_autocomplete(
+                self,
+                ctx: t.CommandI,
+            ):
+        """Retrieves autocomplete options for text filters"""
+        return await self.filter_autocomplete(ctx, FilterEnum.text_filter)
+
+    @remove_user_filter.autocomplete
+    async def user_filter_autocomplete(
+                self,
+                ctx: t.CommandI
+            ) -> list[n.ApplicationCommandChoice]:
+        """Retrieves autocomplete options for user filters"""
+
+        stalker = get_stalker(ctx.user.id)
+
+        guild_id = None
+        if ctx.guild:
+            guild_id = ctx.guild.id
+
+        users = await get_users_from_cache(
+            self.bot,
+            [filter.filter for filter in stalker.filters[FilterEnum.user_filter]],
+            guild_id
+        )
+
+        choices = [
+            n.ApplicationCommandChoice(
+                name= user.username if isinstance(user, n.GuildMember) else str(user),
+                value=f"{FilterEnum.user_filter} {user}"
+            )
+            for user in users
+        ]
+
+        return choices
+
+    @remove_channel_filter.autocomplete
+    async def channel_filter_autocomplete(
+                self,
+                ctx: t.CommandI
+            ) -> list[n.ApplicationCommandChoice]:
+        """Retrieves autocomplete options for channel filters"""
+        return await self.filter_autocomplete(ctx, FilterEnum.channel_filter)
+
+    @remove_server_filter.autocomplete
+    async def server_filter_autocomplete(
+                self,
+                ctx: t.CommandI
+            ) -> list[n.ApplicationCommandChoice]:
+        """Retrieves autocomplete options for server filters"""
+        return await self.filter_autocomplete(ctx, FilterEnum.server_filter)
