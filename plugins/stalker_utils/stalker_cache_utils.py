@@ -12,13 +12,21 @@ from novus.ext import database as db
 from .stalker_objects import Stalker, Filter, FilterEnum, Keyword, Settings
 
 log = logging.getLogger("plugins.stalker_utils.stalker_cache_utils")
+global stalker_cache
 stalker_cache: dict[int, Stalker] = {}
+
+def clear_cache():
+    global stalker_cache
+    for _, stalker in stalker_cache.items():
+        stalker.clear()
+    stalker_cache.clear()
 
 async def load_data() -> None:
     """Loads all the data from the database into the cache."""
+    global stalker_cache
 
     # We want a fresh cache every time we load
-    stalker_cache.clear()
+    clear_cache()
 
     # Get all the data from the database
     async with db.Database.acquire() as conn:
@@ -76,13 +84,15 @@ async def load_data() -> None:
 
         stalker.opted_out = True
 
-    log.info("Caching Complete!")
-    log.info(stalker_cache)
+    log.info(f"Caching Complete! {stalker_cache}")
 
 def get_stalker(user_id: int) -> Stalker:
     """Creates an empty Stalker object if one is not found for a User ID"""
+    global stalker_cache
+    log.info(f"Searching for Stalker {user_id}")
     if not user_id in stalker_cache:
-        stalker_cache[user_id] = Stalker()
+        log.info(f"Creating Stalker {user_id}")
+        stalker_cache[user_id] = Stalker().clear()
 
     return stalker_cache[user_id]
 

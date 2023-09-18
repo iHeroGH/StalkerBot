@@ -88,7 +88,11 @@ class FilterCommands(client.Plugin):
             n.ApplicationCommandOption(
                 name="filter",
                 type=n.ApplicationOptionType.channel,
-                description="The filter you want to add"
+                description="The filter you want to add",
+                channel_types=[n.ChannelType.guild_text,
+                               n.ChannelType.public_thread,
+                               n.ChannelType.private_thread
+                            ]
             ),
         ]
     )

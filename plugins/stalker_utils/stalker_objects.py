@@ -254,6 +254,20 @@ class Stalker:
         self.mute_until = mute_until
         self.opted_out = opted_out
 
+    def clear(self):
+        self.keywords = {0: set()}
+        self.filters =  {
+                    FilterEnum.text_filter: set(),
+                    FilterEnum.user_filter: set(),
+                    FilterEnum.channel_filter: set(),
+                    FilterEnum.server_filter: set()
+                }
+        self.settings = Settings.default()
+        self.mute_until = None
+        self.opted_out = False
+
+        return self
+
     def format_keywords(self, bot: client.Client) -> str:
         """Returns a formatted string listing a user's keywords"""
 
@@ -361,8 +375,8 @@ class Stalker:
                                     for f, user_o in filter_list
                             ]
                         ) if self.filters[filter_type] else \
-                        (f"You don't have any {title.lower()}! " +
-                        f"Set some up by running the {filter_mention} command."),
+                        (f"*You don't have any {title.lower()}! " +
+                        f"Set some up by running the {filter_mention} command.*"),
                 inline=False
             )
 
