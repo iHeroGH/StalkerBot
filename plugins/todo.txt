@@ -2,5 +2,6 @@ remove filters
 keyword autocomplete
 list keywords
 moderation commands
+settings
 
 keyword detection
