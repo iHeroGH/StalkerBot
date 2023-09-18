@@ -1,3 +1,6 @@
+adding duplicate text filters
+adding text filters that dont trigger any keywords
+adding keywords that are already triggered
 remove filters
 keyword autocomplete
 list keywords

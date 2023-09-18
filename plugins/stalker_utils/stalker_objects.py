@@ -350,11 +350,12 @@ class Stalker:
             else:
                 filter_list = list(zip(filter_list, [None] * len(filter_list)))
 
-            sep = '\n' if not filter_type == FilterEnum.text_filter else ', '
+            pre = '- ' if not filter_type == FilterEnum.text_filter else ''
+            sep = '\n- ' if not filter_type == FilterEnum.text_filter else ', '
 
             embed.add_field(
                 name=f"__{title}__",
-                value= sep.join(
+                value= pre + sep.join(
                                 [
                                     await f.get_list_identifier(guild_id, user_o)
                                     for f, user_o in filter_list
