@@ -9,6 +9,7 @@ from .stalker_utils.stalker_cache_utils import stalker_cache, \
                                             filter_modify_cache_db, get_stalker
 from .stalker_utils.stalker_objects import Filter, FilterEnum
 from .stalker_utils.misc import get_guild_from_cache, get_users_from_cache
+from .stalker_utils.autocomplete import current_guild_autocomplete
 
 log = logging.getLogger("plugins.filter_commands")
 
@@ -397,22 +398,8 @@ class FilterCommands(client.Plugin):
         return await self.filter_autocomplete(ctx, FilterEnum.server_filter)
 
     @add_server_filter.autocomplete
-    async def current_server_filter_autocomplete(
+    async def filter_current_guild_autocomplete(
                 self,
                 ctx: t.CommandI
             ) -> list[n.ApplicationCommandChoice]:
-        """Retrieves an option for the current guild"""
-        Filter.bot = self.bot
-
-        if not ctx.guild:
-            return []
-
-        fake_filter = Filter(ctx.guild.id, FilterEnum.server_filter)
-        choices = [
-            n.ApplicationCommandChoice(
-                name=await fake_filter.get_list_identifier(md="", mention=False),
-                value=str(ctx.guild.id)
-            )
-        ]
-
-        return choices
+        return await current_guild_autocomplete(self.bot, ctx)

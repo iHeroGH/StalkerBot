@@ -6,6 +6,7 @@ from novus.ext import client, database as db
 from .stalker_utils.stalker_cache_utils import stalker_cache, \
                                             keyword_modify_cache_db, get_stalker
 from .stalker_utils.misc import get_guild_from_cache
+from .stalker_utils.autocomplete import current_guild_autocomplete
 
 class KeywordCommands(client.Plugin):
 
@@ -25,7 +26,8 @@ class KeywordCommands(client.Plugin):
                 type=n.ApplicationOptionType.string,
                 description="The server ID for a server-specific keyword"
                             + ", or '1' to select the current guild",
-                required=False
+                required=False,
+                autocomplete=True
             )
         ]
     )
@@ -97,7 +99,8 @@ class KeywordCommands(client.Plugin):
                 type=n.ApplicationOptionType.string,
                 description="The server ID for a server-specific keyword"
                             + ", or '1' to select the current guild",
-                required=False
+                required=False,
+                autocomplete=True
             )
         ]
     )
@@ -145,5 +148,13 @@ class KeywordCommands(client.Plugin):
         stalker = get_stalker(ctx.user.id)
 
         await ctx.send(
-            stalker.format_keywords(self.bot)
+            embeds=[stalker.format_keywords(self.bot)]
         )
+
+    @add_keyword.autocomplete
+    @remove_keyword.autocomplete
+    async def keyword_current_guild_autocomplete(
+                self,
+                ctx: t.CommandI
+            ) -> list[n.ApplicationCommandChoice]:
+        return await current_guild_autocomplete(self.bot, ctx)

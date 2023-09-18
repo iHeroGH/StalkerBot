@@ -46,6 +46,13 @@ class Keyword:
                 self.keyword == other.keyword
             )
 
+    def __lt__(self, other: object) -> bool:
+         return (
+                isinstance(other, Keyword)
+                and
+                self.keyword < other.keyword
+            )
+
     def __hash__(self) -> int:
         return hash(self.keyword)
 
@@ -63,7 +70,7 @@ class Keyword:
         return f"Keyword(keyword={self.keyword}, server_id={self.server_id})"
 
     def __str__(self) -> str:
-        return f"`{self.keyword}`"
+        return self.keyword
 
 class FilterEnum(Enum):
     """
@@ -268,7 +275,7 @@ class Stalker:
 
         return self
 
-    def format_keywords(self, bot: client.Client) -> str:
+    def format_keywords(self, bot: client.Client) -> Embed:
         """Returns a formatted string listing a user's keywords"""
 
         add_command = bot.get_command("keyword add")
@@ -276,49 +283,53 @@ class Stalker:
         if add_command:
             command_mention = add_command.mention
 
-        if not self.used_keywords:
-            return (
-                "You don't have any keywords! " +
-                f"Set some up by running the {command_mention} command."
-            )
+        embed = Embed(title="Keywords", color=0xFEE75C)
 
-        output = (
-            f"You are using " +
-            f"{self.used_keywords}/{self.max_keywords} keywords"
-        )
+        if not self.used_keywords:
+            embed.description = ("You don't have any keywords! " +
+                    f"Set some up by running the {command_mention} command.")
+            return embed
+
+        embed.description = (f"You are using " +
+            f"{self.used_keywords}/{self.max_keywords} keywords")
 
         # Having a 0 key is guaranteed
-        output += "\n\n**Global Keywords**\n"
-        if self.keywords[0]:
-            output += ', '.join(map(str, self.keywords[0]))
-        else:
-            output += "*No Global Keywords*"
+        embed.add_field(
+            name="__Global Keywords__",
+            value = '- `' + '`\n- `'.join(map(str, sorted(self.keywords[0]))) + "`"
+                    if self.keywords[0] else
+                    ("You don't have any global keywords! " +
+                    f"Set some up by running the {command_mention} command."),
+            inline=False
+        )
 
-        output += "\n\n**Server-Specific Keywords**\n"
-        has_server_specific = False
+        server_specific_text = ""
         for server_id, keywords in self.keywords.items():
-
             # Skip the global keywords
             if not server_id:
                 continue
 
-            # If they don't have any server-specific keywords, change text later
-            if keywords:
-                has_server_specific = True
-
             # If we can't find the guild in cache, let the user know
             server = get_guild_from_cache(bot, server_id)
-            output += (
-                f"__{server.name}__ ({server.id})" if server else
-                f"__{server_id}__ (StalkerBot may not be in this server)"
+            server_specific_text += (
+                f"**{server.name}** ({server.id})" if server else
+                f"**{server_id}** *(StalkerBot may not be in this server)*"
             ) + "\n"
 
-            output += ', '.join(map(str, keywords)) + "\n"
+            if keywords:
+                server_specific_text += '- `' + '`\n- `'.join(
+                    map(str, sorted(keywords))
+                ) + "`\n"
 
-        if not has_server_specific:
-            output += "*No Server-Specific Keywords"
-
-        return output
+        embed.add_field(
+            name="__Server-Specific Keywords__",
+            value = server_specific_text
+                    if server_specific_text else
+                    ("You don't have any server-specific keywords! " +
+                    f"Set some up by running the {command_mention} command."),
+            inline=False
+        )
+        return embed
 
     async def format_filters(
                 self,
@@ -374,7 +385,7 @@ class Stalker:
                                     await f.get_list_identifier(guild_id, user_o)
                                     for f, user_o in filter_list
                             ]
-                        ) if self.filters[filter_type] else \
+                        ) if self.filters[filter_type] else
                         (f"*You don't have any {title.lower()}! " +
                         f"Set some up by running the {filter_mention} command.*"),
                 inline=False
