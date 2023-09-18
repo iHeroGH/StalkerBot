@@ -1,10 +1,13 @@
+COMMANDS
+remove filters
+remove keywords
+
+PLUGINS
+keyword detection
+settings
+moderation commands
+
+CHECKS
 adding duplicate text filters
 adding text filters that dont trigger any keywords
 adding keywords that are already triggered
-remove filters
-keyword autocomplete
-list keywords
-moderation commands
-settings
-
-keyword detection
