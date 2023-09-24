@@ -194,7 +194,8 @@ class FilterCommands(client.Plugin):
         if not success:
             return await ctx.send(
                 "Ran into some trouble removing that filter, " +
-                " it may not already be in your list."
+                " it may not already be in your list. " +
+                "Make sure to select an option from the autocomplete."
             )
 
         await ctx.send(f"Removed **{filter}**!")
@@ -217,20 +218,21 @@ class FilterCommands(client.Plugin):
             ) -> None:
         """Removes a user filter"""
 
-        # async with db.Database.acquire() as conn:
-        #     success = await filter_modify_cache_db(
-        #         False,
-        #         ctx.user.id,
-        #         filter.id,
-        #         FilterEnum.user_filter,
-        #         conn
-        #     )
+        async with db.Database.acquire() as conn:
+            success = await filter_modify_cache_db(
+                False,
+                ctx.user.id,
+                filter,
+                FilterEnum.user_filter,
+                conn
+            )
 
-        # if not success:
-        #     return await ctx.send(
-        #         "Ran into some trouble removing that filter, " +
-        #         " it may not already be in your list."
-        #     )
+        if not success:
+            return await ctx.send(
+                "Ran into some trouble removing that filter, " +
+                " it may not already be in your list. " +
+                "Make sure to select an option from the autocomplete."
+            )
 
         await ctx.send(f"Removed **{filter}**!")
 
@@ -252,20 +254,21 @@ class FilterCommands(client.Plugin):
             ) -> None:
         """Removes a channel filter"""
 
-        # async with db.Database.acquire() as conn:
-        #     success = await filter_modify_cache_db(
-        #         False,
-        #         ctx.user.id,
-        #         filter.id,
-        #         FilterEnum.channel_filter,
-        #         conn
-        #     )
+        async with db.Database.acquire() as conn:
+            success = await filter_modify_cache_db(
+                False,
+                ctx.user.id,
+                filter,
+                FilterEnum.channel_filter,
+                conn
+            )
 
-        # if not success:
-        #     return await ctx.send(
-        #         "Ran into some trouble removing that filter, " +
-        #         " it may not already be in your list."
-        #     )
+        if not success:
+            return await ctx.send(
+                "Ran into some trouble removing that filter, " +
+                " it may not already be in your list. " +
+                "Make sure to select an option from the autocomplete."
+            )
 
         await ctx.send(f"Removed **{filter}**!")
 
@@ -293,7 +296,7 @@ class FilterCommands(client.Plugin):
 
         async with db.Database.acquire() as conn:
             success = await filter_modify_cache_db(
-                True,
+                False,
                 ctx.user.id,
                 filter,
                 FilterEnum.server_filter,
@@ -303,7 +306,8 @@ class FilterCommands(client.Plugin):
         if not success:
             return await ctx.send(
                 "Ran into some trouble removing that filter, " +
-                " it may not already be in your list."
+                " it may not already be in your list. " +
+                "Make sure to select an option from the autocomplete."
             )
 
         await ctx.send(f"Removed **{filter}**!")
@@ -338,7 +342,7 @@ class FilterCommands(client.Plugin):
         choices = [
             n.ApplicationCommandChoice(
                 name=await filter.get_list_identifier(guild_id, md="", mention=False),
-                value=f"{filter_type} {filter.filter}"
+                value=filter.filter
             )
             for filter in stalker.filters[filter_type]
         ]
@@ -375,7 +379,7 @@ class FilterCommands(client.Plugin):
         choices = [
             n.ApplicationCommandChoice(
                 name=user.username if isinstance(user, n.GuildMember) else str(user),
-                value=f"{FilterEnum.user_filter} {user}"
+                value=user.id if isinstance(user, n.GuildMember) else str(user)
             )
             for user in users
         ]
