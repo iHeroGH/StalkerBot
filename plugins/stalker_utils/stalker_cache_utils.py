@@ -21,6 +21,11 @@ def clear_cache():
         stalker.clear()
     stalker_cache.clear()
 
+def log_cache() -> None:
+    """Logs a message of the cache"""
+    global stalker_cache
+    log.info(f"Cache Requested: {stalker_cache}")
+
 async def load_data() -> None:
     """Loads all the data from the database into the cache."""
     global stalker_cache

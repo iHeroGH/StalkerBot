@@ -15,6 +15,8 @@ log = logging.getLogger("plugins.filter_commands")
 
 class FilterCommands(client.Plugin):
 
+    # FILTER ADDITION
+
     @client.command(
         name="filter add text",
         options = [
@@ -31,6 +33,8 @@ class FilterCommands(client.Plugin):
                 filter: str
             ) -> None:
         """Adds a text filter"""
+
+        log.info(f"Attempting to filter text '{filter}' from {ctx.user.id}")
 
         async with db.Database.acquire() as conn:
             success = await filter_modify_cache_db(
@@ -65,6 +69,8 @@ class FilterCommands(client.Plugin):
                 filter: n.User
             ) -> None:
         """Adds a user filter"""
+
+        log.info(f"Attempting to filter user '{filter.id}' from {ctx.user.id}")
 
         async with db.Database.acquire() as conn:
             success = await filter_modify_cache_db(
@@ -105,6 +111,8 @@ class FilterCommands(client.Plugin):
             ) -> None:
         """Adds a channel filter"""
 
+        log.info(f"Attempting to filter channel '{filter.id}' from {ctx.user.id}")
+
         async with db.Database.acquire() as conn:
             success = await filter_modify_cache_db(
                 True,
@@ -140,9 +148,12 @@ class FilterCommands(client.Plugin):
             ) -> None:
         """Adds a server filter"""
 
+        log.info(f"Attempting to filter server '{filter}' from {ctx.user.id}")
+
         # The bot needs to be in the server
         server = get_guild_from_cache(self.bot, filter, ctx)
         if not server:
+            log.info(f"Server '{filter}' not found.")
             return await ctx.send(
                 "Couldn't find a valid guild. The bot may not be in that guild"
             )
@@ -164,6 +175,8 @@ class FilterCommands(client.Plugin):
 
         await ctx.send(f"Filtered **{server.name}**!")
 
+    # FILTER REMOVAL
+
     @client.command(
         name="filter remove text",
         options = [
@@ -181,6 +194,8 @@ class FilterCommands(client.Plugin):
                 filter: str
             ) -> None:
         """Removes a text filter"""
+
+        log.info(f"Attempting to remove text filter '{filter}' from {ctx.user.id}")
 
         async with db.Database.acquire() as conn:
             success = await filter_modify_cache_db(
@@ -214,9 +229,19 @@ class FilterCommands(client.Plugin):
     async def remove_user_filter(
                 self,
                 ctx: t.CommandI,
-                filter: str
+                filter: str | int
             ) -> None:
         """Removes a user filter"""
+
+        log.info(f"Attempting to remove user filter '{filter}' from {ctx.user.id}")
+
+        if isinstance(filter, str):
+            if filter.isdigit():
+                    filter = int(filter)
+            else:
+                return await ctx.send(
+                    "Make sure to select an option from the autocomplete."
+                )
 
         async with db.Database.acquire() as conn:
             success = await filter_modify_cache_db(
@@ -250,9 +275,19 @@ class FilterCommands(client.Plugin):
     async def remove_channel_filter(
                 self,
                 ctx: t.CommandI,
-                filter: str
+                filter: str | int
             ) -> None:
         """Removes a channel filter"""
+
+        log.info(f"Attempting to remove channel filter '{filter}' from {ctx.user.id}")
+
+        if isinstance(filter, str):
+            if filter.isdigit():
+                    filter = int(filter)
+            else:
+                return await ctx.send(
+                    "Make sure to select an option from the autocomplete."
+                )
 
         async with db.Database.acquire() as conn:
             success = await filter_modify_cache_db(
@@ -286,14 +321,23 @@ class FilterCommands(client.Plugin):
     async def remove_server_filter(
                 self,
                 ctx: t.CommandI,
-                filter: str
+                filter: str | int
             ) -> None:
         """Removes a server filter"""
+
+        log.info(f"Attempting to remove server filter '{filter}' from {ctx.user.id}")
+
+        if isinstance(filter, str):
+            if filter.isdigit():
+                    filter = int(filter)
+            else:
+                return await ctx.send(
+                    "Make sure to select an option from the autocomplete."
+                )
 
         # Won't check if the bot is in the server already, because it is
         # valid that a user would remove a server filter after the bot is
         # removed from it
-
         async with db.Database.acquire() as conn:
             success = await filter_modify_cache_db(
                 False,
@@ -311,6 +355,8 @@ class FilterCommands(client.Plugin):
             )
 
         await ctx.send(f"Removed **{filter}**!")
+
+    # FILTER UTILS
 
     @client.command(name="filter list")
     async def list_filters(self, ctx: t.CommandI) -> None:
@@ -342,7 +388,7 @@ class FilterCommands(client.Plugin):
         choices = [
             n.ApplicationCommandChoice(
                 name=await filter.get_list_identifier(guild_id, md="", mention=False),
-                value=filter.filter
+                value=str(filter.filter)
             )
             for filter in stalker.filters[filter_type]
         ]
@@ -379,7 +425,7 @@ class FilterCommands(client.Plugin):
         choices = [
             n.ApplicationCommandChoice(
                 name=user.username if isinstance(user, n.GuildMember) else str(user),
-                value=user.id if isinstance(user, n.GuildMember) else str(user)
+                value=str(user.id) if isinstance(user, n.GuildMember) else str(user)
             )
             for user in users
         ]

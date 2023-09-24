@@ -255,11 +255,11 @@ class Stalker:
                 opted_out: bool = False
             ) -> None:
         """Initializes a Stalker object"""
-        self.keywords = keywords
-        self.filters = filters
-        self.settings = settings
-        self.mute_until = mute_until
-        self.opted_out = opted_out
+        self.keywords: dict[int, set[Keyword]] = keywords
+        self.filters: dict[FilterEnum, set[Filter]] = filters
+        self.settings: Settings = settings
+        self.mute_until: dt | None = mute_until
+        self.opted_out: bool = opted_out
 
     def clear(self):
         self.keywords = {0: set()}

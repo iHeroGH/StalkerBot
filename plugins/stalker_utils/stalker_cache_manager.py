@@ -5,7 +5,7 @@ from novus import types as t
 from novus.utils import Localization as LC
 from novus.ext import client
 
-from .stalker_cache_utils import load_data
+from .stalker_cache_utils import load_data, log_cache
 
 log = logging.getLogger("plugins.stalker_utils.stalker_cache_manager")
 
@@ -27,5 +27,17 @@ class StalkerCacheManager(client.Plugin):
             ) -> None:
         """Loads all the data from the database into the cache."""
         await load_data()
+
+    @client.command(
+            name="log_cache",
+            guild_ids=[649715200890765342],# 208895639164026880],
+            default_member_permissions=n.Permissions(manage_guild=True)
+        )
+    async def log_cache(
+                self,
+                ctx: t.CommandI,
+            ) -> None:
+        """Sends a log message of the cache"""
+        log_cache()
 
 
