@@ -150,6 +150,81 @@ class KeywordCommands(client.Plugin):
             + (f" from **{server.name}** ({server.id})!" if server else "!")
         )
 
+    @client.command(
+        name="keyword clear",
+        options = [
+            n.ApplicationCommandOption(
+                name="keyword_type",
+                type=n.ApplicationOptionType.string,
+                description="The type of keywords you want to remove",
+                autocomplete=True
+            ),
+        ]
+    )
+    async def clear_keywords(self, ctx: t.CommandI, keyword_type: str):
+        """Clears all keywords of a specified type"""
+
+        # Ensure a correct type was chosen
+        if keyword_type not in ["g", "s", "*"]:
+            return await ctx.send(
+                "Make sure to select an option from the autocomplete."
+            )
+
+        keyword_type_str = {
+            'g': "global",
+            's': "server-specific",
+            '*': "all"
+        }[keyword_type.lower()]
+
+        confirmation_components = [
+            n.ActionRow(
+                [
+                    n.Button(
+                        label="Yes",
+                        style=n.ButtonStyle.green,
+                        custom_id="KEYWORD CLEAR YES"
+                    ),
+                    n.Button(
+                        label="No",
+                        style=n.ButtonStyle.danger,
+                        custom_id="KEYWORD CLEAR NO"
+                    )
+                ]
+            )
+        ]
+        await ctx.send(
+            f"Are you sure you want to delete {keyword_type_str} keywords? " +
+            "(Warning: This is irreversible!)",
+            components=confirmation_components
+        )
+
+        # Get a flattened list of the stalker's keywords
+        stalker = get_stalker(ctx.user.id)
+        keywords = [
+            keyword for keyword_set in stalker.keywords.values()
+            for keyword in keyword_set
+        ]
+
+        # Update the cache and database
+        async with db.Database.acquire() as conn:
+            for keyword in keywords:
+
+                if keyword_type == "g" and keyword.server_id:
+                    continue
+                if keyword_type == "s" and not keyword.server_id:
+                    continue
+
+                await keyword_modify_cache_db(
+                    False,
+                    ctx.user.id,
+                    keyword.keyword,
+                    keyword.server_id,
+                    conn
+                )
+
+        # Send a confirmation message
+        await ctx.send(f"Removed **{keyword_type_str}** keywords.")
+
     @client.command(name="keyword list")
     async def list_keywords(self, ctx: t.CommandI) -> None:
         """Lists a user's keywords"""
@@ -167,3 +242,26 @@ class KeywordCommands(client.Plugin):
                 ctx: t.CommandI
             ) -> list[n.ApplicationCommandChoice]:
         return await current_guild_autocomplete(self.bot, ctx)
+
+    @clear_keywords.autocomplete
+    async def keyword_type_autocomplete(
+            bot,
+            ctx: t.CommandI
+        ) -> list[n.ApplicationCommandChoice]:
+
+        choices = [
+            n.ApplicationCommandChoice(
+                name="Global",
+                value="g"
+            ),
+            n.ApplicationCommandChoice(
+                name="Server-Specific",
+                value="s"
+            ),
+            n.ApplicationCommandChoice(
+                name="Both",
+                value="*"
+            )
+        ]
+
+        return choices

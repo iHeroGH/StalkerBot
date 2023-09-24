@@ -309,14 +309,14 @@ class Stalker:
             if not server_id:
                 continue
 
-            # If we can't find the guild in cache, let the user know
-            server = get_guild_from_cache(bot, server_id)
-            server_specific_text += (
-                f"**{server.name}** ({server.id})" if server else
-                f"**{server_id}** *(StalkerBot may not be in this server)*"
-            ) + "\n"
-
             if keywords:
+                # If we can't find the guild in cache, let the user know
+                server = get_guild_from_cache(bot, server_id)
+                server_specific_text += (
+                    f"**{server.name}** ({server.id})" if server else
+                    f"**{server_id}** *(StalkerBot may not be in this server)*"
+                ) + "\n"
+
                 server_specific_text += '- `' + '`\n- `'.join(
                     map(str, sorted(keywords))
                 ) + "`\n"
