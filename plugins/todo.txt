@@ -2,11 +2,10 @@ COMMANDS
 remove keywords (change keyword autocomplete depending on server id, make both fields optional, if nothing is entered do dropdown)
 
 PLUGINS
-keyword detection
 settings
+keyword detection
 moderation commands
 
 CHECKS
-adding duplicate text filters
 adding text filters that dont trigger any keywords
 adding keywords that are already triggered
