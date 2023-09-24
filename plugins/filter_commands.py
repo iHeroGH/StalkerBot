@@ -390,10 +390,10 @@ class FilterCommands(client.Plugin):
                 name=await filter.get_list_identifier(guild_id, md="", mention=False),
                 value=str(filter.filter)
             )
-            for filter in stalker.filters[filter_type]
+            for filter in sorted(stalker.filters[filter_type])
         ]
 
-        return choices
+        return choices[:25]
 
     @remove_text_filter.autocomplete
     async def text_filter_autocomplete(
@@ -427,10 +427,13 @@ class FilterCommands(client.Plugin):
                 name=user.username if isinstance(user, n.GuildMember) else str(user),
                 value=str(user.id) if isinstance(user, n.GuildMember) else str(user)
             )
-            for user in users
+            for user in sorted(
+                users,
+                key=lambda x: x.username if isinstance(x, n.GuildMember) else str(x)
+            )
         ]
 
-        return choices
+        return choices[:25]
 
     @remove_channel_filter.autocomplete
     async def channel_filter_autocomplete(

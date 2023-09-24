@@ -371,6 +371,11 @@ class Stalker:
                     [filter.filter for filter in filter_list],
                     guild_id
                 )
+                users.sort(
+                    key=lambda x:
+                    x.username if isinstance(x, n.GuildMember) else str(x)
+                )
+
                 filter_list = list(zip(filter_list, users))
             else:
                 filter_list = list(zip(filter_list, [None] * len(filter_list)))
