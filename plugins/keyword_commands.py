@@ -7,11 +7,13 @@ from .stalker_utils.stalker_cache_utils import stalker_cache, \
                                             keyword_modify_cache_db, get_stalker
 from .stalker_utils.misc import get_guild_from_cache
 from .stalker_utils.autocomplete import current_guild_autocomplete
+from .stalker_utils.input_sanitizer import MIN_INPUT_LENGTH, \
+                                            MAX_INPUT_LENGTH,\
+                                            has_blacklisted, \
+                                            get_blacklisted_error
 
 class KeywordCommands(client.Plugin):
 
-    MIN_KEYWORD_LENGTH = 2
-    MAX_KEYWORD_LENGTH = 150
 
     @client.command(
         name="keyword add",
@@ -40,17 +42,19 @@ class KeywordCommands(client.Plugin):
         """Adds a keyword (optionally, a server-specific keyword)"""
 
         # Constrain keyword
-        if len(keyword) < self.MIN_KEYWORD_LENGTH:
+        if len(keyword) < MIN_INPUT_LENGTH:
             return await ctx.send(
                 f"Keywords must be at least " +
-                f"{self.MIN_KEYWORD_LENGTH} characters long."
+                f"{MIN_INPUT_LENGTH} characters long."
             )
-        if len(keyword) > self.MAX_KEYWORD_LENGTH:
+        if len(keyword) > MAX_INPUT_LENGTH:
             return await ctx.send(
                 f"Keywords cannot exceed " +
-                f"{self.MAX_KEYWORD_LENGTH} characters long."
+                f"{MAX_INPUT_LENGTH} characters long."
             )
-        keyword.lower()
+        if has_blacklisted(keyword):
+            return await ctx.send(get_blacklisted_error())
+        keyword = keyword.lower()
 
         # Constrain keyword count
         stalker = get_stalker(ctx.user.id)

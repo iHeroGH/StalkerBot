@@ -10,6 +10,11 @@ from .stalker_utils.stalker_cache_utils import stalker_cache, \
 from .stalker_utils.stalker_objects import Filter, FilterEnum
 from .stalker_utils.misc import get_guild_from_cache, get_users_from_cache
 from .stalker_utils.autocomplete import current_guild_autocomplete
+from .stalker_utils.input_sanitizer import MIN_INPUT_LENGTH, \
+                                            MAX_INPUT_LENGTH,\
+                                            has_blacklisted, \
+                                            get_blacklisted_error
+
 
 log = logging.getLogger("plugins.filter_commands")
 
@@ -35,6 +40,21 @@ class FilterCommands(client.Plugin):
         """Adds a text filter"""
 
         log.info(f"Attempting to filter text '{filter}' from {ctx.user.id}")
+
+        # Constrain filter
+        if len(filter) < MIN_INPUT_LENGTH:
+            return await ctx.send(
+                f"Text filters must be at least " +
+                f"{MIN_INPUT_LENGTH} characters long."
+            )
+        if len(filter) > MAX_INPUT_LENGTH:
+            return await ctx.send(
+                f"Text filters cannot exceed " +
+                f"{MAX_INPUT_LENGTH} characters long."
+            )
+        if has_blacklisted(filter):
+            return await ctx.send(get_blacklisted_error())
+        filter = filter.lower()
 
         async with db.Database.acquire() as conn:
             success = await filter_modify_cache_db(
