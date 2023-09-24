@@ -1,3 +1,5 @@
+import logging
+
 import novus as n
 from novus import types as t
 from novus.utils import Localization as LC
@@ -12,8 +14,9 @@ from .stalker_utils.input_sanitizer import MIN_INPUT_LENGTH, \
                                             has_blacklisted, \
                                             get_blacklisted_error
 
-class KeywordCommands(client.Plugin):
+log = logging.getLogger("plugins.keyword_commands")
 
+class KeywordCommands(client.Plugin):
 
     @client.command(
         name="keyword add",
@@ -55,6 +58,8 @@ class KeywordCommands(client.Plugin):
         if has_blacklisted(keyword):
             return await ctx.send(get_blacklisted_error())
         keyword = keyword.lower()
+
+        log.info(f"Attempting to add keyword '{keyword}' to {ctx.user.id}")
 
         # Constrain keyword count
         stalker = get_stalker(ctx.user.id)

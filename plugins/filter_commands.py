@@ -39,8 +39,6 @@ class FilterCommands(client.Plugin):
             ) -> None:
         """Adds a text filter"""
 
-        log.info(f"Attempting to filter text '{filter}' from {ctx.user.id}")
-
         # Constrain filter
         if len(filter) < MIN_INPUT_LENGTH:
             return await ctx.send(
@@ -55,6 +53,8 @@ class FilterCommands(client.Plugin):
         if has_blacklisted(filter):
             return await ctx.send(get_blacklisted_error())
         filter = filter.lower()
+
+        log.info(f"Attempting to filter text '{filter}' from {ctx.user.id}")
 
         async with db.Database.acquire() as conn:
             success = await filter_modify_cache_db(
