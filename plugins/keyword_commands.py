@@ -245,9 +245,9 @@ class KeywordCommands(client.Plugin):
 
     @clear_keywords.autocomplete
     async def keyword_type_autocomplete(
-            bot,
-            ctx: t.CommandI
-        ) -> list[n.ApplicationCommandChoice]:
+                bot,
+                ctx: t.CommandI
+            ) -> list[n.ApplicationCommandChoice]:
 
         choices = [
             n.ApplicationCommandChoice(
