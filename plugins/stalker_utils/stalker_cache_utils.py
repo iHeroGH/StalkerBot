@@ -94,7 +94,6 @@ async def load_data() -> None:
 def get_stalker(user_id: int) -> Stalker:
     """Creates an empty Stalker object if one is not found for a User ID"""
     global stalker_cache
-    log.info(f"Searching for Stalker {user_id}")
     if not user_id in stalker_cache:
         log.info(f"Creating Stalker {user_id}")
         stalker_cache[user_id] = Stalker().clear()
