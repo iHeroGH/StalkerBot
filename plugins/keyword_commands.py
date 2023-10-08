@@ -2,11 +2,9 @@ import logging
 
 import novus as n
 from novus import types as t
-from novus.utils import Localization as LC
 from novus.ext import client, database as db
 
-from .stalker_utils.stalker_cache_utils import stalker_cache, \
-                                            keyword_modify_cache_db, get_stalker
+from .stalker_utils.stalker_cache_utils import keyword_modify_cache_db, get_stalker
 from .stalker_utils.misc import get_guild_from_cache
 from .stalker_utils.autocomplete import current_guild_autocomplete
 from .stalker_utils.input_sanitizer import MIN_INPUT_LENGTH, \
@@ -47,12 +45,12 @@ class KeywordCommands(client.Plugin):
         # Constrain keyword
         if len(keyword) < MIN_INPUT_LENGTH:
             return await ctx.send(
-                f"Keywords must be at least " +
+                "Keywords must be at least " +
                 f"{MIN_INPUT_LENGTH} characters long."
             )
         if len(keyword) > MAX_INPUT_LENGTH:
             return await ctx.send(
-                f"Keywords cannot exceed " +
+                "Keywords cannot exceed " +
                 f"{MAX_INPUT_LENGTH} characters long."
             )
         if has_blacklisted(keyword):
@@ -193,8 +191,9 @@ class KeywordCommands(client.Plugin):
             components=confirmation_components
         )
 
-    @client.event.filtered_component(r"KEYWORD_CLEAR \d+ \d (g|s|\*)")
+    @client.event.filtered_component(r"KEYWORD_CLEAR \d+ \d .")
     async def clear_keywords_confirmation(self, ctx: t.ComponentI) -> None:
+        """Confirms that a user wants to clear keywords and continues"""
 
         _, required_id, confirm, keyword_type = ctx.data.custom_id.split(" ")
 
@@ -238,6 +237,7 @@ class KeywordCommands(client.Plugin):
         )
 
     def keyword_type_name(self, keyword_type: str):
+        """Returns a readable string defining the keyword type identifier"""
         keyword_type_map = {
             'g': "global",
             's': "server-specific",
@@ -262,13 +262,15 @@ class KeywordCommands(client.Plugin):
                 self,
                 ctx: t.CommandI
             ) -> list[n.ApplicationCommandChoice]:
+        """Retrieves autocomplete option for the current guild"""
         return await current_guild_autocomplete(self.bot, ctx)
 
     @clear_keywords.autocomplete
     async def keyword_type_autocomplete(
-                bot,
-                ctx: t.CommandI
+                self,
+                _: t.CommandI
             ) -> list[n.ApplicationCommandChoice]:
+        """Returns choices for clearing all keywords depending on type"""
 
         choices = [
             n.ApplicationCommandChoice(

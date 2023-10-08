@@ -2,7 +2,6 @@ import logging
 
 import novus as n
 from novus import types as t
-from novus.utils import Localization as LC
 from novus.ext import client
 
 from .stalker_cache_utils import load_data, log_cache
@@ -23,7 +22,7 @@ class StalkerCacheManager(client.Plugin):
         )
     async def load_data(
                 self,
-                ctx: t.CommandI,
+                _: t.CommandI,
             ) -> None:
         """Loads all the data from the database into the cache."""
         await load_data()
@@ -35,9 +34,7 @@ class StalkerCacheManager(client.Plugin):
         )
     async def log_cache(
                 self,
-                ctx: t.CommandI,
+                _: t.CommandI,
             ) -> None:
         """Sends a log message of the cache"""
         log_cache()
-
-

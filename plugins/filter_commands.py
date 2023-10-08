@@ -2,12 +2,10 @@ import logging
 
 import novus as n
 from novus import types as t
-from novus.utils import Localization as LC
 from novus.ext import client, database as db
 
-from .stalker_utils.stalker_cache_utils import stalker_cache, \
-                                            filter_modify_cache_db, get_stalker
-from .stalker_utils.stalker_objects import Filter, FilterEnum
+from .stalker_utils.stalker_cache_utils import filter_modify_cache_db, get_stalker
+from .stalker_utils.stalker_objects import FilterEnum
 from .stalker_utils.misc import get_guild_from_cache, get_users_from_cache
 from .stalker_utils.autocomplete import current_guild_autocomplete
 from .stalker_utils.input_sanitizer import MIN_INPUT_LENGTH, \
@@ -38,29 +36,30 @@ class FilterCommands(client.Plugin):
                 filter: str
             ) -> None:
         """Adds a text filter"""
+        _filter = filter
 
         # Constrain filter
-        if len(filter) < MIN_INPUT_LENGTH:
+        if len(_filter) < MIN_INPUT_LENGTH:
             return await ctx.send(
-                f"Text filters must be at least " +
+                "Text filters must be at least " +
                 f"{MIN_INPUT_LENGTH} characters long."
             )
-        if len(filter) > MAX_INPUT_LENGTH:
+        if len(_filter) > MAX_INPUT_LENGTH:
             return await ctx.send(
-                f"Text filters cannot exceed " +
+                "Text filters cannot exceed " +
                 f"{MAX_INPUT_LENGTH} characters long."
             )
-        if has_blacklisted(filter):
+        if has_blacklisted(_filter):
             return await ctx.send(get_blacklisted_error())
-        filter = filter.lower()
+        _filter = _filter.lower()
 
-        log.info(f"Attempting to filter text '{filter}' from {ctx.user.id}")
+        log.info(f"Attempting to filter text '{_filter}' from {ctx.user.id}")
 
         async with db.Database.acquire() as conn:
             success = await filter_modify_cache_db(
                 True,
                 ctx.user.id,
-                filter,
+                _filter,
                 FilterEnum.text_filter,
                 conn
             )
@@ -71,7 +70,7 @@ class FilterCommands(client.Plugin):
                 "it may already be in your list."
             )
 
-        await ctx.send(f"Filtered **{filter}**!")
+        await ctx.send(f"Filtered **{_filter}**!")
 
     @client.command(
         name="filter add user",
@@ -89,14 +88,15 @@ class FilterCommands(client.Plugin):
                 filter: n.User
             ) -> None:
         """Adds a user filter"""
+        _filter = filter
 
-        log.info(f"Attempting to filter user '{filter.id}' from {ctx.user.id}")
+        log.info(f"Attempting to filter user '{_filter.id}' from {ctx.user.id}")
 
         async with db.Database.acquire() as conn:
             success = await filter_modify_cache_db(
                 True,
                 ctx.user.id,
-                filter.id,
+                _filter.id,
                 FilterEnum.user_filter,
                 conn
             )
@@ -107,7 +107,7 @@ class FilterCommands(client.Plugin):
                 " it may already be in your list."
             )
 
-        await ctx.send(f"Filtered **{filter}**!")
+        await ctx.send(f"Filtered **{_filter}**!")
 
     @client.command(
         name="filter add channel",
@@ -130,14 +130,15 @@ class FilterCommands(client.Plugin):
                 filter: n.Channel
             ) -> None:
         """Adds a channel filter"""
+        _filter = filter
 
-        log.info(f"Attempting to filter channel '{filter.id}' from {ctx.user.id}")
+        log.info(f"Attempting to filter channel '{_filter.id}' from {ctx.user.id}")
 
         async with db.Database.acquire() as conn:
             success = await filter_modify_cache_db(
                 True,
                 ctx.user.id,
-                filter.id,
+                _filter.id,
                 FilterEnum.channel_filter,
                 conn
             )
@@ -148,7 +149,7 @@ class FilterCommands(client.Plugin):
                 " it may already be in your list."
             )
 
-        await ctx.send(f"Filtered **{filter}**!")
+        await ctx.send(f"Filtered **{_filter}**!")
 
     @client.command(
         name="filter add server",
@@ -167,13 +168,14 @@ class FilterCommands(client.Plugin):
                 filter: str
             ) -> None:
         """Adds a server filter"""
+        _filter = filter
 
-        log.info(f"Attempting to filter server '{filter}' from {ctx.user.id}")
+        log.info(f"Attempting to filter server '{_filter}' from {ctx.user.id}")
 
         # The bot needs to be in the server
-        server = get_guild_from_cache(self.bot, filter, ctx)
+        server = get_guild_from_cache(self.bot, _filter, ctx)
         if not server:
-            log.info(f"Server '{filter}' not found.")
+            log.info(f"Server '{_filter}' not found.")
             return await ctx.send(
                 "Couldn't find a valid guild. The bot may not be in that guild"
             )
@@ -214,14 +216,15 @@ class FilterCommands(client.Plugin):
                 filter: str
             ) -> None:
         """Removes a text filter"""
+        _filter = filter
 
-        log.info(f"Attempting to remove text filter '{filter}' from {ctx.user.id}")
+        log.info(f"Attempting to remove text filter '{_filter}' from {ctx.user.id}")
 
         async with db.Database.acquire() as conn:
             success = await filter_modify_cache_db(
                 False,
                 ctx.user.id,
-                filter,
+                _filter,
                 FilterEnum.text_filter,
                 conn
             )
@@ -233,7 +236,7 @@ class FilterCommands(client.Plugin):
                 "Make sure to select an option from the autocomplete."
             )
 
-        await ctx.send(f"Removed **{filter}**!")
+        await ctx.send(f"Removed **{_filter}**!")
 
     @client.command(
         name="filter remove user",
@@ -252,12 +255,13 @@ class FilterCommands(client.Plugin):
                 filter: str | int
             ) -> None:
         """Removes a user filter"""
+        _filter = filter
 
-        log.info(f"Attempting to remove user filter '{filter}' from {ctx.user.id}")
+        log.info(f"Attempting to remove user filter '{_filter}' from {ctx.user.id}")
 
-        if isinstance(filter, str):
-            if filter.isdigit():
-                    filter = int(filter)
+        if isinstance(_filter, str):
+            if _filter.isdigit():
+                _filter = int(_filter)
             else:
                 return await ctx.send(
                     "Make sure to select an option from the autocomplete."
@@ -267,7 +271,7 @@ class FilterCommands(client.Plugin):
             success = await filter_modify_cache_db(
                 False,
                 ctx.user.id,
-                filter,
+                _filter,
                 FilterEnum.user_filter,
                 conn
             )
@@ -279,7 +283,7 @@ class FilterCommands(client.Plugin):
                 "Make sure to select an option from the autocomplete."
             )
 
-        await ctx.send(f"Removed **{filter}**!")
+        await ctx.send(f"Removed **{_filter}**!")
 
     @client.command(
         name="filter remove channel",
@@ -298,12 +302,13 @@ class FilterCommands(client.Plugin):
                 filter: str | int
             ) -> None:
         """Removes a channel filter"""
+        _filter = filter
 
-        log.info(f"Attempting to remove channel filter '{filter}' from {ctx.user.id}")
+        log.info(f"Attempting to remove channel filter '{_filter}' from {ctx.user.id}")
 
-        if isinstance(filter, str):
-            if filter.isdigit():
-                    filter = int(filter)
+        if isinstance(_filter, str):
+            if _filter.isdigit():
+                _filter = int(_filter)
             else:
                 return await ctx.send(
                     "Make sure to select an option from the autocomplete."
@@ -313,7 +318,7 @@ class FilterCommands(client.Plugin):
             success = await filter_modify_cache_db(
                 False,
                 ctx.user.id,
-                filter,
+                _filter,
                 FilterEnum.channel_filter,
                 conn
             )
@@ -325,7 +330,7 @@ class FilterCommands(client.Plugin):
                 "Make sure to select an option from the autocomplete."
             )
 
-        await ctx.send(f"Removed **{filter}**!")
+        await ctx.send(f"Removed **{_filter}**!")
 
     @client.command(
         name="filter remove server",
@@ -344,12 +349,13 @@ class FilterCommands(client.Plugin):
                 filter: str | int
             ) -> None:
         """Removes a server filter"""
+        _filter = filter
 
-        log.info(f"Attempting to remove server filter '{filter}' from {ctx.user.id}")
+        log.info(f"Attempting to remove server filter '{_filter}' from {ctx.user.id}")
 
-        if isinstance(filter, str):
-            if filter.isdigit():
-                    filter = int(filter)
+        if isinstance(_filter, str):
+            if _filter.isdigit():
+                _filter = int(_filter)
             else:
                 return await ctx.send(
                     "Make sure to select an option from the autocomplete."
@@ -362,7 +368,7 @@ class FilterCommands(client.Plugin):
             success = await filter_modify_cache_db(
                 False,
                 ctx.user.id,
-                filter,
+                _filter,
                 FilterEnum.server_filter,
                 conn
             )
@@ -374,7 +380,94 @@ class FilterCommands(client.Plugin):
                 "Make sure to select an option from the autocomplete."
             )
 
-        await ctx.send(f"Removed **{filter}**!")
+        await ctx.send(f"Removed **{_filter}**!")
+
+    @client.command(
+        name="filter clear",
+        options = [
+            n.ApplicationCommandOption(
+                name="filter_type",
+                type=n.ApplicationOptionType.string,
+                description="The type of filters you want to remove",
+                autocomplete=True
+            ),
+        ]
+    )
+    async def clear_filters(self, ctx: t.CommandI, filter_type: str):
+        """Clears all filters of a specified type"""
+
+        # Ensure a correct type was chosen
+        if filter_type not in ["t", "u", "c", "s", "*"]:
+            return await ctx.send(
+                "Make sure to select an option from the autocomplete."
+            )
+
+        confirmation_components = [
+            n.ActionRow(
+                [
+                    n.Button(
+                        label="Yes",
+                        style=n.ButtonStyle.green,
+                        custom_id=f"FILTER_CLEAR {ctx.user.id} 1 {filter_type}"
+                    ),
+                    n.Button(
+                        label="No",
+                        style=n.ButtonStyle.danger,
+                        custom_id=f"FILTER_CLEAR {ctx.user.id} 0 {filter_type}"
+                    )
+                ]
+            )
+        ]
+        await ctx.send(
+            "Are you sure you want to delete " +
+            f"**{self.filter_type_name(filter_type)}** filters? " +
+            "(Warning: This is irreversible!)",
+            components=confirmation_components
+        )
+
+    @client.event.filtered_component(r"FILTER_CLEAR \d+ \d .")
+    async def clear_filters_confirmation(self, ctx: t.ComponentI) -> None:
+        """Confirms that a user wants to clear filters and continues"""
+
+        _, required_id, confirm, filter_type = ctx.data.custom_id.split(" ")
+
+        if int(required_id) != ctx.user.id:
+            return await ctx.send(
+                "You can't interact with this button, run " +
+                f"{self.clear_filters.mention} to get buttons you can press",
+                ephemeral=True
+            )
+
+        if not int(confirm):
+            return await ctx.send("Cancelling filter clear!")
+
+        # Get a flattened list of the stalker's filters
+        stalker = get_stalker(ctx.user.id)
+        filters = [
+            _filter for filter_set in stalker.filters.values()
+            for _filter in filter_set
+        ]
+
+        # Update the cache and database
+        async with db.Database.acquire() as conn:
+            for _filter in filters:
+
+                if _filter.filter_type != self.filter_type_object(filter_type) \
+                    and filter_type != "*":
+                    continue
+
+                await filter_modify_cache_db(
+                    False,
+                    ctx.user.id,
+                    _filter.filter,
+                    _filter.filter_type,
+                    conn
+                )
+
+        # Send a confirmation message
+        await ctx.send(
+            f"Removed **{self.filter_type_name(filter_type)}** filters."
+        )
 
     # FILTER UTILS
 
@@ -476,4 +569,61 @@ class FilterCommands(client.Plugin):
                 self,
                 ctx: t.CommandI
             ) -> list[n.ApplicationCommandChoice]:
+        """Retrieves autocomplete option for the current guild"""
         return await current_guild_autocomplete(self.bot, ctx)
+
+    @clear_filters.autocomplete
+    async def filter_type_autocomplete(
+                self,
+                _: t.CommandI
+            ) -> list[n.ApplicationCommandChoice]:
+        """Returns choices for clearing all filters depending on type"""
+
+        choices = [
+            n.ApplicationCommandChoice(
+                name="Text",
+                value="t"
+            ),
+            n.ApplicationCommandChoice(
+                name="User",
+                value="u"
+            ),
+            n.ApplicationCommandChoice(
+                name="Channel",
+                value="c"
+            ),
+            n.ApplicationCommandChoice(
+                name="Server",
+                value="s"
+            ),
+            n.ApplicationCommandChoice(
+                name="All",
+                value="*"
+            )
+        ]
+
+        return choices
+
+    def filter_type_name(self, filter_type: str) -> str:
+        """Returns a readable string defining the filter type identifier"""
+        filter_type_map = {
+            't': "text",
+            'u': "user",
+            'c': "channel",
+            's': "server",
+            '*': "all"
+        }
+
+        return filter_type_map[filter_type.lower()]
+
+    def filter_type_object(self, filter_type: str) -> FilterEnum:
+        """Returns a FilterEnum defining the filter type identifier"""
+        filter_type_map = {
+            't': FilterEnum.text_filter,
+            'u': FilterEnum.user_filter,
+            'c': FilterEnum.channel_filter,
+            's': FilterEnum.server_filter,
+            '*': FilterEnum
+        }
+
+        return filter_type_map[filter_type.lower()]

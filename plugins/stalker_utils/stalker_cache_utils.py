@@ -241,7 +241,7 @@ async def filter_modify_cache_db(
     """
     # Make sure we have a Stalker object in cache and create a keyword
     stalker = get_stalker(user_id)
-    filter = Filter(filter_value, filter_type)
+    _filter = Filter(filter_value, filter_type)
 
     if filter_type not in stalker.filters:
         stalker.filters[filter_type] = set()
@@ -284,18 +284,18 @@ async def filter_modify_cache_db(
     # CACHE_OPERATION[1] is what to use for add
     CACHE_CHECK, CACHE_OPERATION = [
         (
-            filter in stalker.filters[filter_type],
+            _filter in stalker.filters[filter_type],
             stalker.filters[filter_type].remove
         ),
         (
-            filter not in stalker.filters[filter_type],
+            _filter not in stalker.filters[filter_type],
             stalker.filters[filter_type].add
         ),
     ][int(is_add)]
 
     # Perfrom the operation
     if CACHE_CHECK:
-        CACHE_OPERATION(filter)
+        CACHE_OPERATION(_filter)
 
         # If a database connection was given, add it to the db as well
         if conn:
