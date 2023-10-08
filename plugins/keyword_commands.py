@@ -170,33 +170,43 @@ class KeywordCommands(client.Plugin):
                 "Make sure to select an option from the autocomplete."
             )
 
-        keyword_type_str = {
-            'g': "global",
-            's': "server-specific",
-            '*': "all"
-        }[keyword_type.lower()]
-
         confirmation_components = [
             n.ActionRow(
                 [
                     n.Button(
                         label="Yes",
                         style=n.ButtonStyle.green,
-                        custom_id="KEYWORD CLEAR YES"
+                        custom_id=f"KEYWORD_CLEAR {ctx.user.id} 1 {keyword_type}"
                     ),
                     n.Button(
                         label="No",
                         style=n.ButtonStyle.danger,
-                        custom_id="KEYWORD CLEAR NO"
+                        custom_id=f"KEYWORD_CLEAR {ctx.user.id} 0 {keyword_type}"
                     )
                 ]
             )
         ]
         await ctx.send(
-            f"Are you sure you want to delete {keyword_type_str} keywords? " +
+            "Are you sure you want to delete " +
+            f"**{self.keyword_type_name(keyword_type)}** keywords? " +
             "(Warning: This is irreversible!)",
             components=confirmation_components
         )
+
+    @client.event.filtered_component(r"KEYWORD_CLEAR \d+ \d (g|s|\*)")
+    async def clear_keywords_confirmation(self, ctx: t.ComponentI) -> None:
+
+        _, required_id, confirm, keyword_type = ctx.data.custom_id.split(" ")
+
+        if int(required_id) != ctx.user.id:
+            return await ctx.send(
+                "You can't interact with this button, run " +
+                f"{self.clear_keywords.mention} to get buttons you can press",
+                ephemeral=True
+            )
+
+        if not int(confirm):
+            return await ctx.send("Cancelling keyword clear!")
 
         # Get a flattened list of the stalker's keywords
         stalker = get_stalker(ctx.user.id)
@@ -223,7 +233,18 @@ class KeywordCommands(client.Plugin):
                 )
 
         # Send a confirmation message
-        await ctx.send(f"Removed **{keyword_type_str}** keywords.")
+        await ctx.send(
+            f"Removed **{self.keyword_type_name(keyword_type)}** keywords."
+        )
+
+    def keyword_type_name(self, keyword_type: str):
+        keyword_type_map = {
+            'g': "global",
+            's': "server-specific",
+            '*': "all"
+        }
+
+        return keyword_type_map[keyword_type.lower()]
 
     @client.command(name="keyword list")
     async def list_keywords(self, ctx: t.CommandI) -> None:
