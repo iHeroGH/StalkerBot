@@ -1,7 +1,6 @@
 import aiohttp
 import discord
-from discord.ext import commands
-import voxelbotutils as vbu
+from discord.ext import commands, vbu
 
 
 class AnalyticalCounter(vbu.Cog, name="Analytical Counter"):
@@ -19,10 +18,10 @@ class AnalyticalCounter(vbu.Cog, name="Analytical Counter"):
         """Counts how many unique user IDs there are"""
 
         async with vbu.Database() as db:
-            distinctRows = await db("SELECT DISTINCT userid FROM keywords;")
+            distinct_rows = await db("SELECT DISTINCT userid FROM keywords;")
             rows = await db("SELECT * FROM keywords;")
 
-        await ctx.send(f"`{len(distinctRows)}` unique users with `{len(rows)}` keywords in total.")
+        await ctx.send(f"`{len(distinct_rows)}` unique users with `{len(rows)}` keywords in total.")
 
 
 def setup(bot):

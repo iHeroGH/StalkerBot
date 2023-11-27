@@ -1,6 +1,5 @@
 import discord
-from discord.ext import commands
-import voxelbotutils as vbu
+from discord.ext import commands, vbu
 
 
 class FilterCommands(vbu.Cog, name="Filter Commands"):
@@ -160,7 +159,7 @@ class FilterCommands(vbu.Cog, name="Filter Commands"):
         """Removes a channel filter"""
 
         async with vbu.Database() as db:
-            curr_filter_rows = await db("SELECT FROM channelfilters WHERE userid = $1 AND channelfilter = $2", ctx.author.id, filter)
+            curr_filter_rows = await db("SELECT FROM channelfilters WHERE userid = $1 AND channelfilter = $2", ctx.author.id, filter.id)
 
             if not curr_filter_rows: # Channel filter is already not in list
                 return await ctx.send((f"`{filter}` is not a filter in your list!"))

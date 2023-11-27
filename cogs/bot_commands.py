@@ -1,6 +1,5 @@
 import discord
-from discord.ext import commands
-import voxelbotutils as vbu
+from discord.ext import commands, vbu
 
 class BotCommands(vbu.Cog, name="Bot Commands"):
 

@@ -1,9 +1,7 @@
 import io
 
 import discord
-from discord.ext import commands
-import voxelbotutils as vbu
-
+from discord.ext import commands, vbu
 
 class ModerationCommands(vbu.Cog, name="Moderation Commands"):
 

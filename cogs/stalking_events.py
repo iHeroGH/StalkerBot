@@ -4,8 +4,7 @@ import re
 import typing
 
 import discord
-import voxelbotutils as vbu
-
+from discord.ext import vbu
 
 class StalkingEvents(vbu.Cog, name="Stalking Events (Message Send/Edit)"):
 
@@ -57,7 +56,7 @@ class StalkingEvents(vbu.Cog, name="Stalking Events (Message Send/Edit)"):
         # Filter out StalkerBot
         if message.author == message.guild.me:
             return
-
+        
         # Get the users who are opted out
         async with vbu.Database() as db:
             opt_outs = await db("SELECT * FROM user_opt")
