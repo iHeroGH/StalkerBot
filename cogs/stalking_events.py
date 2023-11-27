@@ -12,7 +12,7 @@ class StalkingEvents(vbu.Cog, name="Stalking Events (Message Send/Edit)"):
 
     @vbu.Cog.listener()
     async def on_message(self, message):
-
+        self.bot.logger.info(f"Message found {message.id}")
         await self.deal_with_message(message)
 
     @vbu.Cog.listener()
@@ -56,7 +56,7 @@ class StalkingEvents(vbu.Cog, name="Stalking Events (Message Send/Edit)"):
         # Filter out StalkerBot
         if message.author == message.guild.me:
             return
-        
+
         # Get the users who are opted out
         async with vbu.Database() as db:
             opt_outs = await db("SELECT * FROM user_opt")
