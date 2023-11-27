@@ -12,7 +12,6 @@ class StalkingEvents(vbu.Cog, name="Stalking Events (Message Send/Edit)"):
 
     @vbu.Cog.listener()
     async def on_message(self, message):
-        self.bot.logger.info(f"Message found {message.id}")
         await self.deal_with_message(message)
 
     @vbu.Cog.listener()
@@ -44,6 +43,7 @@ class StalkingEvents(vbu.Cog, name="Stalking Events (Message Send/Edit)"):
 
         # Only run if the bot is ready
         if not self.bot.is_ready():
+            self.bot.logger.info(f"Bot is not ready")
             return
 
         # If we're in a guild
@@ -64,6 +64,7 @@ class StalkingEvents(vbu.Cog, name="Stalking Events (Message Send/Edit)"):
 
         # Make the author isn't opted out
         if message.author.id in opt_outs:
+            self.bot.logger.info(f"Skipping {message.author.id} since they opted out")
             return
 
         # React with eyes if message contains "Stalker" lol (only on Voxel Fox)
@@ -122,6 +123,7 @@ class StalkingEvents(vbu.Cog, name="Stalking Events (Message Send/Edit)"):
 
         scanned_content = embed_content or message.content
 
+        self.bot.logger.info(f"Dealing with message {message.id}")
         # Get everything (from the users who have had a keyword triggered) from the datbase
         async with vbu.Database() as db:
 
