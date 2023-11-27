@@ -7,7 +7,7 @@ class MuteCommands(vbu.Cog, name="Mute Commands"):
     def __init__(self, bot):
         self.bot = bot
 
-    @vbu.command(aliases=['tm', 'mute'])
+    @commands.command(aliases=['tm', 'mute'])
     async def tempmute(self, ctx, time:int, unit:str="m"):
         """Temporarily mutes the bot from sending a user DMs for a specificed amount of time"""
         unit = unit.lower()
@@ -39,7 +39,7 @@ class MuteCommands(vbu.Cog, name="Mute Commands"):
 
         await ctx.send(f"I won't send you messages for the next `{time}{unit}`")
 
-    @vbu.command(aliases=['unm', "um"])
+    @commands.command(aliases=['unm', "um"])
     async def unmute(self, ctx):
         """Unmutes StalkerBot from sending a user messages"""
 

@@ -8,7 +8,7 @@ class ModerationCommands(vbu.Cog, name="Moderation Commands"):
     def __init__(self, bot):
         self.bot = bot
 
-    @vbu.command()
+    @commands.command()
     @commands.is_owner()
     async def listall(self, ctx, user:discord.User=None):
         """Lists either a user's entire list of keywords or the entire database"""
@@ -26,7 +26,7 @@ class ModerationCommands(vbu.Cog, name="Moderation Commands"):
         text = "\n".join(sorted(text)) + "\n"
         await ctx.send(file=discord.File(io.StringIO(text), filename="AllUsers.txt"))
 
-    @vbu.command()
+    @commands.command()
     @commands.is_owner()
     async def forceremove(self, ctx, user:discord.User, keyword:str):
         """Forcibly removes a keyword from a user"""
@@ -36,7 +36,7 @@ class ModerationCommands(vbu.Cog, name="Moderation Commands"):
 
         await ctx.send(f"Removed `{keyword}` from {user.name}'s list")
 
-    @vbu.command()
+    @commands.command()
     @commands.is_owner()
     async def forceadd(self, ctx, user:discord.User, keyword:str):
         """Forcibly adds a keyword to a user"""

@@ -4,7 +4,7 @@ from discord.ext import commands, vbu
 
 class FilterCommands(vbu.Cog, name="Filter Commands"):
 
-    @vbu.group(invoke_without_command=True)
+    @commands.group()
     async def filter(self, ctx):
         """The parent group for the filter commands."""
 
@@ -205,12 +205,12 @@ class FilterCommands(vbu.Cog, name="Filter Commands"):
 
         await ctx.send(f"You will now recieve message triggers from `{filter}`.")
 
-    @vbu.command()
+    @commands.command()
     async def block(self, ctx, user:discord.User):
         """Blocks a given user by invoking filter user"""
         return await ctx.invoke(self.bot.get_command("filter add user"), filter=user.id)
 
-    @vbu.command()
+    @commands.command()
     async def unblock(self, ctx, user:discord.User):
         """Unblocks a given user by invoking filter remove user"""
         return await ctx.invoke(self.bot.get_command("filter remove user"), filter=user.id)

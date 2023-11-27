@@ -1,12 +1,12 @@
 import asyncio
 
-from discord.ext import vbu
+from discord.ext import commands, vbu
 
 
 class UserSettings(vbu.Cog, name="User Setting Commands"):
 
-    @vbu.command(aliases=['qs', 'quicksettings', 'quicksetup'])
-    async def quickswitch(self, ctx, setting:str=None):
+    @commands.command(aliases=['qs', 'quicksettings', 'quicksetup'])
+    async def quickswitch(self, ctx, setting:str|None=None):
         """Allows users to change individual settings quickly"""
 
         # See if they provided a valid setting
@@ -47,7 +47,7 @@ class UserSettings(vbu.Cog, name="User Setting Commands"):
         # Tell the user it's done :D
         await ctx.send(f"Updated `{setting}` - now {'enabled' if updated_settings[setting] else 'disabled'}.")
 
-    @vbu.command(aliases=['setup', 'usersettings'])
+    @commands.command(aliases=['setup', 'usersettings'])
     async def settings(self, ctx):
         """Allows users to change their settings"""
 

@@ -6,7 +6,7 @@ class BotCommands(vbu.Cog, name="Bot Commands"):
     MAXIMUM_ALLOWED_KEYWORDS = 5
     MINIMUM_KEYWORD_LENGTH = 2
 
-    @vbu.command(aliases=['keyword', 'addkeyword'])
+    @commands.command(aliases=['keyword', 'addkeyword'])
     async def add(self, ctx: vbu.Context, keyword: str):
         """Adds a keyword to your list of DM triggers"""
 
@@ -36,7 +36,7 @@ class BotCommands(vbu.Cog, name="Bot Commands"):
 
         await ctx.send(f"Added `{keyword}` into <@{ctx.author.id}>'s list")
 
-    @vbu.command(aliases=['serverkeyword', 'addserverkeyword'])
+    @commands.command(aliases=['serverkeyword', 'addserverkeyword'])
     async def addserver(self, ctx: vbu.Context, server_id: int, keyword: str):
         """Adds a keyword to your list of server-specific DM triggers"""
 
@@ -71,7 +71,7 @@ class BotCommands(vbu.Cog, name="Bot Commands"):
 
         await ctx.send(f"Added `{keyword}` into <@{ctx.author.id}>'s list")
 
-    @vbu.command(aliases=['keywordremove', 'removekeyword'])
+    @commands.command(aliases=['keywordremove', 'removekeyword'])
     async def remove(self, ctx: vbu.Context, keyword: str):
         """Removes a keyword from your list of DM triggers"""
 
@@ -90,7 +90,7 @@ class BotCommands(vbu.Cog, name="Bot Commands"):
 
         await ctx.send(f"Removed `{keyword}` from <@{ctx.author.id}>'s list")
 
-    @vbu.command(aliases=['serverkeywordremove', 'removeserver'])
+    @commands.command(aliases=['serverkeywordremove', 'removeserver'])
     async def removeserverkeyword(self, ctx: vbu.Context, server_id: int, keyword: str):
         """Removes a keyword from your list of server-specific DM triggers"""
 
@@ -109,7 +109,7 @@ class BotCommands(vbu.Cog, name="Bot Commands"):
 
         await ctx.send(f"Removed `{keyword}` from <@{ctx.author.id}>'s list")
 
-    @vbu.command()
+    @commands.command()
     async def removeall(self, ctx: vbu.Context, ident: str=None):
         """Removes all keywords from your list of DM triggers given an optional type (global/server)"""
 
@@ -137,7 +137,7 @@ class BotCommands(vbu.Cog, name="Bot Commands"):
 
         await ctx.send(f"Removed {delete_type} keywords from <@{ctx.author.id}>'s list")
 
-    @vbu.command(aliases=['keywords', 'keywordlist', 'keywordslist', 'listkeywords'])
+    @commands.command(aliases=['keywords', 'keywordlist', 'keywordslist', 'listkeywords'])
     async def list(self, ctx: vbu.Context, user:discord.User=None):
         """Lists all your keywords"""
 
@@ -202,7 +202,7 @@ class BotCommands(vbu.Cog, name="Bot Commands"):
 
         return sendable
 
-    @vbu.command(aliases=['max', 'maxkey', 'maxwords', 'maxkeyword', 'maxkeys', 'maxword'])
+    @commands.command(aliases=['max', 'maxkey', 'maxwords', 'maxkeyword', 'maxkeys', 'maxword'])
     async def maxkeywords(self, ctx: vbu.Context, user:discord.User=None):
         """Sends the maximum amount of keywords a user can have"""
 

@@ -62,7 +62,7 @@ class MiscCommands(vbu.Cog, name="Miscellaneous Commands"):
 
             self.last_dm = message.author.id
 
-    @vbu.command(aliases=['dmbl'])
+    @commands.command(aliases=['dmbl'])
     @commands.is_owner()
     async def dmblacklist(self, ctx, user:discord.User=None):
         """Blacklists a user from being detected by the DM Stalker"""
@@ -77,7 +77,7 @@ class MiscCommands(vbu.Cog, name="Miscellaneous Commands"):
                 await db("INSERT INTO dm_blacklist (user_id) VALUES ($1)", user.id)
                 await ctx.send(f"Inserted {user.mention} ({str(user)}) into the DM blacklist.", allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
 
-    @vbu.command(aliases=['hero', 'h'], hidden=True)
+    @commands.command(aliases=['hero', 'h'], hidden=True)
     @commands.bot_has_permissions(attach_files=True)
     async def heroify(self, ctx, ident='h', url:typing.Union[discord.User or discord.ClientUser, str]=None):
 
@@ -136,7 +136,7 @@ class MiscCommands(vbu.Cog, name="Miscellaneous Commands"):
 
         await ctx.send(file=discord.File(sendable_image, filename="heroed.png"))
 
-    @vbu.command()
+    @commands.command()
     @commands.is_owner()
     async def send(self, ctx, channel_type:send_type.SendType, snowflake:typing.Optional[send_snowflake.SendSnowflake], *, message:str=None):
         """Sends a message to a channel or a user through StalkerBot"""
@@ -181,7 +181,7 @@ class MiscCommands(vbu.Cog, name="Miscellaneous Commands"):
         else:
             await ctx.message.add_reaction("👌")
 
-    @vbu.command()
+    @commands.command()
     @commands.is_owner()
     async def edit(self, ctx, message:discord.Message, new_message:typing.Optional[message_str.MessageStr], embeddify:bool=False, delete_time:int=-1):
         """Edits/Deletes a message sent by the bot"""
@@ -214,7 +214,7 @@ class MiscCommands(vbu.Cog, name="Miscellaneous Commands"):
         else:
             await ctx.message.add_reaction("👌")
 
-    @vbu.command(aliases=['joinvc', 'leavevc', 'leave', 'disc', 'con', 'connect', 'disconnect'])
+    @commands.command(aliases=['joinvc', 'leavevc', 'leave', 'disc', 'con', 'connect', 'disconnect'])
     @commands.is_owner()
     async def join(self, ctx, vc:discord.VoiceChannel, timeout:float=0.0):
         """Joins/Leaves a Discord Voice Channel"""
@@ -230,7 +230,7 @@ class MiscCommands(vbu.Cog, name="Miscellaneous Commands"):
 
         return await ctx.message.add_reaction("👌")
 
-    @vbu.command()
+    @commands.command()
     @commands.is_owner()
     async def react(self, ctx, message:discord.Message, *reactions):
         """Reacts to a message in a channel with a reaction"""
@@ -258,7 +258,7 @@ class MiscCommands(vbu.Cog, name="Miscellaneous Commands"):
 
         await ctx.message.add_reaction("👌") # React to the command with a confirmation
 
-    @vbu.command()
+    @commands.command()
     async def suggest(self, ctx, *, suggestion:str=None):
         """Sends a suggestion message to the bot creator (@Hero#2313)"""
 

@@ -5,14 +5,14 @@ from discord.ext import commands, vbu
 
 class AnalyticalCounter(vbu.Cog, name="Analytical Counter"):
 
-    @vbu.command(aliases=['countservers'])
+    @commands.command(aliases=['countservers'])
     @commands.is_owner()
     async def countguilds(self, ctx):
         """Counts how many guilds have the bot"""
 
         await ctx.send(f"The bot is in `{len(self.bot.guilds)}` guilds.")
 
-    @vbu.command()
+    @commands.command()
     @commands.is_owner()
     async def countusers(self, ctx):
         """Counts how many unique user IDs there are"""

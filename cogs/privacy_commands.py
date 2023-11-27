@@ -6,7 +6,7 @@ class PrivacyCommands(vbu.Cog, name="Privacy Commands"):
     def __init__(self, bot):
         self.bot = bot
 
-    @vbu.command(aliases=['privacypolicy', 'policy'])
+    @commands.command(aliases=['privacypolicy', 'policy'])
     async def privacy(self, ctx: vbu.Context):
         """Sends the public privacy policy of the bot"""
 
@@ -26,7 +26,7 @@ class PrivacyCommands(vbu.Cog, name="Privacy Commands"):
 
         await ctx.author.send(privacy_policy)
 
-    @vbu.command()
+    @commands.command()
     async def optout(self, ctx: vbu.Context):
         """Opt-out of StalkerBot features"""
 
@@ -40,7 +40,7 @@ class PrivacyCommands(vbu.Cog, name="Privacy Commands"):
 
         await ctx.send(f"Successfully opted-out of StalkerBot features.")
 
-    @vbu.command()
+    @commands.command()
     async def optin(self, ctx: vbu.Context):
         """Opt-in to StalkerBot features"""
 
