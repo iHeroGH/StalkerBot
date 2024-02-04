@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from datetime import datetime as dt
 
 if TYPE_CHECKING:
@@ -100,7 +100,9 @@ def get_stalker(user_id: int) -> Stalker:
 
     return stalker_cache[user_id]
 
-async def cache_filters(filter_rows, filter_type: FilterEnum) -> None:
+async def cache_filters(
+        filter_rows: list[dict[str, Any]],
+        filter_type: FilterEnum) -> None:
     """
     Since filter caching is generally the same each time, we only
     deal with a changing filter_type

@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from novus import types as t
     from novus.ext import client
 
-from .misc import get_guild_from_cache, get_users_from_cache, \
+from .misc_utils import get_guild_from_cache, get_users_from_cache, \
                                     get_channel_from_cache
 
 class Keyword:
@@ -279,7 +279,7 @@ class Stalker:
         return self
 
     def format_keywords(self, bot: client.Client) -> Embed:
-        """Returns a formatted string listing a user's keywords"""
+        """Returns a formatted Embed listing a user's keywords"""
 
         add_command = bot.get_command("keyword add")
         command_mention = "`keyword add`"
@@ -339,7 +339,7 @@ class Stalker:
                 bot: client.Client,
                 guild_id: int | None = None
             ) -> Embed:
-        """Returns a formatted embed listing a user's filters"""
+        """Returns a formatted Embed listing a user's filters"""
 
         FILTER_TITLES = {
             FilterEnum.text_filter: "Text Filters",

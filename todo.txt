@@ -9,4 +9,3 @@ moderation commands
 MISC
 adding text filters that dont trigger any keywords
 adding keywords that are already triggered
-dynamically change autocomplete options depending on what's already written

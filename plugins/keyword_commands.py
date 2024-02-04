@@ -5,8 +5,9 @@ from novus import types as t
 from novus.ext import client, database as db
 
 from .stalker_utils.stalker_cache_utils import keyword_modify_cache_db, get_stalker
-from .stalker_utils.misc import get_guild_from_cache
-from .stalker_utils.autocomplete import current_guild_autocomplete
+from .stalker_utils.misc_utils import get_guild_from_cache
+from .stalker_utils.autocomplete import current_guild_autocomplete, \
+                                        keyword_type_options
 from .stalker_utils.input_sanitizer import MIN_INPUT_LENGTH, \
                                             MAX_INPUT_LENGTH,\
                                             has_blacklisted, \
@@ -15,6 +16,51 @@ from .stalker_utils.input_sanitizer import MIN_INPUT_LENGTH, \
 log = logging.getLogger("plugins.keyword_commands")
 
 class KeywordCommands(client.Plugin):
+
+    @client.event.filtered_component(r"KEYWORD_CLEAR \d+ \d .")
+    async def clear_keywords_confirmation(self, ctx: t.ComponentI) -> None:
+        """Confirms that a user wants to clear keywords and continues"""
+
+        _, required_id, confirm, keyword_type = ctx.data.custom_id.split(" ")
+
+        if int(required_id) != ctx.user.id:
+            return await ctx.send(
+                "You can't interact with this button, run " +
+                f"{self.clear_keywords.mention} to get buttons you can press",
+                ephemeral=True
+            )
+
+        if not int(confirm):
+            return await ctx.send("Cancelling keyword clear!")
+
+        # Get a flattened list of the stalker's keywords
+        stalker = get_stalker(ctx.user.id)
+        keywords = [
+            keyword for keyword_set in stalker.keywords.values()
+            for keyword in keyword_set
+        ]
+
+        # Update the cache and database
+        async with db.Database.acquire() as conn:
+            for keyword in keywords:
+
+                if keyword_type == "g" and keyword.server_id:
+                    continue
+                if keyword_type == "s" and not keyword.server_id:
+                    continue
+
+                await keyword_modify_cache_db(
+                    False,
+                    ctx.user.id,
+                    keyword.keyword,
+                    keyword.server_id,
+                    conn
+                )
+
+        # Send a confirmation message
+        await ctx.send(
+            f"Removed **{self.keyword_type_name(keyword_type)}** keywords."
+        )
 
     @client.command(
         name="keyword add",
@@ -191,49 +237,14 @@ class KeywordCommands(client.Plugin):
             components=confirmation_components
         )
 
-    @client.event.filtered_component(r"KEYWORD_CLEAR \d+ \d .")
-    async def clear_keywords_confirmation(self, ctx: t.ComponentI) -> None:
-        """Confirms that a user wants to clear keywords and continues"""
+    @client.command(name="keyword list")
+    async def list_keywords(self, ctx: t.CommandI) -> None:
+        """Lists a user's keywords"""
 
-        _, required_id, confirm, keyword_type = ctx.data.custom_id.split(" ")
-
-        if int(required_id) != ctx.user.id:
-            return await ctx.send(
-                "You can't interact with this button, run " +
-                f"{self.clear_keywords.mention} to get buttons you can press",
-                ephemeral=True
-            )
-
-        if not int(confirm):
-            return await ctx.send("Cancelling keyword clear!")
-
-        # Get a flattened list of the stalker's keywords
         stalker = get_stalker(ctx.user.id)
-        keywords = [
-            keyword for keyword_set in stalker.keywords.values()
-            for keyword in keyword_set
-        ]
 
-        # Update the cache and database
-        async with db.Database.acquire() as conn:
-            for keyword in keywords:
-
-                if keyword_type == "g" and keyword.server_id:
-                    continue
-                if keyword_type == "s" and not keyword.server_id:
-                    continue
-
-                await keyword_modify_cache_db(
-                    False,
-                    ctx.user.id,
-                    keyword.keyword,
-                    keyword.server_id,
-                    conn
-                )
-
-        # Send a confirmation message
         await ctx.send(
-            f"Removed **{self.keyword_type_name(keyword_type)}** keywords."
+            embeds=[stalker.format_keywords(self.bot)]
         )
 
     def keyword_type_name(self, keyword_type: str):
@@ -245,16 +256,6 @@ class KeywordCommands(client.Plugin):
         }
 
         return keyword_type_map[keyword_type.lower()]
-
-    @client.command(name="keyword list")
-    async def list_keywords(self, ctx: t.CommandI) -> None:
-        """Lists a user's keywords"""
-
-        stalker = get_stalker(ctx.user.id)
-
-        await ctx.send(
-            embeds=[stalker.format_keywords(self.bot)]
-        )
 
     @add_keyword.autocomplete
     @remove_keyword.autocomplete
@@ -268,23 +269,6 @@ class KeywordCommands(client.Plugin):
     @clear_keywords.autocomplete
     async def keyword_type_autocomplete(
                 self,
-                _: t.CommandI
+                ctx: t.CommandI
             ) -> list[n.ApplicationCommandChoice]:
-        """Returns choices for clearing all keywords depending on type"""
-
-        choices = [
-            n.ApplicationCommandChoice(
-                name="Global",
-                value="g"
-            ),
-            n.ApplicationCommandChoice(
-                name="Server-Specific",
-                value="s"
-            ),
-            n.ApplicationCommandChoice(
-                name="Both",
-                value="*"
-            )
-        ]
-
-        return choices
+        return await keyword_type_options()

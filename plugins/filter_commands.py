@@ -6,13 +6,14 @@ from novus.ext import client, database as db
 
 from .stalker_utils.stalker_cache_utils import filter_modify_cache_db, get_stalker
 from .stalker_utils.stalker_objects import FilterEnum
-from .stalker_utils.misc import get_guild_from_cache, get_users_from_cache
-from .stalker_utils.autocomplete import current_guild_autocomplete
+from .stalker_utils.misc_utils import get_guild_from_cache, get_users_from_cache
+from .stalker_utils.autocomplete import current_guild_autocomplete, \
+                                        filter_autocomplete, \
+                                        filter_type_options
 from .stalker_utils.input_sanitizer import MIN_INPUT_LENGTH, \
                                             MAX_INPUT_LENGTH,\
                                             has_blacklisted, \
                                             get_blacklisted_error
-
 
 log = logging.getLogger("plugins.filter_commands")
 
@@ -470,7 +471,6 @@ class FilterCommands(client.Plugin):
         )
 
     # FILTER UTILS
-
     @client.command(name="filter list")
     async def list_filters(self, ctx: t.CommandI) -> None:
         """Lists a user's filters"""
@@ -484,125 +484,6 @@ class FilterCommands(client.Plugin):
         await ctx.send(
             embeds=[await stalker.format_filters(self.bot, guild_id)]
         )
-
-    async def filter_autocomplete(
-                self,
-                ctx: t.CommandI,
-                filter_type: FilterEnum
-            ) -> list[n.ApplicationCommandChoice]:
-        """Retrieves the autocomplete options for a given filter type"""
-
-        stalker = get_stalker(ctx.user.id)
-
-        guild_id = None
-        if ctx.guild:
-            guild_id = ctx.guild.id
-
-        choices = [
-            n.ApplicationCommandChoice(
-                name=await filter.get_list_identifier(guild_id, md="", mention=False),
-                value=str(filter.filter)
-            )
-            for filter in sorted(stalker.filters[filter_type])
-        ]
-
-        return choices[:25]
-
-    @remove_text_filter.autocomplete
-    async def text_filter_autocomplete(
-                self,
-                ctx: t.CommandI,
-            ):
-        """Retrieves autocomplete options for text filters"""
-        return await self.filter_autocomplete(ctx, FilterEnum.text_filter)
-
-    @remove_user_filter.autocomplete
-    async def user_filter_autocomplete(
-                self,
-                ctx: t.CommandI
-            ) -> list[n.ApplicationCommandChoice]:
-        """Retrieves autocomplete options for user filters"""
-
-        stalker = get_stalker(ctx.user.id)
-
-        guild_id = None
-        if ctx.guild:
-            guild_id = ctx.guild.id
-
-        users = await get_users_from_cache(
-            self.bot,
-            [filter.filter for filter in stalker.filters[FilterEnum.user_filter]],
-            guild_id
-        )
-
-        choices = [
-            n.ApplicationCommandChoice(
-                name=user.username if isinstance(user, n.GuildMember) else str(user),
-                value=str(user.id) if isinstance(user, n.GuildMember) else str(user)
-            )
-            for user in sorted(
-                users,
-                key=lambda x: x.username if isinstance(x, n.GuildMember) else str(x)
-            )
-        ]
-
-        return choices[:25]
-
-    @remove_channel_filter.autocomplete
-    async def channel_filter_autocomplete(
-                self,
-                ctx: t.CommandI
-            ) -> list[n.ApplicationCommandChoice]:
-        """Retrieves autocomplete options for channel filters"""
-        return await self.filter_autocomplete(ctx, FilterEnum.channel_filter)
-
-    @remove_server_filter.autocomplete
-    async def server_filter_autocomplete(
-                self,
-                ctx: t.CommandI
-            ) -> list[n.ApplicationCommandChoice]:
-        """Retrieves autocomplete options for server filters"""
-        return await self.filter_autocomplete(ctx, FilterEnum.server_filter)
-
-    @add_server_filter.autocomplete
-    async def filter_current_guild_autocomplete(
-                self,
-                ctx: t.CommandI
-            ) -> list[n.ApplicationCommandChoice]:
-        """Retrieves autocomplete option for the current guild"""
-        return await current_guild_autocomplete(self.bot, ctx)
-
-    @clear_filters.autocomplete
-    async def filter_type_autocomplete(
-                self,
-                _: t.CommandI
-            ) -> list[n.ApplicationCommandChoice]:
-        """Returns choices for clearing all filters depending on type"""
-
-        choices = [
-            n.ApplicationCommandChoice(
-                name="Text",
-                value="t"
-            ),
-            n.ApplicationCommandChoice(
-                name="User",
-                value="u"
-            ),
-            n.ApplicationCommandChoice(
-                name="Channel",
-                value="c"
-            ),
-            n.ApplicationCommandChoice(
-                name="Server",
-                value="s"
-            ),
-            n.ApplicationCommandChoice(
-                name="All",
-                value="*"
-            )
-        ]
-
-        return choices
 
     def filter_type_name(self, filter_type: str) -> str:
         """Returns a readable string defining the filter type identifier"""
@@ -627,3 +508,62 @@ class FilterCommands(client.Plugin):
         }
 
         return filter_type_map[filter_type.lower()]
+
+    @remove_text_filter.autocomplete
+    async def text_filter_autocomplete(
+                self,
+                ctx: t.CommandI,
+                options: dict[str, n.InteractionOption]
+            ):
+        """Retrieves autocomplete options for text filters"""
+        return await filter_autocomplete(
+            ctx, FilterEnum.text_filter, options
+        )
+
+    @remove_user_filter.autocomplete
+    async def user_filter_autocomplete(
+                self,
+                ctx: t.CommandI,
+                options: dict[str, n.InteractionOption]
+            ) -> list[n.ApplicationCommandChoice]:
+        """Retrieves autocomplete options for user filters"""
+        return await filter_autocomplete(
+            ctx, FilterEnum.user_filter, options, self.bot
+        )
+
+    @remove_channel_filter.autocomplete
+    async def channel_filter_autocomplete(
+                self,
+                ctx: t.CommandI,
+                options: dict[str, n.InteractionOption]
+            ) -> list[n.ApplicationCommandChoice]:
+        """Retrieves autocomplete options for channel filters"""
+        return await filter_autocomplete(
+            ctx, FilterEnum.channel_filter, options
+        )
+
+    @remove_server_filter.autocomplete
+    async def server_filter_autocomplete(
+                self,
+                ctx: t.CommandI,
+                options: dict[str, n.InteractionOption]
+            ) -> list[n.ApplicationCommandChoice]:
+        """Retrieves autocomplete options for server filters"""
+        return await filter_autocomplete(
+            ctx, FilterEnum.server_filter, options
+        )
+
+    @add_server_filter.autocomplete
+    async def filter_current_guild_autocomplete(
+                self,
+                ctx: t.CommandI
+            ) -> list[n.ApplicationCommandChoice]:
+        """Retrieves autocomplete option for the current guild"""
+        return await current_guild_autocomplete(self.bot, ctx)
+
+    @clear_filters.autocomplete
+    async def filter_type_autocomplete(
+                self,
+                ctx: t.CommandI
+            ):
+        return await filter_type_options()

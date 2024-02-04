@@ -7,7 +7,7 @@ from datetime import datetime as dt
 
 from .stalker_utils.stalker_cache_utils import mute_modify_cache_db, \
                                                 opt_modify_cache_db
-from .stalker_utils.misc import get_datetime_until
+from .stalker_utils.misc_utils import get_datetime_until
 
 class MuteCommands(client.Plugin):
 
