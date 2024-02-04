@@ -1,10 +1,10 @@
 from __future__ import annotations
+from enum import IntEnum
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 from datetime import datetime as dt
 
-from novus.enums.utils import Enum
 from novus import Embed
 from vfflags import Flags
 
@@ -72,7 +72,7 @@ class Keyword:
     def __str__(self) -> str:
         return self.keyword
 
-class FilterEnum(Enum):
+class FilterEnum(IntEnum):
     """
     An Enum class to keep track of the different types of filters.
     Currently, there are text, user, channel, and server filters.
@@ -96,6 +96,9 @@ class FilterEnum(Enum):
 
             case FilterEnum.server_filter:
                 return f"(Server)"
+
+            case _:
+                return ""
 
 class Filter:
     """
@@ -188,7 +191,7 @@ class Settings(Flags):
         edit_trigger: bool
         embed_message: bool
 
-    CREATE_FLAGS = {
+    CREATE_FLAGS: ClassVar[dict[str, int]] = {
         "self_trigger": 1 << 0, # The user triggers their own triggers
         "quote_trigger": 1 << 1, # Keywords in a "> text" quote are triggered
         "reply_trigger": 1 << 2, # The user recieves a DM for replies

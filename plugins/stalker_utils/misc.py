@@ -91,13 +91,15 @@ async def get_users_from_cache(
             return user_ids
 
         guild = bot.cache.guilds[guild_id]
-        users = await guild.chunk_members(user_ids=user_ids)
+        users: list[n.GuildMember] | None
+        users = await guild.chunk_members(user_ids=user_ids) # type: ignore
 
         user_idents: dict[int, n.GuildMember | int] = {
             user_id: user_id for user_id in user_ids
         }
-        for user in users:
-            user_idents[user.id] = user
+        if users:
+            for user in users:
+                user_idents[user.id] = user
 
         return list(user_idents.values())
 
@@ -123,7 +125,7 @@ def get_channel_from_cache(
         """
 
         if not bot:
-            return
+            return None
 
         channel =  get_object_from_cache(channel_id, bot.cache.channels)
         assert not channel or isinstance(channel, n.Channel)
