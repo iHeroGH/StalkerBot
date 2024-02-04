@@ -9,3 +9,4 @@ moderation commands
 MISC
 adding text filters that dont trigger any keywords
 adding keywords that are already triggered
+just.. send the embed that triggered a keyword.... why do it any other way??
