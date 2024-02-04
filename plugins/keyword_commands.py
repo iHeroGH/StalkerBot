@@ -6,8 +6,10 @@ from novus.ext import client, database as db
 
 from .stalker_utils.stalker_cache_utils import keyword_modify_cache_db, get_stalker
 from .stalker_utils.misc_utils import get_guild_from_cache
-from .stalker_utils.autocomplete import current_guild_autocomplete, \
-                                        keyword_type_options
+from .stalker_utils.autocomplete import available_guilds_autocomplete, \
+                                        current_guild_autocomplete, \
+                                        keyword_type_options, \
+                                        keyword_autocomplete
 from .stalker_utils.input_sanitizer import MIN_INPUT_LENGTH, \
                                             MAX_INPUT_LENGTH,\
                                             has_blacklisted, \
@@ -143,25 +145,27 @@ class KeywordCommands(client.Plugin):
         name="keyword remove",
         options = [
             n.ApplicationCommandOption(
-                name="keyword",
-                type=n.ApplicationOptionType.string,
-                description="The keyword you want to remove"
-            ),
-            n.ApplicationCommandOption(
                 name="server_id",
                 type=n.ApplicationOptionType.string,
                 description="The server ID for a server-specific keyword"
-                            + ", or '1' to select the current guild",
-                required=False,
+                            + ", or 'Gloabl' to select global keywords",
+                required=True,
                 autocomplete=True
-            )
+            ),
+            n.ApplicationCommandOption(
+                name="keyword",
+                type=n.ApplicationOptionType.string,
+                description="The keyword you want to remove",
+                required=True,
+                autocomplete=False
+            ),
         ]
     )
     async def remove_keyword(
                 self,
                 ctx: t.CommandI,
-                keyword: str,
-                server_id: str = "0"
+                server_id: str,
+                keyword: str
             ) -> None:
         """Removes a keyword (optionally, a server-specific keyword)"""
 
@@ -258,13 +262,30 @@ class KeywordCommands(client.Plugin):
         return keyword_type_map[keyword_type.lower()]
 
     @add_keyword.autocomplete
-    @remove_keyword.autocomplete
     async def keyword_current_guild_autocomplete(
                 self,
                 ctx: t.CommandI
             ) -> list[n.ApplicationCommandChoice]:
         """Retrieves autocomplete option for the current guild"""
         return await current_guild_autocomplete(self.bot, ctx)
+
+    @remove_keyword.autocomplete
+    async def keyword_guilds_autocomplete(
+                self,
+                ctx: t.CommandI,
+                options: dict[str, n.InteractionOption]
+            ) -> list[n.ApplicationCommandChoice]:
+        """Retrieves autocomplete option for the available guild"""
+        return await available_guilds_autocomplete(self.bot, ctx, options)
+
+    # @remove_keyword.autocomplete
+    # async def keyword_autocomplete(
+    #             self,
+    #             ctx: t.CommandI,
+    #             options: dict[str, n.InteractionOption]
+    #         ) -> list[n.ApplicationCommandChoice]:
+    #     """Retrieves autocomplete option for the keywords set"""
+    #     return await keyword_autocomplete(self.bot, ctx, options)
 
     @clear_keywords.autocomplete
     async def keyword_type_autocomplete(

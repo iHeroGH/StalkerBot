@@ -454,7 +454,7 @@ class FilterCommands(client.Plugin):
             for _filter in filters:
 
                 if _filter.filter_type != self.filter_type_object(filter_type) \
-                    and filter_type != "*":
+                        and filter_type != "*":
                     continue
 
                 await filter_modify_cache_db(

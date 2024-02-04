@@ -66,6 +66,9 @@ class Keyword:
         except KeyError:
             raise KeyError("Invalid Keyword record passed to `from_record`.")
 
+    def get_list_identifier(self) -> str:
+        return self.keyword + (f"({self.server_id})" if self.server_id else "")
+
     def __repr__(self) -> str:
         return f"Keyword(keyword={self.keyword}, server_id={self.server_id})"
 
