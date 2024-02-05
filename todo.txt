@@ -1,5 +1,4 @@
 COMMANDS
-remove keywords (change keyword autocomplete depending on server id, make both fields optional, if nothing is entered do dropdown)
 
 PLUGINS
 settings
