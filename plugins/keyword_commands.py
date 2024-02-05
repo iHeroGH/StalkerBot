@@ -8,7 +8,7 @@ from .stalker_utils.stalker_cache_utils import keyword_modify_cache_db, get_stal
 from .stalker_utils.misc_utils import get_guild_from_cache
 from .stalker_utils.autocomplete import available_guilds_autocomplete, \
                                         current_guild_autocomplete, \
-                                        keyword_type_options, \
+                                        KEYWORD_TYPE_OPTIONS, \
                                         keyword_autocomplete
 from .stalker_utils.input_sanitizer import MIN_INPUT_LENGTH, \
                                             MAX_INPUT_LENGTH,\
@@ -149,25 +149,28 @@ class KeywordCommands(client.Plugin):
                 type=n.ApplicationOptionType.string,
                 description="The server ID for a server-specific keyword"
                             + ", or 'Gloabl' to select global keywords",
-                required=True,
+                required=False,
                 autocomplete=True
             ),
             n.ApplicationCommandOption(
                 name="keyword",
                 type=n.ApplicationOptionType.string,
                 description="The keyword you want to remove",
-                required=True,
-                autocomplete=False
+                required=False,
+                autocomplete=True
             ),
         ]
     )
     async def remove_keyword(
                 self,
                 ctx: t.CommandI,
-                server_id: str,
-                keyword: str
+                server_id: str | None = None,
+                keyword: str | None = None
             ) -> None:
         """Removes a keyword (optionally, a server-specific keyword)"""
+
+        if server_id is None or keyword is None:
+            server_id, keyword = await self.select_keyword_dropdown(ctx)
 
         # Constrain keyword
         keyword.lower()
@@ -205,7 +208,7 @@ class KeywordCommands(client.Plugin):
                 name="keyword_type",
                 type=n.ApplicationOptionType.string,
                 description="The type of keywords you want to remove",
-                autocomplete=True
+                choices=KEYWORD_TYPE_OPTIONS,
             ),
         ]
     )
@@ -261,6 +264,9 @@ class KeywordCommands(client.Plugin):
 
         return keyword_type_map[keyword_type.lower()]
 
+    async def select_keyword_dropdown(self, ctx: t.CommandI) -> tuple[str, str]:
+        return "", ""
+
     @add_keyword.autocomplete
     async def keyword_current_guild_autocomplete(
                 self,
@@ -270,26 +276,21 @@ class KeywordCommands(client.Plugin):
         return await current_guild_autocomplete(self.bot, ctx)
 
     @remove_keyword.autocomplete
-    async def keyword_guilds_autocomplete(
+    async def remove_keywords_autocomplete(
                 self,
                 ctx: t.CommandI,
                 options: dict[str, n.InteractionOption]
             ) -> list[n.ApplicationCommandChoice]:
-        """Retrieves autocomplete option for the available guild"""
-        return await available_guilds_autocomplete(self.bot, ctx, options)
+        """
+        Retrieves autocomplete options depending on the focused field
 
-    # @remove_keyword.autocomplete
-    # async def keyword_autocomplete(
-    #             self,
-    #             ctx: t.CommandI,
-    #             options: dict[str, n.InteractionOption]
-    #         ) -> list[n.ApplicationCommandChoice]:
-    #     """Retrieves autocomplete option for the keywords set"""
-    #     return await keyword_autocomplete(self.bot, ctx, options)
+        If the user is electing the server_id field, the guilds with keywords
+        set will be shown
 
-    @clear_keywords.autocomplete
-    async def keyword_type_autocomplete(
-                self,
-                ctx: t.CommandI
-            ) -> list[n.ApplicationCommandChoice]:
-        return await keyword_type_options()
+        Otherwise the user is selecting the keywords field, the keywords for
+        that server are shown
+        """
+        if "server_id" in options and options["server_id"].focused:
+            return await available_guilds_autocomplete(self.bot, ctx, options)
+
+        return await keyword_autocomplete(self.bot, ctx, options)

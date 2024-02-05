@@ -13,15 +13,21 @@ def predictive_choices(
             entered: str
         ) -> list[n.ApplicationCommandChoice]:
     """
-    Dynamically removes autocomplete options that don't start with
-    what the user entered
+    Dynamically removes autocomplete options that don't contain with
+    what the user entered. Also removes duplicates. If no options are found
+    that match what the user entered, the entire list is returned.
     """
+    entered = entered.lower()
+
     fixed_choices = []
     encountered_choices: set[str] = set()
     for choice in choices:
-        if entered in choice.name and choice.name not in encountered_choices:
+        if entered in choice.name.lower() and choice.name not in encountered_choices:
             fixed_choices.append(choice)
             encountered_choices.add(choice.name)
+
+    if not fixed_choices:
+        return choices
 
     return fixed_choices
 
@@ -153,8 +159,7 @@ async def keyword_autocomplete(
 
     choices = [
         n.ApplicationCommandChoice(
-            name=keyword.get_list_identifier(),
-            value=str(keyword)
+            name=str(keyword)
         )
         for keyword in sorted(visible_keywords)
     ]
@@ -165,50 +170,40 @@ async def keyword_autocomplete(
 
     return predictive_choices(choices, entered_keyword)[:SHOW_OPTIONS]
 
-async def filter_type_options() -> list[n.ApplicationCommandChoice]:
-    """Returns choices for clearing all filters depending on type"""
+FILTER_TYPE_OPTIONS: list[n.ApplicationCommandChoice] = [
+    n.ApplicationCommandChoice(
+        name="Text",
+        value="t"
+    ),
+    n.ApplicationCommandChoice(
+        name="User",
+        value="u"
+    ),
+    n.ApplicationCommandChoice(
+        name="Channel",
+        value="c"
+    ),
+    n.ApplicationCommandChoice(
+        name="Server",
+        value="s"
+    ),
+    n.ApplicationCommandChoice(
+        name="All",
+        value="*"
+    )
+]
 
-    choices = [
-        n.ApplicationCommandChoice(
-            name="Text",
-            value="t"
-        ),
-        n.ApplicationCommandChoice(
-            name="User",
-            value="u"
-        ),
-        n.ApplicationCommandChoice(
-            name="Channel",
-            value="c"
-        ),
-        n.ApplicationCommandChoice(
-            name="Server",
-            value="s"
-        ),
-        n.ApplicationCommandChoice(
-            name="All",
-            value="*"
-        )
-    ]
-
-    return choices
-
-async def keyword_type_options() -> list[n.ApplicationCommandChoice]:
-    """Returns choices for clearing all keywords depending on type"""
-
-    choices = [
-        n.ApplicationCommandChoice(
-            name="Global",
-            value="g"
-        ),
-        n.ApplicationCommandChoice(
-            name="Server-Specific",
-            value="s"
-        ),
-        n.ApplicationCommandChoice(
-            name="Both",
-            value="*"
-        )
-    ]
-
-    return choices
+KEYWORD_TYPE_OPTIONS: list[n.ApplicationCommandChoice] = [
+    n.ApplicationCommandChoice(
+        name="Global",
+        value="g"
+    ),
+    n.ApplicationCommandChoice(
+        name="Server-Specific",
+        value="s"
+    ),
+    n.ApplicationCommandChoice(
+        name="Both",
+        value="*"
+    )
+]

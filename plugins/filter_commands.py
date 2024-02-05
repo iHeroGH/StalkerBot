@@ -9,7 +9,7 @@ from .stalker_utils.stalker_objects import FilterEnum
 from .stalker_utils.misc_utils import get_guild_from_cache, get_users_from_cache
 from .stalker_utils.autocomplete import current_guild_autocomplete, \
                                         filter_autocomplete, \
-                                        filter_type_options
+                                        FILTER_TYPE_OPTIONS
 from .stalker_utils.input_sanitizer import MIN_INPUT_LENGTH, \
                                             MAX_INPUT_LENGTH,\
                                             has_blacklisted, \
@@ -390,7 +390,7 @@ class FilterCommands(client.Plugin):
                 name="filter_type",
                 type=n.ApplicationOptionType.string,
                 description="The type of filters you want to remove",
-                autocomplete=True
+                choices=FILTER_TYPE_OPTIONS
             ),
         ]
     )
@@ -560,10 +560,3 @@ class FilterCommands(client.Plugin):
             ) -> list[n.ApplicationCommandChoice]:
         """Retrieves autocomplete option for the current guild"""
         return await current_guild_autocomplete(self.bot, ctx)
-
-    @clear_filters.autocomplete
-    async def filter_type_autocomplete(
-                self,
-                ctx: t.CommandI
-            ):
-        return await filter_type_options()
