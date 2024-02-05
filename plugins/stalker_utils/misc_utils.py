@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import typing
 
 import novus as n
@@ -10,7 +12,7 @@ import re
 def get_guild_from_cache(
                 bot: client.Client | None,
                 server_id: str | int,
-                ctx: typing.Optional[t.CommandI] = None,
+                ctx: t.CommandI | t.ComponentI | None = None,
             ) -> n.BaseGuild | None:
         """
         Retrieves a Guild from the bot's cache given its ID
@@ -25,7 +27,7 @@ def get_guild_from_cache(
             None
         server_id : str | int
             The ID of the guild to find
-        ctx : t.CommandI | None
+        ctx : t.CommandI | t.ComponentI | None
             The command interaction to find the guild from. If None is given,
             no default guild is returned.
 

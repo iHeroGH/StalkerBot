@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import logging
+import typing
 
 import novus as n
 from novus import types as t
@@ -23,6 +26,8 @@ class KeywordCommands(client.Plugin):
     async def clear_keywords_confirmation(self, ctx: t.ComponentI) -> None:
         """Confirms that a user wants to clear keywords and continues"""
 
+        log.info("Keyword clear confirmation sent.")
+
         _, required_id, confirm, keyword_type = ctx.data.custom_id.split(" ")
 
         if int(required_id) != ctx.user.id:
@@ -34,6 +39,8 @@ class KeywordCommands(client.Plugin):
 
         if not int(confirm):
             return await ctx.send("Cancelling keyword clear!")
+
+        log.info(f"Clearing keywords for {ctx.user.id}")
 
         # Get a flattened list of the stalker's keywords
         stalker = get_stalker(ctx.user.id)
@@ -63,6 +70,24 @@ class KeywordCommands(client.Plugin):
         await ctx.send(
             f"Removed **{self.keyword_type_name(keyword_type)}** keywords."
         )
+
+    @client.event.filtered_component(r"KEYWORD_REMOVE DROPDOWN")
+    async def remove_keyword_event(self, ctx: t.ComponentI) -> None:
+        """Deals with a user removing a keyword from the dropdown list"""
+
+        log.info("Keyword removal dropdown option clicked.")
+
+        _, required_id, keyword, server_id = ctx.data.values[0].value.split(" ")
+        if int(required_id) != ctx.user.id:
+            return await ctx.send(
+                "You can't interact with this button, run " +
+                f"{self.remove_keyword.mention} to get buttons you can press",
+                ephemeral=True
+            )
+
+        log.info("Removing keyword via dropdown")
+
+        await self.remove_keyword_helper(ctx, server_id, keyword)
 
     @client.command(
         name="keyword add",
@@ -170,8 +195,41 @@ class KeywordCommands(client.Plugin):
         """Removes a keyword (optionally, a server-specific keyword)"""
 
         if server_id is None or keyword is None:
-            server_id, keyword = await self.select_keyword_dropdown(ctx)
+            keyword_options = self.get_keyword_dropdown(ctx)
 
+            if not keyword_options:
+                return await ctx.send("You don't have any keywords! " +
+                                    "Set some up by running the "+
+                                    f"{self.add_keyword.mention} command."
+                                )
+
+            return await ctx.send(
+                "Select a keyword to remove:",
+                components=[
+                    n.ActionRow([
+                        n.StringSelectMenu(
+                            options=keyword_options,
+                            custom_id="KEYWORD_REMOVE DROPDOWN",
+                            placeholder="Keyword"
+                        )
+                    ])
+                ]
+            )
+
+        log.info("Removing keyword via command")
+
+        await self.remove_keyword_helper(ctx, server_id, keyword)
+
+    async def remove_keyword_helper(
+                self,
+                ctx: t.CommandI | t.ComponentI,
+                server_id: str,
+                keyword: str
+            ) -> None:
+        """
+        Since keywords can be removed via the command or the dropdown,
+        we need a helper function to deal with the actual removal of the keyword
+        """
         # Constrain keyword
         keyword.lower()
 
@@ -264,8 +322,22 @@ class KeywordCommands(client.Plugin):
 
         return keyword_type_map[keyword_type.lower()]
 
-    async def select_keyword_dropdown(self, ctx: t.CommandI) -> tuple[str, str]:
-        return "", ""
+    def get_keyword_dropdown(self, ctx: t.CommandI) -> list[n.SelectOption]:
+
+        stalker = get_stalker(ctx.user.id)
+
+        keyword_options: list[n.SelectOption] = []
+        for keyword_set in stalker.keywords.values():
+            for keyword in keyword_set:
+                keyword_options.append(
+                    n.SelectOption(
+                        label=keyword.get_list_identifier(),
+                        value="KEYWORD_REMOVE " + \
+                        f"{ctx.user.id} {str(keyword)} {keyword.server_id}"
+                    )
+                )
+
+        return keyword_options
 
     @add_keyword.autocomplete
     async def keyword_current_guild_autocomplete(
