@@ -147,6 +147,11 @@ async def keyword_modify_cache_db(
         the item was not already found. If removing, return if the item was
         present.
     """
+    log.info(
+        f"{'Adding' if is_add else 'Removing'} {user_id}'s keyword" +
+        f" {keyword_text} in {server_id}" + ("with DB" if conn else "")
+    )
+
     # Make sure we have a Stalker object in cache and create a keyword
     stalker = get_stalker(user_id)
     keyword = Keyword.from_record(
@@ -241,6 +246,11 @@ async def filter_modify_cache_db(
         the item was not already found. If removing, return if the item was
         present.
     """
+    log.info(
+        f"{'Adding' if is_add else 'Removing'} {user_id}'s filter type " +
+        f" {filter_type} value {filter_value}" + ("with DB" if conn else "")
+    )
+
     # Make sure we have a Stalker object in cache and create a keyword
     stalker = get_stalker(user_id)
     _filter = Filter(filter_value, filter_type)
@@ -333,6 +343,10 @@ async def opt_modify_cache_db(
         A state of sucess for the requested operation. If opting-in, if the user
         was opted out. If opting out, if the user was opted in.
     """
+    log.info(
+        f"Opting for {user_id} to {opting_out} {'with DB' if conn else ''}"
+    )
+
     # Make sure we have a Stalker object in cache
     stalker = get_stalker(user_id)
 
@@ -400,6 +414,10 @@ async def mute_modify_cache_db(
         A state of sucess for the requested operation. If unmuting, if the user
         had the bot muted in the first place. If muting, True regardless.
     """
+    log.info(
+        f"Muting for {user_id} until {mute_until} {'with DB' if conn else ''}"
+    )
+
     # Make sure we have a Stalker object in cache
     stalker = get_stalker(user_id)
 
@@ -451,5 +469,71 @@ async def mute_modify_cache_db(
         # If a database connection was given, add it to the db as well
         if conn:
             await conn.execute(*DB_QUERY)
+
+    return CACHE_CHECK
+
+async def settings_modify_cache_db(
+            user_id: int,
+            setting: str,
+            new_value: int | bool,
+            conn: Connection | None = None,
+        ) -> bool:
+    """
+    Performs an operation on the cache and optionally updates the database
+
+    Parameters
+    ----------
+    user_id : int
+        The user_id of the Stalker to update
+    setting : str
+        The setting to modify
+    new_value : int | bool
+        The new value to set the setting to
+    conn : Connection | None
+        An optional DB connection. If given, a query will be run to add the
+        given data to the database in addition to the cache
+
+    Returns
+    -------
+    success : bool
+        A state of sucess for the requested operation. For settings, this should
+        probably always return True
+    """
+    log.info(
+        f"Changing Setting {setting} for {user_id} to {new_value} " +
+        f"{'with DB' if conn else ''}"
+    )
+
+    # Make sure we have a Stalker object in cache
+    stalker = get_stalker(user_id)
+
+    # The query to change a variable setting
+    DB_QUERY = (
+        """
+        UPDATE
+            user_settings
+        SET
+            {} = $2
+        WHERE
+            user_id = $1
+        """
+    )
+
+    # CACHE_CHECK must be true to perform the caching and storing
+    # CACHE_OPERATION is the operation to perform to actually cache the setting
+    CACHE_CHECK: bool = setting in stalker.settings.VALID_FLAGS and \
+            type(new_value) == type(stalker.settings.__getattribute__(setting))
+
+    # Perfrom the operation
+    if CACHE_CHECK:
+        stalker.settings.__setattr__(setting, new_value)
+
+        # If a database connection was given, add it to the db as well
+        if conn:
+            await conn.execute(
+                DB_QUERY.format(setting),
+                user_id,
+                new_value
+            )
 
     return CACHE_CHECK

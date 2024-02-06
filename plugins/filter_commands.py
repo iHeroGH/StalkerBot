@@ -4,9 +4,10 @@ import novus as n
 from novus import types as t
 from novus.ext import client, database as db
 
-from .stalker_utils.stalker_cache_utils import filter_modify_cache_db, get_stalker
+from .stalker_utils.stalker_cache_utils import filter_modify_cache_db, \
+                                                get_stalker
 from .stalker_utils.stalker_objects import FilterEnum
-from .stalker_utils.misc_utils import get_guild_from_cache, get_users_from_cache
+from .stalker_utils.misc_utils import get_guild_from_cache
 from .stalker_utils.autocomplete import current_guild_autocomplete, \
                                         filter_autocomplete, \
                                         FILTER_TYPE_OPTIONS
@@ -471,6 +472,7 @@ class FilterCommands(client.Plugin):
         )
 
     # FILTER UTILS
+
     @client.command(name="filter list")
     async def list_filters(self, ctx: t.CommandI) -> None:
         """Lists a user's filters"""
