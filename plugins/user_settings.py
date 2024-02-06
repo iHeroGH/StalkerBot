@@ -91,7 +91,8 @@ class UserSettings(client.Plugin):
         """Lets you see and modify your settings"""
         embed, buttons = self.create_settings_menu(ctx.user.id)
         await ctx.send(
-            embeds=[embed], components=self.split_action_rows(buttons, 5)
+            embeds=[embed], components=self.split_action_rows(buttons, 5),
+            ephemeral=True
         )
 
     @client.command(name="quick_switch")
@@ -118,7 +119,7 @@ class UserSettings(client.Plugin):
             current_value = current_settings.__getattribute__(setting)
 
             settings_menu.description += "- " + description
-            settings_menu.description += f" (currently {current_value})\n"
+            settings_menu.description += f" (currently **{current_value}**)\n"
 
             button_style = n.ButtonStyle.gray
             if not is_menu:

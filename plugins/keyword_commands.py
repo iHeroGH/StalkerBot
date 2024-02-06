@@ -38,7 +38,7 @@ class KeywordCommands(client.Plugin):
             )
 
         if not int(confirm):
-            return await ctx.send("Cancelling keyword clear!")
+            return await ctx.send("Cancelling keyword clear!", ephemeral=True)
 
         log.info(f"Clearing keywords for {ctx.user.id}")
 
@@ -68,7 +68,8 @@ class KeywordCommands(client.Plugin):
 
         # Send a confirmation message
         await ctx.send(
-            f"Removed **{self.keyword_type_name(keyword_type)}** keywords."
+            f"Removed **{self.keyword_type_name(keyword_type)}** keywords.",
+            ephemeral=True
         )
 
     @client.event.filtered_component(r"KEYWORD_REMOVE DROPDOWN")
@@ -119,15 +120,15 @@ class KeywordCommands(client.Plugin):
         if len(keyword) < MIN_INPUT_LENGTH:
             return await ctx.send(
                 "Keywords must be at least " +
-                f"{MIN_INPUT_LENGTH} characters long."
+                f"{MIN_INPUT_LENGTH} characters long.", ephemeral=True
             )
         if len(keyword) > MAX_INPUT_LENGTH:
             return await ctx.send(
                 "Keywords cannot exceed " +
-                f"{MAX_INPUT_LENGTH} characters long."
+                f"{MAX_INPUT_LENGTH} characters long.", ephemeral=True
             )
         if has_blacklisted(keyword):
-            return await ctx.send(get_blacklisted_error())
+            return await ctx.send(get_blacklisted_error(), ephemeral=True)
         keyword = keyword.lower()
 
         log.info(f"Attempting to add keyword '{keyword}' to {ctx.user.id}")
@@ -137,13 +138,16 @@ class KeywordCommands(client.Plugin):
         max_keywords = stalker.max_keywords
         if stalker.used_keywords >= max_keywords:
             return await ctx.send(
-                f"You cannot add more than {max_keywords} keywords"
+                f"You cannot add more than {max_keywords} keywords",
+                ephemeral=True
             )
 
         # Get a server if it's server-specific
         server = get_guild_from_cache(self.bot, server_id, ctx)
         if not server and server_id != "0":
-            return await ctx.send("Couldn't find a valid guild.")
+            return await ctx.send(
+                "Couldn't find a valid guild.", ephemeral=True
+            )
 
         # Update the cache and database
         async with db.Database.acquire() as conn:
@@ -157,13 +161,14 @@ class KeywordCommands(client.Plugin):
         if not success:
             return await ctx.send(
                 "Ran into some trouble adding that keyword, " +
-                "it may already be in your list."
+                "it may already be in your list.", ephemeral=True
             )
 
         # Send a confirmation message
         await ctx.send(
             f"Added **{keyword}**"
-            + (f" to **{server.name}** ({server.id})!" if server else "!")
+            + (f" to **{server.name}** ({server.id})!" if server else "!"),
+            ephemeral=True
         )
 
     @client.command(
@@ -198,10 +203,11 @@ class KeywordCommands(client.Plugin):
             keyword_options = self.get_keyword_dropdown(ctx)
 
             if not keyword_options:
-                return await ctx.send("You don't have any keywords! " +
-                                    "Set some up by running the "+
-                                    f"{self.add_keyword.mention} command."
-                                )
+                return await ctx.send(
+                    "You don't have any keywords! Set some up by running the " +
+                    f"{self.add_keyword.mention} command.",
+                    ephemeral=True
+                )
 
             return await ctx.send(
                 "Select a keyword to remove:",
@@ -213,7 +219,7 @@ class KeywordCommands(client.Plugin):
                             placeholder="Keyword"
                         )
                     ])
-                ]
+                ], ephemeral=True
             )
 
         log.info("Removing keyword via command")
@@ -236,7 +242,7 @@ class KeywordCommands(client.Plugin):
         # Get a server if it's server-specific
         server = get_guild_from_cache(self.bot, server_id, ctx)
         if not server and server_id != "0":
-            return await ctx.send("Couldn't find a valid guild.")
+            return await ctx.send("Couldn't find a valid guild.", ephemeral=True)
 
         # Update the cache and database
         async with db.Database.acquire() as conn:
@@ -250,13 +256,14 @@ class KeywordCommands(client.Plugin):
         if not success:
             return await ctx.send(
                 "Ran into some trouble removing that keyword, " +
-                "it may not already be in your list."
+                "it may not already be in your list.", ephemeral=True
             )
 
         # Send a confirmation message
         await ctx.send(
             f"Removed **{keyword}**"
-            + (f" from **{server.name}** ({server.id})!" if server else "!")
+            + (f" from **{server.name}** ({server.id})!" if server else "!"),
+            ephemeral=True
         )
 
     @client.command(
@@ -276,7 +283,8 @@ class KeywordCommands(client.Plugin):
         # Ensure a correct type was chosen
         if keyword_type not in ["g", "s", "*"]:
             return await ctx.send(
-                "Make sure to select an option from the autocomplete."
+                "Make sure to select an option from the autocomplete.",
+                ephemeral=True
             )
 
         confirmation_components = [
@@ -299,7 +307,8 @@ class KeywordCommands(client.Plugin):
             "Are you sure you want to delete " +
             f"**{self.keyword_type_name(keyword_type)}** keywords? " +
             "(Warning: This is irreversible!)",
-            components=confirmation_components
+            components=confirmation_components,
+            ephemeral=True
         )
 
     @client.command(name="keyword list")
@@ -309,7 +318,8 @@ class KeywordCommands(client.Plugin):
         stalker = get_stalker(ctx.user.id)
 
         await ctx.send(
-            embeds=[stalker.format_keywords(self.bot)]
+            embeds=[stalker.format_keywords(self.bot)],
+            ephemeral=True
         )
 
     def keyword_type_name(self, keyword_type: str):

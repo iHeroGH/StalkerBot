@@ -32,11 +32,14 @@ class MuteCommands(client.Plugin):
             )
 
         if not success:
-            return await ctx.send("Something went wrong trying to mute")
+            return await ctx.send(
+                "Something went wrong trying to mute.", ephemeral=True
+            )
 
         await ctx.send(
             f"Muting until " +
-            f"{format_timestamp(n_utcnow() + mute_until)}"
+            f"{format_timestamp(n_utcnow() + mute_until)}",
+            ephemeral=True
         )
 
     @client.command(name="unmute")
@@ -49,10 +52,10 @@ class MuteCommands(client.Plugin):
         if not success:
             return await ctx.send(
                 "Something went wrong trying to unmute, " +
-                "the bot may have already been unmuted."
+                "the bot may have already been unmuted.", ephemeral=True
             )
 
-        await ctx.send("Successfully unmuted!")
+        await ctx.send("Successfully unmuted!", ephemeral=True)
 
     @client.command(name="opt_out")
     async def opt_out(self, ctx: t.CommandI) -> None:
@@ -64,10 +67,11 @@ class MuteCommands(client.Plugin):
         if not success:
             return await ctx.send(
                 "Something went wrong trying to opt-out, " +
-                "you may already be opted-out of the bot's features."
+                "you may already be opted-out of the bot's features.",
+                ephemeral=True
             )
 
-        await ctx.send("Successfully opted-out!")
+        await ctx.send("Successfully opted-out!", ephemeral=True)
 
     @client.command(name="opt_in")
     async def opt_in(self, ctx: t.CommandI) -> None:
@@ -79,7 +83,8 @@ class MuteCommands(client.Plugin):
         if not success:
             return await ctx.send(
                 "Something went wrong trying to opt-in, " +
-                "you may already be opted-in to the bot's features."
+                "you may already be opted-in to the bot's features.",
+                ephemeral=True
             )
 
-        await ctx.send("Successfully opted-in!")
+        await ctx.send("Successfully opted-in!", ephemeral=True)

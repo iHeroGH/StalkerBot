@@ -44,15 +44,15 @@ class FilterCommands(client.Plugin):
         if len(_filter) < MIN_INPUT_LENGTH:
             return await ctx.send(
                 "Text filters must be at least " +
-                f"{MIN_INPUT_LENGTH} characters long."
+                f"{MIN_INPUT_LENGTH} characters long.", ephemeral=True
             )
         if len(_filter) > MAX_INPUT_LENGTH:
             return await ctx.send(
                 "Text filters cannot exceed " +
-                f"{MAX_INPUT_LENGTH} characters long."
+                f"{MAX_INPUT_LENGTH} characters long.", ephemeral=True
             )
         if has_blacklisted(_filter):
-            return await ctx.send(get_blacklisted_error())
+            return await ctx.send(get_blacklisted_error(), ephemeral=True)
         _filter = _filter.lower()
 
         log.info(f"Attempting to filter text '{_filter}' from {ctx.user.id}")
@@ -69,10 +69,10 @@ class FilterCommands(client.Plugin):
         if not success:
             return await ctx.send(
                 "Ran into some trouble adding that filter, " +
-                "it may already be in your list."
+                "it may already be in your list.", ephemeral=True
             )
 
-        await ctx.send(f"Filtered **{_filter}**!")
+        await ctx.send(f"Filtered **{_filter}**!", ephemeral=True)
 
     @client.command(
         name="filter add user",
@@ -106,10 +106,10 @@ class FilterCommands(client.Plugin):
         if not success:
             return await ctx.send(
                 "Ran into some trouble adding that filter, " +
-                " it may already be in your list."
+                " it may already be in your list.", ephemeral=True
             )
 
-        await ctx.send(f"Filtered **{_filter}**!")
+        await ctx.send(f"Filtered **{_filter}**!", ephemeral=True)
 
     @client.command(
         name="filter add channel",
@@ -148,10 +148,10 @@ class FilterCommands(client.Plugin):
         if not success:
             return await ctx.send(
                 "Ran into some trouble adding that filter, " +
-                " it may already be in your list."
+                " it may already be in your list.", ephemeral=True
             )
 
-        await ctx.send(f"Filtered **{_filter}**!")
+        await ctx.send(f"Filtered **{_filter}**!", ephemeral=True)
 
     @client.command(
         name="filter add server",
@@ -179,7 +179,8 @@ class FilterCommands(client.Plugin):
         if not server:
             log.info(f"Server '{_filter}' not found.")
             return await ctx.send(
-                "Couldn't find a valid guild. The bot may not be in that guild"
+                "Couldn't find a valid guild. The bot may not be in that guild",
+                ephemeral=True
             )
 
         async with db.Database.acquire() as conn:
@@ -194,10 +195,10 @@ class FilterCommands(client.Plugin):
         if not success:
             return await ctx.send(
                 "Ran into some trouble adding that filter, " +
-                " it may already be in your list."
+                " it may already be in your list.", ephemeral=True
             )
 
-        await ctx.send(f"Filtered **{server.name}**!")
+        await ctx.send(f"Filtered **{server.name}**!", ephemeral=True)
 
     # FILTER REMOVAL
 
@@ -235,10 +236,11 @@ class FilterCommands(client.Plugin):
             return await ctx.send(
                 "Ran into some trouble removing that filter, " +
                 " it may not already be in your list. " +
-                "Make sure to select an option from the autocomplete."
+                "Make sure to select an option from the autocomplete.",
+                ephemeral=True
             )
 
-        await ctx.send(f"Removed **{_filter}**!")
+        await ctx.send(f"Removed **{_filter}**!", ephemeral=True)
 
     @client.command(
         name="filter remove user",
@@ -266,7 +268,8 @@ class FilterCommands(client.Plugin):
                 _filter = int(_filter)
             else:
                 return await ctx.send(
-                    "Make sure to select an option from the autocomplete."
+                    "Make sure to select an option from the autocomplete.",
+                    ephemeral=True
                 )
 
         async with db.Database.acquire() as conn:
@@ -282,10 +285,11 @@ class FilterCommands(client.Plugin):
             return await ctx.send(
                 "Ran into some trouble removing that filter, " +
                 " it may not already be in your list. " +
-                "Make sure to select an option from the autocomplete."
+                "Make sure to select an option from the autocomplete.",
+                ephemeral=True
             )
 
-        await ctx.send(f"Removed **{_filter}**!")
+        await ctx.send(f"Removed **{_filter}**!", ephemeral=True)
 
     @client.command(
         name="filter remove channel",
@@ -313,7 +317,8 @@ class FilterCommands(client.Plugin):
                 _filter = int(_filter)
             else:
                 return await ctx.send(
-                    "Make sure to select an option from the autocomplete."
+                    "Make sure to select an option from the autocomplete.",
+                    ephemeral=True
                 )
 
         async with db.Database.acquire() as conn:
@@ -329,10 +334,11 @@ class FilterCommands(client.Plugin):
             return await ctx.send(
                 "Ran into some trouble removing that filter, " +
                 " it may not already be in your list. " +
-                "Make sure to select an option from the autocomplete."
+                "Make sure to select an option from the autocomplete.",
+                ephemeral=True
             )
 
-        await ctx.send(f"Removed **{_filter}**!")
+        await ctx.send(f"Removed **{_filter}**!", ephemeral=True)
 
     @client.command(
         name="filter remove server",
@@ -360,7 +366,8 @@ class FilterCommands(client.Plugin):
                 _filter = int(_filter)
             else:
                 return await ctx.send(
-                    "Make sure to select an option from the autocomplete."
+                    "Make sure to select an option from the autocomplete.",
+                    ephemeral=True
                 )
 
         # Won't check if the bot is in the server already, because it is
@@ -379,10 +386,11 @@ class FilterCommands(client.Plugin):
             return await ctx.send(
                 "Ran into some trouble removing that filter, " +
                 " it may not already be in your list. " +
-                "Make sure to select an option from the autocomplete."
+                "Make sure to select an option from the autocomplete.",
+                ephemeral=True
             )
 
-        await ctx.send(f"Removed **{_filter}**!")
+        await ctx.send(f"Removed **{_filter}**!", ephemeral=True)
 
     @client.command(
         name="filter clear",
@@ -401,7 +409,8 @@ class FilterCommands(client.Plugin):
         # Ensure a correct type was chosen
         if filter_type not in ["t", "u", "c", "s", "*"]:
             return await ctx.send(
-                "Make sure to select an option from the autocomplete."
+                "Make sure to select an option from the autocomplete.",
+                ephemeral=True
             )
 
         confirmation_components = [
@@ -424,7 +433,8 @@ class FilterCommands(client.Plugin):
             "Are you sure you want to delete " +
             f"**{self.filter_type_name(filter_type)}** filters? " +
             "(Warning: This is irreversible!)",
-            components=confirmation_components
+            components=confirmation_components,
+            ephemeral=True
         )
 
     @client.event.filtered_component(r"FILTER_CLEAR \d+ \d .")
@@ -441,7 +451,7 @@ class FilterCommands(client.Plugin):
             )
 
         if not int(confirm):
-            return await ctx.send("Cancelling filter clear!")
+            return await ctx.send("Cancelling filter clear!", ephemeral=True)
 
         # Get a flattened list of the stalker's filters
         stalker = get_stalker(ctx.user.id)
@@ -468,7 +478,8 @@ class FilterCommands(client.Plugin):
 
         # Send a confirmation message
         await ctx.send(
-            f"Removed **{self.filter_type_name(filter_type)}** filters."
+            f"Removed **{self.filter_type_name(filter_type)}** filters.",
+            ephemeral=True
         )
 
     # FILTER UTILS
@@ -484,7 +495,8 @@ class FilterCommands(client.Plugin):
             guild_id = ctx.guild.id
 
         await ctx.send(
-            embeds=[await stalker.format_filters(self.bot, guild_id)]
+            embeds=[await stalker.format_filters(self.bot, guild_id)],
+            ephemeral=True
         )
 
     def filter_type_name(self, filter_type: str) -> str:

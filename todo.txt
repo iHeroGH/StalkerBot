@@ -2,7 +2,7 @@ COMMANDS
 
 PLUGINS
 keyword detection
-moderation commands
+misc commands
 
 MISC
 adding text filters that dont trigger any keywords
