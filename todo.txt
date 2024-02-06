@@ -1,7 +1,6 @@
 COMMANDS
 
 PLUGINS
-settings
 keyword detection
 moderation commands
 
