@@ -207,3 +207,30 @@ KEYWORD_TYPE_OPTIONS: list[n.ApplicationCommandChoice] = [
         value="*"
     )
 ]
+
+SETTING_OPTIONS: list[n.ApplicationCommandChoice] = [
+    n.ApplicationCommandChoice(
+        name="Trigger your own keywords",
+        value="self_trigger"
+    ),
+    n.ApplicationCommandChoice(
+        name="Keywords in >quotes are triggered",
+        value="quote_trigger"
+    ),
+    n.ApplicationCommandChoice(
+        name="Replies send a DM",
+        value="reply_trigger"
+    ),
+    n.ApplicationCommandChoice(
+        name="Bots trigger keywords",
+        value="bot_trigger"
+    ),
+    n.ApplicationCommandChoice(
+        name="Edits trigger keywords",
+        value="edit_trigger"
+    ),
+    n.ApplicationCommandChoice(
+        name="DMs are embedded",
+        value="embed_messages"
+    )
+]

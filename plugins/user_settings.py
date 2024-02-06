@@ -9,46 +9,39 @@ from novus.ext import client, database as db
 from .stalker_utils.stalker_cache_utils import settings_modify_cache_db, \
                                                 get_stalker
 from .stalker_utils.misc_utils import split_action_rows
+from .stalker_utils.autocomplete import SETTING_OPTIONS
 
 log = logging.getLogger("plugins.user_settings")
 
 class UserSettings(client.Plugin):
 
-    # A map of the setting abbreviation to a
-    # (full description, whether or not it needs a menu)
+    # A map of the setting abbreviation to a description
     SETTING_DESCRIPTORS = {
         "self_trigger": (
-            "Should you trigger your own keywords?",
-            False
+            "Should you trigger your own keywords?"
         ),
         "quote_trigger": (
-            "Should you get a DM if your keyword is said in a `>` quote?",
-            False
+            "Should you get a DM if your keyword is said in a `>` quote?"
         ),
         "reply_trigger": (
-            "Should you get a DM if a user replies to your message?",
-            False
+            "Should you get a DM if a user replies to your message?"
         ),
         "bot_trigger": (
-            "Should bots trigger your keywords?",
-            False
+            "Should bots trigger your keywords?"
         ),
         "edit_trigger": (
-            "Should you get a DM if a user edits a message with a keyword?",
-            False
+            "Should you get a DM if a user edits a message with a keyword?"
         ),
         "embed_message": (
-            "Should your DMs be embedded?",
-            False
-        ),
+            "Should your DMs be embedded?"
+        )
     }
 
-    @client.event.filtered_component(r"SETTINGS \d+ .+ \d")
+    @client.event.filtered_component(r"SETTINGS \d+ .+")
     async def setting_pressed_event(self, ctx: t.ComponentI) -> None:
         log.info(f"Settings button pressed: {ctx.data.custom_id}")
 
-        _, required_id, setting, is_menu = ctx.data.custom_id.split(" ")
-        is_menu = int(is_menu)
+        _, required_id, setting = ctx.data.custom_id.split(" ")
 
         if int(required_id) != ctx.user.id:
             return await ctx.send(
@@ -58,14 +51,13 @@ class UserSettings(client.Plugin):
             )
 
         stalker = get_stalker(ctx.user.id)
-        if not is_menu:
-            async with db.Database.acquire() as conn:
-                await settings_modify_cache_db(
-                    ctx.user.id,
-                    setting,
-                    not stalker.settings.__getattribute__(setting),
-                    conn
-                )
+        async with db.Database.acquire() as conn:
+            await settings_modify_cache_db(
+                ctx.user.id,
+                setting,
+                not stalker.settings.__getattribute__(setting),
+                conn
+            )
 
         embed, buttons = self.create_settings_menu(ctx.user.id)
         await ctx.update(
@@ -96,10 +88,41 @@ class UserSettings(client.Plugin):
             ephemeral=True
         )
 
-    @client.command(name="quick_switch")
-    async def quick_switch(self, ctx: t.CommandI) -> None:
+    @client.command(
+        name="quickswitch",
+        options = [
+            n.ApplicationCommandOption(
+                name="setting",
+                type=n.ApplicationOptionType.string,
+                description="The setting you want to flip",
+                choices=SETTING_OPTIONS
+            ),
+        ]
+    )
+    async def quick_switch(self, ctx: t.CommandI, setting: str) -> None:
         """Lets you quickly change one of your settings"""
-        return
+        stalker = get_stalker(ctx.user.id)
+
+        async with db.Database.acquire() as conn:
+            success = await settings_modify_cache_db(
+                ctx.user.id,
+                setting,
+                not stalker.settings.__getattribute__(setting),
+                conn
+            )
+
+        if not success:
+            return await ctx.send(
+                "Ran into some trouble changing that setting, " +
+                "it may not be an available setting.", ephemeral=True
+            )
+
+        # Send a confirmation message
+        await ctx.send(
+            f"Updated the `{setting}` setting to " +
+            f"`{stalker.settings.__getattribute__(setting)}`",
+            ephemeral=True
+        )
 
     def create_settings_menu(
                 self,
@@ -116,20 +139,18 @@ class UserSettings(client.Plugin):
         )
         settings_menu.description = ""
         settings_buttons = []
-        for setting, (description, is_menu) in self.SETTING_DESCRIPTORS.items():
+        for setting, description in self.SETTING_DESCRIPTORS.items():
             current_value = current_settings.__getattribute__(setting)
 
             settings_menu.description += "- " + description
             settings_menu.description += f" (currently **{current_value}**)\n"
 
-            button_style = n.ButtonStyle.gray
-            if not is_menu:
-                button_style = n.ButtonStyle.danger if not current_value \
-                                else n.ButtonStyle.green
+            button_style = n.ButtonStyle.danger if not current_value \
+                            else n.ButtonStyle.green
 
             settings_buttons.append(n.Button(
                 label=setting.replace("_", " ").title(),
-                custom_id=f"SETTINGS {user_id} {setting} {int(is_menu)}",
+                custom_id=f"SETTINGS {user_id} {setting}",
                 style=button_style
             ))
 

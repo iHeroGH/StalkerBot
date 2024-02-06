@@ -16,25 +16,27 @@ class StalkerCacheManager(client.Plugin):
         await load_data()
 
     @client.command(
-            name="load",
-            guild_ids=[649715200890765342],# 208895639164026880],
-            default_member_permissions=n.Permissions(manage_guild=True)
-        )
+        name="load",
+        guild_ids=[649715200890765342],# 208895639164026880],
+        default_member_permissions=n.Permissions(manage_guild=True)
+    )
     async def load_data(
                 self,
-                _: t.CommandI,
+                ctx: t.CommandI,
             ) -> None:
         """Loads all the data from the database into the cache."""
         await load_data()
+        await ctx.send("Reloaded cache.", ephemeral=True)
 
     @client.command(
-            name="log_cache",
-            guild_ids=[649715200890765342],# 208895639164026880],
-            default_member_permissions=n.Permissions(manage_guild=True)
-        )
+        name="log_cache",
+        guild_ids=[649715200890765342],# 208895639164026880],
+        default_member_permissions=n.Permissions(manage_guild=True)
+    )
     async def log_cache(
                 self,
-                _: t.CommandI,
+                ctx: t.CommandI,
             ) -> None:
         """Sends a log message of the cache"""
         log_cache()
+        await ctx.send("Logged to terminal.", ephemeral=True)

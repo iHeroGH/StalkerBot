@@ -149,7 +149,7 @@ async def keyword_modify_cache_db(
     """
     log.info(
         f"{'Adding' if is_add else 'Removing'} {user_id}'s keyword" +
-        f" {keyword_text} in {server_id}" + ("with DB" if conn else "")
+        f" {keyword_text} in {server_id} " + ("with DB" if conn else "")
     )
 
     # Make sure we have a Stalker object in cache and create a keyword
@@ -248,7 +248,7 @@ async def filter_modify_cache_db(
     """
     log.info(
         f"{'Adding' if is_add else 'Removing'} {user_id}'s filter type " +
-        f" {filter_type} value {filter_value}" + ("with DB" if conn else "")
+        f" {filter_type} value {filter_value} " + ("with DB" if conn else "")
     )
 
     # Make sure we have a Stalker object in cache and create a keyword
@@ -475,7 +475,7 @@ async def mute_modify_cache_db(
 async def settings_modify_cache_db(
             user_id: int,
             setting: str,
-            new_value: int | bool,
+            new_value: bool,
             conn: Connection | None = None,
         ) -> bool:
     """
@@ -496,8 +496,8 @@ async def settings_modify_cache_db(
     Returns
     -------
     success : bool
-        A state of sucess for the requested operation. For settings, this should
-        probably always return True
+        A state of sucess for the requested operation. This will be False if the
+        given setting string is not an available setting.
     """
     log.info(
         f"Changing Setting {setting} for {user_id} to {new_value} " +
@@ -521,8 +521,7 @@ async def settings_modify_cache_db(
 
     # CACHE_CHECK must be true to perform the caching and storing
     # CACHE_OPERATION is the operation to perform to actually cache the setting
-    CACHE_CHECK: bool = setting in stalker.settings.VALID_FLAGS and \
-            type(new_value) == type(stalker.settings.__getattribute__(setting))
+    CACHE_CHECK: bool = setting in stalker.settings.VALID_FLAGS
 
     # Perfrom the operation
     if CACHE_CHECK:
