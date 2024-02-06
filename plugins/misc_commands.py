@@ -20,6 +20,7 @@ class MiscCommands(client.Plugin):
     GIT_LINK = r"https://github.com/iHeroGH/StalkerBot"
     DONATION_LINK = r"https://upgrade.chat/208895639164026880/shop"
     VOTE_LINK = r"https://top.gg/bot/723813550136754216/vote"
+
     HELP_TEXT = (
         "StalkerBot is just a simple bot that sends you a DM every time a " +
         "keyword that you set is said in a channel you have access to!\n\n\n" +
@@ -42,6 +43,23 @@ class MiscCommands(client.Plugin):
         r"hm=aae500b5b8bb7cfe0adcd9b3da06e24081f43d6a5ddb458845dffd6c91b30d67&"
     )
 
+    PRIVACY_POLICY = (
+        "While the name of the bot may be slightly misleading, StalkerBot is " +
+        "dedicated to keeping users' privacy safe:\n"
+
+        "- StalkerBot never saves your messages outside of Discord.\n" +
+
+        "- StalkerBot only sends messages to other users if a keyword is " +
+        "said in those messages (or if the message is a reply).\n" +
+
+        "- Users can opt-out of triggering others' keywords and receiving " +
+        "messages for their own keywords\n\n"
+
+        "To opt out, run the {} command\n" +
+        "To opt back in, run the {} command\n" +
+        "All users are opted in by default."
+    )
+
     @client.command(name="invite")
     async def invite(self, ctx: t.CommandI) -> None:
         """Sends an invite link for the bot"""
@@ -50,7 +68,7 @@ class MiscCommands(client.Plugin):
     @client.command(name="info")
     async def info(self, ctx: t.CommandI) -> None:
         """Sends an informative message about the bot"""
-        info_embed = n.Embed(title="StalkerBot Info")
+        info_embed = n.Embed(title="StalkerBot Information")
 
         # Description and image
         info_embed.description = self.HELP_TEXT.format(
@@ -136,3 +154,14 @@ class MiscCommands(client.Plugin):
 
         await ctx.send(embeds=[stats_embed])
 
+    @client.command(name="privacy")
+    async def privacy(self, ctx: t.CommandI) -> None:
+        """Sends the bot's privacy policy"""
+        privacy_embed = n.Embed(title="StalkerBot Privacy Policy")
+
+        privacy_embed.description = self.PRIVACY_POLICY.format(
+            self.bot.get_command("opt out").mention, # type: ignore
+            self.bot.get_command("opt in").mention # type: ignore
+        )
+
+        await ctx.send(embeds=[privacy_embed])

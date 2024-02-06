@@ -1,4 +1,5 @@
 COMMANDS
+quickswitch
 
 PLUGINS
 keyword detection

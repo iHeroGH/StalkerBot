@@ -57,7 +57,7 @@ class MuteCommands(client.Plugin):
 
         await ctx.send("Successfully unmuted!", ephemeral=True)
 
-    @client.command(name="opt_out")
+    @client.command(name="opt out")
     async def opt_out(self, ctx: t.CommandI) -> None:
         """Opts-Out of the bot's features."""
 
@@ -73,7 +73,7 @@ class MuteCommands(client.Plugin):
 
         await ctx.send("Successfully opted-out!", ephemeral=True)
 
-    @client.command(name="opt_in")
+    @client.command(name="opt in")
     async def opt_in(self, ctx: t.CommandI) -> None:
         """Opts-In to the bot's features."""
 
