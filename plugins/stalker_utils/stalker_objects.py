@@ -249,6 +249,7 @@ class Stalker:
 
     def __init__(
                 self,
+                user_id: int,
                 keywords: dict[int, set[Keyword]] = {0: set()},
                 filters: dict[FilterEnum, set[Filter]] = {
                     FilterEnum.text_filter: set(),
@@ -261,6 +262,7 @@ class Stalker:
                 opted_out: bool = False
             ) -> None:
         """Initializes a Stalker object"""
+        self.user_id: int = user_id
         self.keywords: dict[int, set[Keyword]] = keywords
         self.filters: dict[FilterEnum, set[Filter]] = filters
         self.settings: Settings = settings
@@ -414,6 +416,7 @@ class Stalker:
 
     def __repr__(self) -> str:
         return (f"Stalker("+
+                f"user_id={self.user_id}, "
                 f"keywords={self.keywords}, "
                 f"filters={self.filters}, "
                 f"settings={self.settings}, "
@@ -423,3 +426,9 @@ class Stalker:
 
     def __str__(self) -> str:
         return self.__repr__()
+
+    def __hash__(self) -> int:
+        return hash(self.user_id)
+
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, Stalker) and other.user_id == self.user_id

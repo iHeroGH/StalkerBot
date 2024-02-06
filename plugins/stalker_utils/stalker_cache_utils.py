@@ -96,13 +96,18 @@ def get_stalker(user_id: int) -> Stalker:
     global stalker_cache
     if not user_id in stalker_cache:
         log.info(f"Creating Stalker {user_id}")
-        stalker_cache[user_id] = Stalker().clear()
+        stalker_cache[user_id] = Stalker(user_id).clear()
 
     return stalker_cache[user_id]
 
+def get_all_stalkers() -> list[Stalker]:
+    global stalker_cache
+    return list(stalker_cache.values())
+
 async def cache_filters(
         filter_rows: list[dict[str, Any]],
-        filter_type: FilterEnum) -> None:
+        filter_type: FilterEnum
+    ) -> None:
     """
     Since filter caching is generally the same each time, we only
     deal with a changing filter_type
@@ -510,12 +515,23 @@ async def settings_modify_cache_db(
     # The query to change a variable setting
     DB_QUERY = (
         """
-        UPDATE
+        INSERT INTO
             user_settings
-        SET
+            (
+                user_id,
+                {}
+            )
+        VALUES
+            (
+                $1,
+                $2
+            )
+        ON CONFLICT
+            (
+                user_id
+            )
+        DO UPDATE SET
             {} = $2
-        WHERE
-            user_id = $1
         """
     )
 
@@ -530,7 +546,7 @@ async def settings_modify_cache_db(
         # If a database connection was given, add it to the db as well
         if conn:
             await conn.execute(
-                DB_QUERY.format(setting),
+                DB_QUERY.format(setting, setting),
                 user_id,
                 new_value
             )
