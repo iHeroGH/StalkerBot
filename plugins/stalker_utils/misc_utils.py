@@ -10,162 +10,162 @@ from datetime import timedelta
 import re
 
 def get_guild_from_cache(
-                bot: client.Client | None,
-                server_id: str | int,
-                ctx: t.CommandI | t.ComponentI | None = None,
-            ) -> n.BaseGuild | None:
-        """
-        Retrieves a Guild from the bot's cache given its ID
+            bot: client.Client | None,
+            server_id: str | int,
+            ctx: t.CommandI | t.ComponentI | None = None,
+        ) -> n.BaseGuild | None:
+    """
+    Retrieves a Guild from the bot's cache given its ID
 
-        If "1" is passed as the ID, return the guild in which the command
-        was run
+    If "1" is passed as the ID, return the guild in which the command
+    was run
 
-        Parameters
-        ----------
-        bot : Client | None
-            The Client object to check cache from. If not given, we just return
-            None
-        server_id : str | int
-            The ID of the guild to find
-        ctx : t.CommandI | t.ComponentI | None
-            The command interaction to find the guild from. If None is given,
-            no default guild is returned.
+    Parameters
+    ----------
+    bot : Client | None
+        The Client object to check cache from. If not given, we just return
+        None
+    server_id : str | int
+        The ID of the guild to find
+    ctx : t.CommandI | t.ComponentI | None
+        The command interaction to find the guild from. If None is given,
+        no default guild is returned.
 
-        Returns
-        -------
-        guild : n.BaseGuild | None
-            The guild, if it was found
-        """
-        if not bot:
+    Returns
+    -------
+    guild : n.BaseGuild | None
+        The guild, if it was found
+    """
+    if not bot:
+        return None
+
+    # If the user enters something that is not a digit, we couldn't
+    # get a guild
+    if isinstance(server_id, str):
+        if server_id.isdigit():
+            server_id = int(server_id)
+        else:
             return None
 
-        # If the user enters something that is not a digit, we couldn't
-        # get a guild
-        if isinstance(server_id, str):
-            if server_id.isdigit():
-                server_id = int(server_id)
-            else:
-                return None
+    # If server_id is 0, it is a global keyword
+    # If server_id is 1, it is the current guild
+    # Otherwise, try to find a guild
+    guild = None
+    if server_id == 0:
+        pass
+    elif server_id == 1:
+        if ctx:
+            guild = ctx.guild
+    elif server_id and server_id in bot.cache.guild_ids:
+        guild = bot.cache.guilds[server_id]
 
-        # If server_id is 0, it is a global keyword
-        # If server_id is 1, it is the current guild
-        # Otherwise, try to find a guild
-        guild = None
-        if server_id == 0:
-            pass
-        elif server_id == 1:
-            if ctx:
-                guild = ctx.guild
-        elif server_id and server_id in bot.cache.guild_ids:
-            guild = bot.cache.guilds[server_id]
-
-        return guild
+    return guild
 
 async def get_users_from_cache(
-                bot: client.Client | None,
-                user_id_values: list[str | int],
-                guild_id: str | int | None = None
-            ) -> list[int] | list[n.GuildMember | int]:
-        """
-        Fetches a list of users and returns their associated user objects or
-        their ID
+            bot: client.Client | None,
+            user_id_values: list[str | int],
+            guild_id: str | int | None = None
+        ) -> list[int] | list[n.GuildMember | int]:
+    """
+    Fetches a list of users and returns their associated user objects or
+    their ID
 
-        Parameters
-        ----------
-        bot : Client | None
-            The Client object to check cache from. If not given, we just return
-            None
-        user_id_values : list[str | int]
-            The IDs of the users to find
-        guild_id : str | int | None
-            The guild to find the user in (default None, in which case we cannot
-            find a user)
+    Parameters
+    ----------
+    bot : Client | None
+        The Client object to check cache from. If not given, we just return
+        None
+    user_id_values : list[str | int]
+        The IDs of the users to find
+    guild_id : str | int | None
+        The guild to find the user in (default None, in which case we cannot
+        find a user)
 
-        Returns
-        -------
-        users_idents : list[int] | list[n.GuildMember | int]
-            A list of user IDs or a mixture of members or IDs if the user was not
-            found
-        """
-        user_ids = list(map(int, user_id_values))
+    Returns
+    -------
+    users_idents : list[int] | list[n.GuildMember | int]
+        A list of user IDs or a mixture of members or IDs if the user was not
+        found
+    """
+    user_ids = list(map(int, user_id_values))
 
-        if not bot or not guild_id or guild_id not in bot.cache.guilds:
-            return user_ids
+    if not bot or not guild_id or guild_id not in bot.cache.guilds:
+        return user_ids
 
-        guild = bot.cache.guilds[guild_id]
-        users: list[n.GuildMember] | None
-        users = await guild.chunk_members(user_ids=user_ids) # type: ignore
+    guild = bot.cache.guilds[guild_id]
+    users: list[n.GuildMember] | None
+    users = await guild.chunk_members(user_ids=user_ids) # type: ignore
 
-        user_idents: dict[int, n.GuildMember | int] = {
-            user_id: user_id for user_id in user_ids
-        }
-        if users:
-            for user in users:
-                user_idents[user.id] = user
+    user_idents: dict[int, n.GuildMember | int] = {
+        user_id: user_id for user_id in user_ids
+    }
+    if users:
+        for user in users:
+            user_idents[user.id] = user
 
-        return list(user_idents.values())
+    return list(user_idents.values())
 
 def get_channel_from_cache(
-                bot: client.Client | None,
-                channel_id: str | int,
-            ) -> n.Channel | None:
-        """
-        Retrieves a Channel from the bot's cache given its ID
+            bot: client.Client | None,
+            channel_id: str | int,
+        ) -> n.Channel | None:
+    """
+    Retrieves a Channel from the bot's cache given its ID
 
-        Parameters
-        ----------
-        bot : Client
-            The Client object to check cache from. If not given, we just return
-            None
-        channel_id : str
-            The ID of the channel to find
+    Parameters
+    ----------
+    bot : Client
+        The Client object to check cache from. If not given, we just return
+        None
+    channel_id : str
+        The ID of the channel to find
 
-        Returns
-        -------
-        channel : n.Channel | None
-            The channel, if it was found
-        """
+    Returns
+    -------
+    channel : n.Channel | None
+        The channel, if it was found
+    """
 
-        if not bot:
-            return None
+    if not bot:
+        return None
 
-        channel =  get_object_from_cache(channel_id, bot.cache.channels)
-        assert not channel or isinstance(channel, n.Channel)
-        return channel
+    channel =  get_object_from_cache(channel_id, bot.cache.channels)
+    assert not channel or isinstance(channel, n.Channel)
+    return channel
 
 def get_object_from_cache(
-                object_id: str | int,
-                cache: dict[int, n.User] | dict[int, n.Channel]
-            ) -> n.User | n.Channel | None:
-        """
-        Retrieves an object from the bot's cache given its ID
+            object_id: str | int,
+            cache: dict[int, n.User] | dict[int, n.Channel]
+        ) -> n.User | n.Channel | None:
+    """
+    Retrieves an object from the bot's cache given its ID
 
-        Parameters
-        ----------
-        object_id : str | int
-            The ID of the object to find
-        cache : dict[int, n.User] | dict[int, n.Channel]
-            The cache to search. Usually found in Client.cache
+    Parameters
+    ----------
+    object_id : str | int
+        The ID of the object to find
+    cache : dict[int, n.User] | dict[int, n.Channel]
+        The cache to search. Usually found in Client.cache
 
-        Returns
-        -------
-        object : n.User | n.Channel | None
-            The user or channel, if it was found
-        """
+    Returns
+    -------
+    object : n.User | n.Channel | None
+        The user or channel, if it was found
+    """
 
-        # If given a string, make sure it's a digit
-        if isinstance(object_id, str):
-            if object_id.isdigit():
-                object_id = int(object_id)
-            else:
-                return None
+    # If given a string, make sure it's a digit
+    if isinstance(object_id, str):
+        if object_id.isdigit():
+            object_id = int(object_id)
+        else:
+            return None
 
-        # Default to None if we couldn't find the object
-        object = None
-        if object_id and object_id in cache:
-            object = cache[object_id]
+    # Default to None if we couldn't find the object
+    object = None
+    if object_id and object_id in cache:
+        object = cache[object_id]
 
-        return object
+    return object
 
 def get_datetime_until(time: str) -> timedelta:
     """
@@ -214,3 +214,22 @@ def get_datetime_until(time: str) -> timedelta:
         length = int(length_str)
         builder += timedelta(**{period_map[period[0]]: length})
     return builder
+
+def split_action_rows(
+            buttons: list[n.Button],
+            n_in_row: int
+        ) -> list[n.ActionRow]:
+    """Splits a given list of buttons into rows"""
+    action_rows: list[n.ActionRow] = []
+    current_row = n.ActionRow()
+    for button in buttons:
+        if len(current_row.components) < n_in_row:
+            current_row.components.append(button)
+        else:
+            action_rows.append(current_row)
+            current_row = n.ActionRow([button])
+
+    if current_row.components:
+        action_rows.append(current_row)
+
+    return action_rows

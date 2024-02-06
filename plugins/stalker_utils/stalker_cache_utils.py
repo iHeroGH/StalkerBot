@@ -537,3 +537,19 @@ async def settings_modify_cache_db(
             )
 
     return CACHE_CHECK
+
+def count_stalkers() -> int:
+    """Returns how many Stalkers there are"""
+    global stalker_cache
+    return len(stalker_cache)
+
+def count_keywords() -> int:
+    """Returns how many keywords there are"""
+    global stalker_cache
+    keyword_count = 0
+
+    for _, stalker in stalker_cache.items():
+        for _, keyword_set in stalker.keywords.items():
+            keyword_count += len(keyword_set)
+
+    return keyword_count

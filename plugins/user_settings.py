@@ -8,6 +8,7 @@ from novus.ext import client, database as db
 
 from .stalker_utils.stalker_cache_utils import settings_modify_cache_db, \
                                                 get_stalker
+from .stalker_utils.misc_utils import split_action_rows
 
 log = logging.getLogger("plugins.user_settings")
 
@@ -68,7 +69,7 @@ class UserSettings(client.Plugin):
 
         embed, buttons = self.create_settings_menu(ctx.user.id)
         await ctx.update(
-            embeds=[embed], components=self.split_action_rows(buttons, 5)
+            embeds=[embed], components=split_action_rows(buttons, 5)
         )
 
     @client.event.filtered_component(r"SETTINGS_CANCEL \d+")
@@ -91,7 +92,7 @@ class UserSettings(client.Plugin):
         """Lets you see and modify your settings"""
         embed, buttons = self.create_settings_menu(ctx.user.id)
         await ctx.send(
-            embeds=[embed], components=self.split_action_rows(buttons, 5),
+            embeds=[embed], components=split_action_rows(buttons, 5),
             ephemeral=True
         )
 
@@ -140,23 +141,3 @@ class UserSettings(client.Plugin):
         )
 
         return settings_menu, settings_buttons
-
-    def split_action_rows(
-                self,
-                buttons: list[n.Button],
-                n_in_row: int
-            ) -> list[n.ActionRow]:
-        """Splits a given list of buttons into rows"""
-        action_rows: list[n.ActionRow] = []
-        current_row = n.ActionRow()
-        for button in buttons:
-            if len(current_row.components) < n_in_row:
-                current_row.components.append(button)
-            else:
-                action_rows.append(current_row)
-                current_row = n.ActionRow([button])
-
-        if current_row.components:
-            action_rows.append(current_row)
-
-        return action_rows
