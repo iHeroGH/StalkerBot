@@ -420,7 +420,7 @@ class StalkMaster(client.Plugin):
             )
 
         if keyword.keyword not in content.lower():
-            if original_content != content:
+            if len(original_content) != len(content):
                 log.info(
                     f"Skipping {stalker.user_id} with keyword {keyword}: "+
                     "Text Filter/Quotes."
