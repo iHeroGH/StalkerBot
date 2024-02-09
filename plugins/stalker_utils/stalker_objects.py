@@ -259,7 +259,8 @@ class Stalker:
                 },
                 settings: Settings = Settings.default(),
                 mute_until: dt | None = None,
-                opted_out: bool = False
+                opted_out: bool = False,
+                dm_channel: int | n.Channel | None = None
             ) -> None:
         """Initializes a Stalker object"""
         self.user_id: int = user_id
@@ -268,6 +269,7 @@ class Stalker:
         self.settings: Settings = settings
         self.mute_until: dt | None = mute_until
         self.opted_out: bool = opted_out
+        self.dm_channel = dm_channel
 
     def clear(self):
         self.keywords = {0: set()}
@@ -414,9 +416,19 @@ class Stalker:
     def max_keywords(self) -> int:
         return self.MAX_KEYWORDS
 
+    def represent_channel(self) -> str:
+        if isinstance(self.dm_channel, int):
+            return str(self.dm_channel)
+        if isinstance(self.dm_channel, n.Channel):
+            return str(self.dm_channel.id)
+
+        return "?"
+
+
     def __repr__(self) -> str:
-        return (f"Stalker("+
+        return (f"Stalker(" +
                 f"user_id={self.user_id}, "
+                f"channel_id={self.represent_channel()}, "
                 f"keywords={self.keywords}, "
                 f"filters={self.filters}, "
                 f"settings={self.settings}, "

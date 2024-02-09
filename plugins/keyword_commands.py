@@ -7,7 +7,9 @@ import novus as n
 from novus import types as t
 from novus.ext import client, database as db
 
-from .stalker_utils.stalker_cache_utils import keyword_modify_cache_db, get_stalker
+from .stalker_utils.stalker_cache_utils import keyword_modify_cache_db, \
+                                                channel_modify_cache_db, \
+                                                get_stalker
 from .stalker_utils.misc_utils import get_guild_from_cache
 from .stalker_utils.autocomplete import available_guilds_autocomplete, \
                                         current_guild_autocomplete, \
@@ -158,6 +160,13 @@ class KeywordCommands(client.Plugin):
                 server.id if server else 0,
                 conn
             )
+
+            await channel_modify_cache_db(
+                await ctx.user.create_dm_channel(),
+                ctx.user.id,
+                conn
+            )
+
         if not success:
             return await ctx.send(
                 "Ran into some trouble adding that keyword, " +

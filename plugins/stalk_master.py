@@ -1,13 +1,16 @@
 import logging
 import re
+from datetime import datetime
 
 import novus as n
 from novus import types as t
 from novus.utils import Localization as LC
-from novus.ext import client
+from novus.ext import client, database as db
 
-from.stalker_utils.stalker_cache_utils import get_all_stalkers, get_stalker
-from .stalker_utils.stalker_objects import Stalker
+from.stalker_utils.stalker_cache_utils import channel_modify_cache_db, \
+                                            get_all_stalkers, \
+                                                get_stalker
+from .stalker_utils.stalker_objects import Keyword, Stalker, FilterEnum, Filter
 from .stalker_utils.input_sanitizer import BLACKLISTED_CHARACTERS
 
 log = logging.getLogger("plugins.stalk_master")
@@ -21,7 +24,6 @@ class StalkMaster(client.Plugin):
 
     @client.event.message
     async def on_message(self, message: n.Message):
-        print("Message Found!")
         await self.stalk_message(message)
 
     @client.event.message_edit
@@ -71,7 +73,6 @@ class StalkMaster(client.Plugin):
 
         # Maintain a set of users who have already been sent a message
         already_sent: set[Stalker] = set()
-        all_stalkers = get_all_stalkers()
 
         # Easy access to the guild and channel
         guild = self.bot.get_guild(message.guild.id)
@@ -82,25 +83,74 @@ class StalkMaster(client.Plugin):
         message_reply = message.referenced_message
         if message_reply:
             success = await self.acknowledge_reply(
-                message, message_reply, guild
+                message=message,
+                reply=message_reply,
+                guild=guild,
+                channel=channel,
+                already_sent=already_sent,
+                is_edit=before is not None
             )
 
             if success:
                 await self.send_trigger(
                     stalker:=get_stalker(message_reply.author.id),
                     message=message,
+                    guild=guild,
                     before=before,
                     triggered_keyword="",
-                    triggering_embeds=list(decoded_embeds.keys()),
+                    triggering_embeds=[],
                     is_reply=True
                 )
                 already_sent.add(stalker)
+
+        all_stalkers = get_all_stalkers()
+        for stalker in all_stalkers:
+
+            if not self.is_triggerable_stalker(
+                stalker,
+                already_sent=already_sent,
+                message=message,
+                guild=guild,
+                channel=channel,
+                is_reply=False,
+                is_edit=before is not None
+            ):
+                continue
+
+            # TODO: If a webhook sent the message, the webhook author will not be in the guild
+
+            for keyword_set in stalker.keywords.values():
+                for keyword in keyword_set:
+                    triggering_embeds = self.get_triggering_embeds(
+                        stalker,
+                        keyword,
+                        decoded_embeds=decoded_embeds,
+                        guild=guild
+                    )
+
+                    if self.is_triggering_keyword(
+                        stalker,
+                        keyword,
+                        message=message,
+                        guild=guild
+                    ) or triggering_embeds:
+                        await self.send_trigger(
+                            stalker,
+                            message=message,
+                            guild=guild,
+                            before=before,
+                            triggered_keyword=keyword.keyword,
+                            triggering_embeds=triggering_embeds,
+                            is_reply=False
+                        )
+                        already_sent.add(stalker)
 
     async def send_trigger(
                 self,
                 stalker: Stalker,
                 *,
                 message: n.Message,
+                guild: n.Guild,
                 before: n.Message | None = None,
                 triggered_keyword: str = "",
                 triggering_embeds: list[n.Embed] = [],
@@ -110,6 +160,7 @@ class StalkMaster(client.Plugin):
         The main hub for triggered keywords to be sent out to their
         respective users
         """
+
         log.info(
             f"Sending {stalker.user_id} " +
             f"message {message.id} by {message.author.id} " +
@@ -118,35 +169,373 @@ class StalkMaster(client.Plugin):
             f"{'with embeds ' if triggering_embeds else ''}" +
             f"{'as a reply ' if is_reply else ''}"
         )
-        return
+
+        message_payload = {
+            "content": "",
+            "embeds": []
+        }
+
+        if stalker.settings.embed_message:
+            message_payload['embeds'].append(self.create_sendable_embed(
+                message=message,
+                before=before,
+                triggered_keyword=triggered_keyword,
+                triggering_embeds=triggering_embeds,
+                is_reply=is_reply
+            ))
+        else:
+            message_payload['content'] = self.create_sendable_string(
+                message=message,
+                before=before,
+                triggered_keyword=triggered_keyword,
+                triggering_embeds=triggering_embeds,
+                is_reply=is_reply
+            )
+
+        message_payload['embeds'] += triggering_embeds[:9]
+
+        if stalker.dm_channel:
+            if isinstance(stalker.dm_channel, int):
+                stalker.dm_channel = n.Channel.partial(
+                    self.bot.state, stalker.dm_channel
+                )
+            await stalker.dm_channel.send(**message_payload)
+        else:
+            member = await self.get_stalker_member(stalker, guild)
+            if member:
+                await member.send(**message_payload)
+            else:
+                log.info(
+                    f"A DM channel could not be created for {stalker.user_id}"
+                )
 
     async def acknowledge_reply(
                 self,
+                *,
                 message: n.Message,
                 reply: n.Message,
-                guild: n.Guild
+                guild: n.Guild,
+                channel: n.Channel,
+                is_edit: bool = False,
+                already_sent: set[Stalker] = set()
             ) -> bool:
         """Deal with a message that replies to another message"""
 
         log.info(f"Analyzing reply {reply.id} for message {message.id}")
-        # If this fails, OP is no longer a member of the guild
-        try:
-            author_member = await guild.fetch_member(reply.author.id)
-            stalker = get_stalker(author_member.id)
 
-            if stalker.opted_out or not stalker.settings.reply_trigger:
-                return False
+        stalker = get_stalker(reply.author.id)
+        member = await self.get_stalker_member(stalker, guild)
 
-            if message.author.id == reply.author.id and not stalker.settings.self_trigger:
-                return False
+        if not member:
+            return False
 
-            if message.author.bot and not stalker.settings.bot_trigger:
-                return False
-
-        except:
+        if not self.is_triggerable_stalker(
+            stalker,
+            message=message,
+            guild=guild,
+            channel=channel,
+            already_sent=already_sent,
+            is_reply=True,
+            is_edit=is_edit
+        ):
             return False
 
         return True
+
+    async def get_stalker_member(
+                self,
+                stalker: Stalker,
+                guild: n.Guild,
+            ) -> n.GuildMember | None:
+        """Retrieves a member object via the API"""
+        try:
+            member = await guild.fetch_member(stalker.user_id)
+            if not stalker.dm_channel:
+                channel = await member.create_dm_channel()
+
+                async with db.Database.acquire() as conn:
+                    await channel_modify_cache_db(
+                        channel, stalker.user_id, conn
+                    )
+        except:
+            return None
+
+        return member
+
+    def is_triggerable_stalker(
+                self,
+                stalker: Stalker,
+                *,
+                already_sent: set[Stalker] = set(),
+                message: n.Message | None = None,
+                guild: n.Guild | None = None,
+                channel: n.Channel | None = None,
+                is_reply: bool = False,
+                is_edit: bool = False
+            ) -> bool:
+        """
+        A master conditional of the cases in which a stalker may be DMed
+        a message
+        """
+
+        if stalker.opted_out:
+            log.info(f"Skipping {stalker.user_id}: Opted out.")
+            return False
+
+        if already_sent and stalker in already_sent:
+            log.info(f"Skipping {stalker.user_id}: Already sent.")
+            return False
+
+        if stalker.mute_until and datetime.utcnow() <= stalker.mute_until:
+            log.info(f"Skipping {stalker.user_id}: Muted.")
+            return False
+
+        if not stalker.settings.reply_trigger and is_reply:
+            log.info(f"Skipping {stalker.user_id}: Uninterested in replies.")
+            return False
+
+        if not stalker.settings.edit_trigger and is_edit:
+            log.info(f"Skipping {stalker.user_id}: Uninterested in edits.")
+            return False
+
+        if not message:
+            log.info(f"Continuing with {stalker.user_id}")
+            return True
+
+        if not stalker.settings.bot_trigger and message.author.bot:
+            log.info(f"Skipping {stalker.user_id}: Uninterested in bots.")
+            return False
+
+        if not stalker.settings.bot_trigger and message.author.discriminator == "0000":
+            log.info(f"Skipping {stalker.user_id}: Uninterested in webhooks.")
+            return False
+
+        if not stalker.settings.self_trigger and message.author.id == stalker.user_id:
+            log.info(f"Skipping {stalker.user_id}: Uninterested in self.")
+            return False
+
+        fake_user_filter = Filter(message.author.id, FilterEnum.user_filter)
+        if fake_user_filter in stalker.filters[FilterEnum.user_filter]:
+            log.info(f"Skipping {stalker.user_id}: Uninterested in author {message.author.id}.")
+            return False
+
+        # If both are not given, then it's okay. But if one is given, the other
+        # must also be given
+        if not guild and not channel:
+            return True
+        assert guild and channel
+
+        # TODO: Deal with if we actually wanna pass the full Guild object or if BaseGuild (message.guild) is enough
+
+        if False: # TODO: Check user's permissions
+            log.info(f"Skipping {stalker.user_id}: No permissions.")
+            return False
+
+        fake_guild_filter = Filter(guild.id, FilterEnum.server_filter)
+        if fake_guild_filter in stalker.filters[FilterEnum.server_filter]:
+            log.info(f"Skipping {stalker.user_id}: Uninterested in guild {guild.id}.")
+            return False
+
+        fake_channel_filter = Filter(channel.id, FilterEnum.channel_filter)
+        if fake_channel_filter in stalker.filters[FilterEnum.channel_filter]:
+            log.info(f"Skipping {stalker.user_id}: Uninterested in channel {channel.id}.")
+            return False
+
+        return True
+
+    def is_triggering_keyword(
+                self,
+                stalker: Stalker,
+                keyword: Keyword,
+                *,
+                message: n.Message,
+                guild: n.Guild
+            ) -> bool:
+        """
+        A master conditional of the cases in which a keyword may trigger a DM
+        """
+
+        return self.is_triggering(
+            stalker,
+            keyword,
+            content=message.content,
+            guild=guild
+        )
+
+    def get_triggering_embeds(
+                self,
+                stalker: Stalker,
+                keyword: Keyword,
+                *,
+                decoded_embeds: dict[n.Embed, str],
+                guild: n.Guild
+            ) -> list[n.Embed]:
+        """
+        Returns a list of embeds that successfully trigger keywords
+        """
+
+        triggering: list[n.Embed] = []
+        for embed, embed_content in decoded_embeds.items():
+            if self.is_triggering(
+                stalker,
+                keyword,
+                content=embed_content,
+                guild=guild
+            ):
+                triggering.append(embed)
+
+        return triggering
+
+    def is_triggering(
+                self,
+                stalker: Stalker,
+                keyword: Keyword,
+                *,
+                content: str,
+                guild: n.Guild
+            ) -> bool:
+        """
+        Checks if a string of content can be triggered without bypassing
+        quotes or filters
+        """
+        if keyword.server_id and keyword.server_id != guild.id:
+            log.info(f"Skipping {stalker.user_id} for {keyword}: Server-Specific.")
+            return False
+
+        original_content = content
+
+        if not stalker.settings.quote_trigger:
+            non_quoted = [
+                line
+                for line in content.split("\n")
+                if not line.startswith("> ")
+            ]
+            content = "\n".join(non_quoted)
+
+        for text_filter in stalker.filters[FilterEnum.text_filter]:
+            assert isinstance(text_filter.filter, str)
+
+            content = re.sub(
+                text_filter.filter.lower(), "", content.lower()
+            )
+
+        if keyword.keyword not in content.lower():
+            if original_content != content:
+                log.info(
+                    f"Skipping {stalker.user_id} with keyword {keyword}: "+
+                    "Text Filter/Quotes."
+                )
+            return False
+
+        return True
+
+    def create_sendable_embed(
+                self,
+                *,
+                message: n.Message,
+                before: n.Message | None = None,
+                triggered_keyword: str = "",
+                triggering_embeds: list[n.Embed] = [],
+                is_reply: bool = False
+            ) -> n.Embed:
+        """Creates a nicely formatted embed to send to triggered Stalkers"""
+        embed = n.Embed()
+        embed.color = abs(hash(triggered_keyword)) & 0xffffff
+
+        embed.set_author_from_user(message.author)
+
+        if before:
+            embed.add_field(
+                name="Previous Content",
+                value=before.content,
+                inline=False
+            )
+
+        embed.add_field(
+            name="Message Content",
+            value=message.content[:1900] if not triggering_embeds \
+                else "*Embeds attached*",
+            inline=False
+        )
+
+        assert message.guild
+        embed.add_field(
+            name="Message Channel",
+            value=f"{message.channel.mention}\n" + \
+                f"({message.guild.name}: {message.channel.name})",
+            inline=True
+        )
+
+        embed.add_field(
+            name="Message Link",
+            value=f"[Jump To Message]({message.jump_url})",
+            inline=True
+        )
+
+        if message.attachments:
+            embed.add_field(
+                name="Attachment Links",
+                value=self.extract_attachments(message),
+                inline=False
+            )
+
+        if triggered_keyword:
+            embed.set_footer(f"Keyword: {triggered_keyword}")
+
+        if is_reply:
+            embed.set_footer("Reply")
+
+        embed.timestamp = message.timestamp
+
+        return embed
+
+    def create_sendable_string(
+                self,
+                *,
+                message: n.Message,
+                before: n.Message | None = None,
+                triggered_keyword: str = "",
+                triggering_embeds: list[n.Embed] = [],
+                is_reply: bool = False
+            ) -> str:
+        """Creates an identifying string to send to triggered Stalkers"""
+
+        author_identifier = f"{message.author.mention} ({message.author.username})"
+        action_identifier = "typed"
+        if before:
+            action_identifier = "edited their message to include"
+        if triggering_embeds:
+            action_identifier = "sent an embedded message containing"
+        if is_reply:
+            action_identifier = "replied to your message"
+
+        assert message.guild
+        location_identifier = f"the keyword `{triggered_keyword}` in " + \
+                            f"{message.channel.mention} " + \
+                            f"({message.guild.name}: {message.channel.name})"
+
+        full_message_identifier = f"They typed `{message.content[:1900]}` " + \
+                                f"<{message.jump_url}>"
+        if triggering_embeds:
+            full_message_identifier = "Embeds Attached"
+
+        sendable_message = f"{author_identifier} {action_identifier} " + \
+                        f"{location_identifier}. {full_message_identifier}."
+
+        if message.attachments:
+            sendable_message += "\n" + self.extract_attachments(message)
+
+        return sendable_message
+
+    def extract_attachments(self, message: n.Message) -> str:
+        attachment_links = [
+                attachment.url for attachment in message.attachments
+            ]
+        attachment_text = ""
+        for ind, link in enumerate(attachment_links):
+            attachment_text += f"[Attachment {ind + 1}]({link})\n"
+
+        return attachment_text
 
     def decode_embed(self, embed: n.Embed) -> str:
         """

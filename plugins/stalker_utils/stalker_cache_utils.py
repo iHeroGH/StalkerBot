@@ -6,6 +6,7 @@ from datetime import datetime as dt
 
 if TYPE_CHECKING:
     from asyncpg.connection import Connection
+    import novus as n
 
 from novus.ext import database as db
 
@@ -35,6 +36,8 @@ async def load_data() -> None:
 
     # Get all the data from the database
     async with db.Database.acquire() as conn:
+        channel_rows = await conn.fetch("SELECT * FROM stalker_channels")
+
         settings_rows = await conn.fetch("SELECT * FROM user_settings")
 
         keyword_rows = await conn.fetch("SELECT * FROM keywords")
@@ -49,6 +52,13 @@ async def load_data() -> None:
         user_opt_out_rows = await conn.fetch("SELECT * FROM user_opt_out")
 
     # Add it to the cache
+    log.info("Caching Stalker Channels.")
+    for channel_record in channel_rows:
+        user_id = channel_record['user_id']
+        stalker = get_stalker(user_id)
+
+        stalker.dm_channel = channel_record['channel_id']
+
     log.info("Caching Settings.")
     for settings_record in settings_rows:
         user_id = settings_record['user_id']
@@ -549,6 +559,78 @@ async def settings_modify_cache_db(
                 DB_QUERY.format(setting, setting),
                 user_id,
                 new_value
+            )
+
+    return CACHE_CHECK
+
+async def channel_modify_cache_db(
+            channel: n.Channel,
+            user_id: int,
+            conn: Connection | None = None,
+        ) -> bool:
+    """
+    Performs an operation on the cache and optionally updates the database
+
+    Parameters
+    ----------
+    channel: n.Channel
+        The channel to add to the stalker
+    user_id : int
+        The user_id of the Stalker to update
+    conn : Connection | None
+        An optional DB connection. If given, a query will be run to add the
+        given data to the database in addition to the cache
+
+    Returns
+    -------
+    success : bool
+        A state of sucess for the requested operation. If unmuting, if the user
+        had the bot muted in the first place. If muting, True regardless.
+    """
+    log.info(
+        f"Adding channel {channel.id} to {user_id} " +
+        f"{'with DB' if conn else ''}"
+    )
+
+    # Make sure we have a Stalker object in cache
+    stalker = get_stalker(user_id)
+
+    # DB_QUERY[0] is what to use for unmuting
+    # DB_QUERY[1] is what to use for muting
+    DB_QUERY = (
+        """
+        INSERT INTO
+            stalker_channels
+            (
+                user_id,
+                channel_id
+            )
+        VALUES
+            (
+                $1,
+                $2
+            )
+        ON CONFLICT (user_id)
+        DO UPDATE
+        SET
+            channel_id = $2
+        """
+    )
+
+    # CACHE_CHECK must be true to perform the caching and storing
+    # CACHE_OPERATION is the operation to perform to actually cache the setting
+    CACHE_CHECK: bool = not stalker.dm_channel
+
+    # Perfrom the operation
+    if CACHE_CHECK:
+        stalker.dm_channel = channel
+
+        # If a database connection was given, add it to the db as well
+        if conn:
+            await conn.execute(
+                DB_QUERY,
+                user_id,
+                channel.id
             )
 
     return CACHE_CHECK

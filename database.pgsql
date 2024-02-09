@@ -1,3 +1,9 @@
+-- The stalker_channels table keeps track of created DM channel IDs
+CREATE TABLE IF NOT EXISTS stalker_channels(
+    user_id BIGINT PRIMARY KEY NOT NULL,
+    channel_id BIGINT NOT NULL
+);
+
 -- The user_settings table keeps track of various adjustable settings
 CREATE TABLE IF NOT EXISTS user_settings(
     user_id BIGINT PRIMARY KEY NOT NULL,
