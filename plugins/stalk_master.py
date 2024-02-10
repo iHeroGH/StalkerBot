@@ -249,7 +249,8 @@ class StalkMaster(client.Plugin):
             ) -> n.GuildMember | None:
         """Retrieves a member object via the API"""
         try:
-            member = await guild.fetch_member(stalker.user_id)
+            member = guild.get_member(stalker.user_id) or await guild.fetch_member(stalker.user_id)
+            assert member
             if not stalker.dm_channel:
                 channel = await member.create_dm_channel()
 

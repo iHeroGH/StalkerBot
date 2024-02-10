@@ -87,14 +87,17 @@ async def get_users_from_cache(
         A list of user IDs or a mixture of members or IDs if the user was not
         found
     """
-    user_ids = list(map(int, user_id_values))
+    user_ids = set(map(int, user_id_values))
 
     if not bot or not guild_id or guild_id not in bot.cache.guilds:
-        return user_ids
+        return list(user_ids)
 
     guild = bot.cache.guilds[guild_id]
     users: list[n.GuildMember] | None
-    users = await guild.chunk_members(user_ids=user_ids) # type: ignore
+    if guild.members:
+        users = [member for member in guild.members if member.id in user_ids]
+    else:
+        users = await guild.chunk_members(user_ids=user_ids) # type: ignore
 
     user_idents: dict[int, n.GuildMember | int] = {
         user_id: user_id for user_id in user_ids
