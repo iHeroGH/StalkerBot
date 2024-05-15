@@ -1,22 +1,22 @@
 import novus as n
 from novus import types as t
-from novus.utils import Localization as LC
 from novus.ext import client
 
 from .stalker_utils.stalker_cache_utils import get_stalker
+
 
 class ModerationCommands(client.Plugin):
 
     @client.command(
         name="admin keywords",
-        options = [
+        options=[
             n.ApplicationCommandOption(
                 name="target",
-                type=n.ApplicationOptionType.user,
+                type=n.ApplicationOptionType.USER,
                 description="The user whose keywords you want to access"
             ),
         ],
-        guild_ids=[649715200890765342],# 208895639164026880],
+        guild_ids=[649715200890765342],  # 208895639164026880],
         default_member_permissions=n.Permissions(manage_guild=True)
     )
     async def admin_keywords(self, ctx: t.CommandI, target: n.User) -> None:
@@ -30,14 +30,14 @@ class ModerationCommands(client.Plugin):
 
     @client.command(
         name="admin filters",
-        options = [
+        options=[
             n.ApplicationCommandOption(
                 name="target",
-                type=n.ApplicationOptionType.user,
+                type=n.ApplicationOptionType.USER,
                 description="The user whose filters you want to access"
             ),
         ],
-        guild_ids=[649715200890765342],# 208895639164026880],
+        guild_ids=[649715200890765342],  # 208895639164026880],
         default_member_permissions=n.Permissions(manage_guild=True)
     )
     async def admin_filters(self, ctx: t.CommandI, target: n.User) -> None:

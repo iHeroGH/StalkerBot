@@ -3,15 +3,14 @@ import re
 from datetime import datetime
 
 import novus as n
-from novus import types as t
-from novus.utils import Localization as LC
-from novus.ext import client, database as db
+from novus.ext import client
+from novus.ext import database as db
 
-from.stalker_utils.stalker_cache_utils import channel_modify_cache_db, \
+from .stalker_utils.stalker_cache_utils import channel_modify_cache_db, \
                                             get_all_stalkers, \
-                                                get_stalker
-from .stalker_utils.stalker_objects import Keyword, Stalker, FilterEnum, Filter
+                                            get_stalker
 from .stalker_utils.input_sanitizer import BLACKLISTED_CHARACTERS
+from .stalker_utils.stalker_objects import Filter, FilterEnum, Keyword, Stalker
 
 log = logging.getLogger("plugins.stalk_master")
 
@@ -20,6 +19,8 @@ Filters
 Message can be regular, embedded, or a reply
 Event could be regular or an edit
 """
+
+
 class StalkMaster(client.Plugin):
 
     @client.event.message
@@ -66,7 +67,8 @@ class StalkMaster(client.Plugin):
         # React with the eyes emoji on special servers
         await self.stalk_reaction(message)
 
-        # Maintain a dictionary of the message's embeds to its scannable content
+        # Maintain a dictionary of the message's embeds
+        # to its scannable content
         decoded_embeds = {}
         for embed in message.embeds:
             decoded_embeds[embed] = self.decode_embed(embed)
@@ -93,7 +95,7 @@ class StalkMaster(client.Plugin):
 
             if success:
                 await self.send_trigger(
-                    stalker:=get_stalker(message_reply.author.id),
+                    stalker := get_stalker(message_reply.author.id),
                     message=message,
                     guild=guild,
                     before=before,
@@ -117,7 +119,8 @@ class StalkMaster(client.Plugin):
             ):
                 continue
 
-            # TODO: If a webhook sent the message, the webhook author will not be in the guild
+            # TODO: If a webhook sent the message, the webhook author will
+            # not be in the guild
 
             for keyword_set in stalker.keywords.values():
                 for keyword in keyword_set:
@@ -165,7 +168,7 @@ class StalkMaster(client.Plugin):
             f"Sending {stalker.user_id} " +
             f"message {message.id} by {message.author.id} " +
             f"{'with an edit ' if before else ''}" +
-            f"{f'for keyword {triggered_keyword} ' if triggered_keyword else ''}" +
+            f"{f'for kwd {triggered_keyword} ' if triggered_keyword else ''}" +
             f"{'with embeds ' if triggering_embeds else ''}" +
             f"{'as a reply ' if is_reply else ''}"
         )
@@ -249,7 +252,10 @@ class StalkMaster(client.Plugin):
             ) -> n.GuildMember | None:
         """Retrieves a member object via the API"""
         try:
-            member = guild.get_member(stalker.user_id) or await guild.fetch_member(stalker.user_id)
+            member = (
+                guild.get_member(stalker.user_id) or
+                await guild.fetch_member(stalker.user_id)
+            )
             assert member
             if not stalker.dm_channel:
                 channel = await member.create_dm_channel()
@@ -258,7 +264,8 @@ class StalkMaster(client.Plugin):
                     await channel_modify_cache_db(
                         channel, stalker.user_id, conn
                     )
-        except:
+        except Exception as e:
+            log.error(f"Something went wrong getting stalker member: {e}")
             return None
 
         return member
@@ -307,17 +314,22 @@ class StalkMaster(client.Plugin):
             log.info(f"Skipping {stalker.user_id}: Uninterested in bots.")
             return False
 
-        if not stalker.settings.bot_trigger and message.author.discriminator == "0000":
+        if not stalker.settings.bot_trigger and \
+                message.author.discriminator == "0000":
             log.info(f"Skipping {stalker.user_id}: Uninterested in webhooks.")
             return False
 
-        if not stalker.settings.self_trigger and message.author.id == stalker.user_id:
+        if not stalker.settings.self_trigger and \
+                message.author.id == stalker.user_id:
             log.info(f"Skipping {stalker.user_id}: Uninterested in self.")
             return False
 
         fake_user_filter = Filter(message.author.id, FilterEnum.user_filter)
         if fake_user_filter in stalker.filters[FilterEnum.user_filter]:
-            log.info(f"Skipping {stalker.user_id}: Uninterested in author {message.author.id}.")
+            log.info(
+                f"Skipping {stalker.user_id}: " +
+                f"Uninterested in author {message.author.id}."
+            )
             return False
 
         # If both are not given, then it's okay. But if one is given, the other
@@ -326,20 +338,27 @@ class StalkMaster(client.Plugin):
             return True
         assert guild and channel
 
-        # TODO: Deal with if we actually wanna pass the full Guild object or if BaseGuild (message.guild) is enough
+        # TODO: Deal with if we actually wanna pass the full Guild object or
+        # if BaseGuild (message.guild) is enough
 
-        if False: # TODO: Check user's permissions
+        if False:  # TODO: Check user's permissions
             log.info(f"Skipping {stalker.user_id}: No permissions.")
             return False
 
         fake_guild_filter = Filter(guild.id, FilterEnum.server_filter)
         if fake_guild_filter in stalker.filters[FilterEnum.server_filter]:
-            log.info(f"Skipping {stalker.user_id}: Uninterested in guild {guild.id}.")
+            log.info(
+                f"Skipping {stalker.user_id}: " +
+                f"Uninterested in guild {guild.id}."
+            )
             return False
 
         fake_channel_filter = Filter(channel.id, FilterEnum.channel_filter)
         if fake_channel_filter in stalker.filters[FilterEnum.channel_filter]:
-            log.info(f"Skipping {stalker.user_id}: Uninterested in channel {channel.id}.")
+            log.info(
+                f"Skipping {stalker.user_id}: " +
+                f"Uninterested in channel {channel.id}."
+            )
             return False
 
         return True
@@ -400,7 +419,9 @@ class StalkMaster(client.Plugin):
         quotes or filters
         """
         if keyword.server_id and keyword.server_id != guild.id:
-            log.info(f"Skipping {stalker.user_id} for {keyword}: Server-Specific.")
+            log.info(
+                f"Skipping {stalker.user_id} for {keyword}: Server-Specific."
+            )
             return False
 
         original_content = content
@@ -423,7 +444,7 @@ class StalkMaster(client.Plugin):
         if keyword.keyword not in content.lower():
             if len(original_content) != len(content):
                 log.info(
-                    f"Skipping {stalker.user_id} with keyword {keyword}: "+
+                    f"Skipping {stalker.user_id} with keyword {keyword}: " +
                     "Text Filter/Quotes."
                 )
             return False
@@ -454,16 +475,20 @@ class StalkMaster(client.Plugin):
 
         embed.add_field(
             name="Message Content",
-            value=message.content[:1900] if not triggering_embeds \
-                else "*Embeds attached*",
+            value=(
+                message.content[:1900] if not triggering_embeds else
+                "*Embeds attached*"
+            ),
             inline=False
         )
 
         assert message.guild
         embed.add_field(
             name="Message Channel",
-            value=f"{message.channel.mention}\n" + \
-                f"({message.guild.name}: {message.channel.name})",
+            value=(
+                f"{message.channel.mention}\n" +
+                f"({message.guild.name}: {message.channel.name})"
+            ),
             inline=True
         )
 
@@ -501,7 +526,9 @@ class StalkMaster(client.Plugin):
             ) -> str:
         """Creates an identifying string to send to triggered Stalkers"""
 
-        author_identifier = f"{message.author.mention} ({message.author.username})"
+        author_identifier = (
+            f"{message.author.mention} ({message.author.username})"
+        )
         action_identifier = "typed"
         if before:
             action_identifier = "edited their message to include"
@@ -511,17 +538,23 @@ class StalkMaster(client.Plugin):
             action_identifier = "replied to your message"
 
         assert message.guild
-        location_identifier = f"the keyword `{triggered_keyword}` in " + \
-                            f"{message.channel.mention} " + \
-                            f"({message.guild.name}: {message.channel.name})"
+        location_identifier = (
+            f"the keyword `{triggered_keyword}` in " +
+            f"{message.channel.mention} " +
+            f"({message.guild.name}: {message.channel.name})"
+        )
 
-        full_message_identifier = f"They typed `{message.content[:1900]}` " + \
-                                f"<{message.jump_url}>"
+        full_message_identifier = (
+            f"They typed `{message.content[:1900]}` " +
+            f"<{message.jump_url}>"
+        )
         if triggering_embeds:
             full_message_identifier = "Embeds Attached"
 
-        sendable_message = f"{author_identifier} {action_identifier} " + \
-                        f"{location_identifier}. {full_message_identifier}."
+        sendable_message = (
+            f"{author_identifier} {action_identifier} " +
+            f"{location_identifier}. {full_message_identifier}."
+        )
 
         if message.attachments:
             sendable_message += "\n" + self.extract_attachments(message)

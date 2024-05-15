@@ -1,17 +1,17 @@
 import logging
-import typing
 
 import novus as n
 from novus import types as t
-from novus.utils import Localization as LC
-from novus.ext import client, database as db
+from novus.ext import client
+from novus.ext import database as db
 
-from .stalker_utils.stalker_cache_utils import settings_modify_cache_db, \
-                                                get_stalker
-from .stalker_utils.misc_utils import split_action_rows
 from .stalker_utils.autocomplete import SETTING_OPTIONS
+from .stalker_utils.misc_utils import split_action_rows
+from .stalker_utils.stalker_cache_utils import (get_stalker,
+                                                settings_modify_cache_db)
 
 log = logging.getLogger("plugins.user_settings")
+
 
 class UserSettings(client.Plugin):
 
@@ -90,10 +90,10 @@ class UserSettings(client.Plugin):
 
     @client.command(
         name="quickswitch",
-        options = [
+        options=[
             n.ApplicationCommandOption(
                 name="setting",
-                type=n.ApplicationOptionType.string,
+                type=n.ApplicationOptionType.STRING,
                 description="The setting you want to flip",
                 choices=SETTING_OPTIONS
             ),
@@ -145,8 +145,10 @@ class UserSettings(client.Plugin):
             settings_menu.description += "- " + description
             settings_menu.description += f" (currently **{current_value}**)\n"
 
-            button_style = n.ButtonStyle.danger if not current_value \
-                            else n.ButtonStyle.green
+            button_style = (
+                n.ButtonStyle.DANGER if not current_value else
+                n.ButtonStyle.GREEN
+            )
 
             settings_buttons.append(n.Button(
                 label=setting.replace("_", " ").title(),
@@ -157,7 +159,7 @@ class UserSettings(client.Plugin):
         settings_buttons.append(n.Button(
                 label="Done",
                 custom_id=f"SETTINGS_CANCEL {user_id}",
-                style=n.ButtonStyle.blurple
+                style=n.ButtonStyle.BLURPLE
             )
         )
 

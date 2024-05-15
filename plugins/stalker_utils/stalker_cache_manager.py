@@ -8,6 +8,7 @@ from .stalker_cache_utils import load_data, log_cache
 
 log = logging.getLogger("plugins.stalker_utils.stalker_cache_manager")
 
+
 class StalkerCacheManager(client.Plugin):
 
     @client.event.ready
@@ -17,7 +18,7 @@ class StalkerCacheManager(client.Plugin):
 
     @client.command(
         name="load",
-        guild_ids=[649715200890765342],# 208895639164026880],
+        guild_ids=[649715200890765342],  # 208895639164026880],
         default_member_permissions=n.Permissions(manage_guild=True)
     )
     async def load_data(
@@ -30,7 +31,7 @@ class StalkerCacheManager(client.Plugin):
 
     @client.command(
         name="log_cache",
-        guild_ids=[649715200890765342],# 208895639164026880],
+        guild_ids=[649715200890765342],  # 208895639164026880],
         default_member_permissions=n.Permissions(manage_guild=True)
     )
     async def log_cache(

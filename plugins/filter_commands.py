@@ -2,21 +2,22 @@ import logging
 
 import novus as n
 from novus import types as t
-from novus.ext import client, database as db
+from novus.ext import client
+from novus.ext import database as db
 
-from .stalker_utils.stalker_cache_utils import filter_modify_cache_db, \
-                                                get_stalker
-from .stalker_utils.stalker_objects import FilterEnum
+from .stalker_utils.autocomplete import (FILTER_TYPE_OPTIONS,
+                                         current_guild_autocomplete,
+                                         filter_autocomplete)
+from .stalker_utils.input_sanitizer import (MAX_INPUT_LENGTH, MIN_INPUT_LENGTH,
+                                            get_blacklisted_error,
+                                            has_blacklisted)
 from .stalker_utils.misc_utils import get_guild_from_cache
-from .stalker_utils.autocomplete import current_guild_autocomplete, \
-                                        filter_autocomplete, \
-                                        FILTER_TYPE_OPTIONS
-from .stalker_utils.input_sanitizer import MIN_INPUT_LENGTH, \
-                                            MAX_INPUT_LENGTH,\
-                                            has_blacklisted, \
-                                            get_blacklisted_error
+from .stalker_utils.stalker_cache_utils import (filter_modify_cache_db,
+                                                get_stalker)
+from .stalker_utils.stalker_objects import FilterEnum
 
 log = logging.getLogger("plugins.filter_commands")
+
 
 class FilterCommands(client.Plugin):
 
@@ -24,10 +25,10 @@ class FilterCommands(client.Plugin):
 
     @client.command(
         name="filter add text",
-        options = [
+        options=[
             n.ApplicationCommandOption(
                 name="filter",
-                type=n.ApplicationOptionType.string,
+                type=n.ApplicationOptionType.STRING,
                 description="The filter you want to add"
             ),
         ]
@@ -76,10 +77,10 @@ class FilterCommands(client.Plugin):
 
     @client.command(
         name="filter add user",
-        options = [
+        options=[
             n.ApplicationCommandOption(
                 name="filter",
-                type=n.ApplicationOptionType.user,
+                type=n.ApplicationOptionType.USER,
                 description="The filter you want to add"
             ),
         ]
@@ -92,7 +93,9 @@ class FilterCommands(client.Plugin):
         """Adds a user filter"""
         _filter = filter
 
-        log.info(f"Attempting to filter user '{_filter.id}' from {ctx.user.id}")
+        log.info(
+            f"Attempting to filter user '{_filter.id}' from {ctx.user.id}"
+        )
 
         async with db.Database.acquire() as conn:
             success = await filter_modify_cache_db(
@@ -113,15 +116,15 @@ class FilterCommands(client.Plugin):
 
     @client.command(
         name="filter add channel",
-        options = [
+        options=[
             n.ApplicationCommandOption(
                 name="filter",
-                type=n.ApplicationOptionType.channel,
+                type=n.ApplicationOptionType.CHANNEL,
                 description="The filter you want to add",
                 channel_types=[
-                    n.ChannelType.guild_text,
-                    n.ChannelType.public_thread,
-                    n.ChannelType.private_thread
+                    n.ChannelType.GUILD_TEXT,
+                    n.ChannelType.PUBLIC_THREAD,
+                    n.ChannelType.PRIVATE_THREAD
                 ]
             ),
         ]
@@ -134,7 +137,9 @@ class FilterCommands(client.Plugin):
         """Adds a channel filter"""
         _filter = filter
 
-        log.info(f"Attempting to filter channel '{_filter.id}' from {ctx.user.id}")
+        log.info(
+            f"Attempting to filter channel '{_filter.id}' from {ctx.user.id}"
+        )
 
         async with db.Database.acquire() as conn:
             success = await filter_modify_cache_db(
@@ -155,10 +160,10 @@ class FilterCommands(client.Plugin):
 
     @client.command(
         name="filter add server",
-        options = [
+        options=[
             n.ApplicationCommandOption(
                 name="filter",
-                type=n.ApplicationOptionType.string,
+                type=n.ApplicationOptionType.STRING,
                 description="The filter you want to add",
                 autocomplete=True
             ),
@@ -179,7 +184,8 @@ class FilterCommands(client.Plugin):
         if not server:
             log.info(f"Server '{_filter}' not found.")
             return await ctx.send(
-                "Couldn't find a valid guild. The bot may not be in that guild",
+                "Couldn't find a valid guild. " +
+                "The bot may not be in that guild",
                 ephemeral=True
             )
 
@@ -204,10 +210,10 @@ class FilterCommands(client.Plugin):
 
     @client.command(
         name="filter remove text",
-        options = [
+        options=[
             n.ApplicationCommandOption(
                 name="filter",
-                type=n.ApplicationOptionType.string,
+                type=n.ApplicationOptionType.STRING,
                 description="The filter you want to remove",
                 autocomplete=True
             ),
@@ -221,7 +227,9 @@ class FilterCommands(client.Plugin):
         """Removes a text filter"""
         _filter = filter
 
-        log.info(f"Attempting to remove text filter '{_filter}' from {ctx.user.id}")
+        log.info(
+            f"Attempting to remove text filter '{_filter}' from {ctx.user.id}"
+        )
 
         async with db.Database.acquire() as conn:
             success = await filter_modify_cache_db(
@@ -244,10 +252,10 @@ class FilterCommands(client.Plugin):
 
     @client.command(
         name="filter remove user",
-        options = [
+        options=[
             n.ApplicationCommandOption(
                 name="filter",
-                type=n.ApplicationOptionType.string,
+                type=n.ApplicationOptionType.STRING,
                 description="The filter you want to add",
                 autocomplete=True
             ),
@@ -261,7 +269,9 @@ class FilterCommands(client.Plugin):
         """Removes a user filter"""
         _filter = filter
 
-        log.info(f"Attempting to remove user filter '{_filter}' from {ctx.user.id}")
+        log.info(
+            f"Attempting to remove user filter '{_filter}' from {ctx.user.id}"
+        )
 
         if isinstance(_filter, str):
             if _filter.isdigit():
@@ -293,10 +303,10 @@ class FilterCommands(client.Plugin):
 
     @client.command(
         name="filter remove channel",
-        options = [
+        options=[
             n.ApplicationCommandOption(
                 name="filter",
-                type=n.ApplicationOptionType.string,
+                type=n.ApplicationOptionType.STRING,
                 description="The filter you want to add",
                 autocomplete=True
             ),
@@ -310,7 +320,10 @@ class FilterCommands(client.Plugin):
         """Removes a channel filter"""
         _filter = filter
 
-        log.info(f"Attempting to remove channel filter '{_filter}' from {ctx.user.id}")
+        log.info(
+            "Attempting to remove channel filter" +
+            f"'{_filter}' from {ctx.user.id}"
+        )
 
         if isinstance(_filter, str):
             if _filter.isdigit():
@@ -342,10 +355,10 @@ class FilterCommands(client.Plugin):
 
     @client.command(
         name="filter remove server",
-        options = [
+        options=[
             n.ApplicationCommandOption(
                 name="filter",
-                type=n.ApplicationOptionType.string,
+                type=n.ApplicationOptionType.STRING,
                 description="The filter you want to add",
                 autocomplete=True
             ),
@@ -359,7 +372,10 @@ class FilterCommands(client.Plugin):
         """Removes a server filter"""
         _filter = filter
 
-        log.info(f"Attempting to remove server filter '{_filter}' from {ctx.user.id}")
+        log.info(
+            "Attempting to remove server filter" +
+            f"'{_filter}' from {ctx.user.id}"
+        )
 
         if isinstance(_filter, str):
             if _filter.isdigit():
@@ -394,10 +410,10 @@ class FilterCommands(client.Plugin):
 
     @client.command(
         name="filter clear",
-        options = [
+        options=[
             n.ApplicationCommandOption(
                 name="filter_type",
-                type=n.ApplicationOptionType.string,
+                type=n.ApplicationOptionType.STRING,
                 description="The type of filters you want to remove",
                 choices=FILTER_TYPE_OPTIONS
             ),
@@ -418,12 +434,12 @@ class FilterCommands(client.Plugin):
                 [
                     n.Button(
                         label="Yes",
-                        style=n.ButtonStyle.green,
+                        style=n.ButtonStyle.GREEN,
                         custom_id=f"FILTER_CLEAR {ctx.user.id} 1 {filter_type}"
                     ),
                     n.Button(
                         label="No",
-                        style=n.ButtonStyle.danger,
+                        style=n.ButtonStyle.DANGER,
                         custom_id=f"FILTER_CLEAR {ctx.user.id} 0 {filter_type}"
                     )
                 ]
@@ -464,7 +480,7 @@ class FilterCommands(client.Plugin):
         async with db.Database.acquire() as conn:
             for _filter in filters:
 
-                if _filter.filter_type != self.filter_type_object(filter_type) \
+                if _filter.filter_type != self.filter_type_object(filter_type)\
                         and filter_type != "*":
                     continue
 

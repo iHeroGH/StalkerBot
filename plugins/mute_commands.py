@@ -1,22 +1,25 @@
-import novus as n
-from novus import types as t
-from novus.utils.times import utcnow as n_utcnow, format_timestamp
-from novus.ext import client, database as db
-
 from datetime import datetime as dt
 
-from .stalker_utils.stalker_cache_utils import mute_modify_cache_db, \
-                                                opt_modify_cache_db
+import novus as n
+from novus import types as t
+from novus.ext import client
+from novus.ext import database as db
+from novus.utils.times import format_timestamp
+from novus.utils.times import utcnow as n_utcnow
+
 from .stalker_utils.misc_utils import get_datetime_until
+from .stalker_utils.stalker_cache_utils import (mute_modify_cache_db,
+                                                opt_modify_cache_db)
+
 
 class MuteCommands(client.Plugin):
 
     @client.command(
         name="mute",
-        options = [
+        options=[
             n.ApplicationCommandOption(
                 name="time",
-                type=n.ApplicationOptionType.string,
+                type=n.ApplicationOptionType.STRING,
                 description="The amount of time to mute for ('number'(smhdy))"
             ),
         ]
@@ -37,7 +40,7 @@ class MuteCommands(client.Plugin):
             )
 
         await ctx.send(
-            f"Muting until " +
+            "Muting until " +
             f"{format_timestamp(n_utcnow() + mute_until)}",
             ephemeral=True
         )

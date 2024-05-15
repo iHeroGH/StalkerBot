@@ -1,26 +1,26 @@
 from __future__ import annotations
 
 import logging
-import typing
 
 import novus as n
 from novus import types as t
-from novus.ext import client, database as db
+from novus.ext import client
+from novus.ext import database as db
 
-from .stalker_utils.stalker_cache_utils import keyword_modify_cache_db, \
-                                                channel_modify_cache_db, \
-                                                get_stalker
+from .stalker_utils.autocomplete import (KEYWORD_TYPE_OPTIONS,
+                                         available_guilds_autocomplete,
+                                         current_guild_autocomplete,
+                                         keyword_autocomplete)
+from .stalker_utils.input_sanitizer import (MAX_INPUT_LENGTH, MIN_INPUT_LENGTH,
+                                            get_blacklisted_error,
+                                            has_blacklisted)
 from .stalker_utils.misc_utils import get_guild_from_cache
-from .stalker_utils.autocomplete import available_guilds_autocomplete, \
-                                        current_guild_autocomplete, \
-                                        KEYWORD_TYPE_OPTIONS, \
-                                        keyword_autocomplete
-from .stalker_utils.input_sanitizer import MIN_INPUT_LENGTH, \
-                                            MAX_INPUT_LENGTH,\
-                                            has_blacklisted, \
-                                            get_blacklisted_error
+from .stalker_utils.stalker_cache_utils import (channel_modify_cache_db,
+                                                get_stalker,
+                                                keyword_modify_cache_db)
 
 log = logging.getLogger("plugins.keyword_commands")
+
 
 class KeywordCommands(client.Plugin):
 
@@ -80,7 +80,9 @@ class KeywordCommands(client.Plugin):
 
         log.info("Keyword removal dropdown option clicked.")
 
-        _, required_id, keyword, server_id = ctx.data.values[0].value.split(" ")
+        _, required_id, keyword, server_id = ctx.data.values[0].value.split(
+            " "
+        )
         if int(required_id) != ctx.user.id:
             return await ctx.send(
                 "You can't interact with this button, run " +
@@ -94,15 +96,15 @@ class KeywordCommands(client.Plugin):
 
     @client.command(
         name="keyword add",
-        options = [
+        options=[
             n.ApplicationCommandOption(
                 name="keyword",
-                type=n.ApplicationOptionType.string,
+                type=n.ApplicationOptionType.STRING,
                 description="The keyword you want to add"
             ),
             n.ApplicationCommandOption(
                 name="server_id",
-                type=n.ApplicationOptionType.string,
+                type=n.ApplicationOptionType.STRING,
                 description="The server ID for a server-specific keyword"
                             + ", or '1' to select the current guild",
                 required=False,
@@ -114,7 +116,7 @@ class KeywordCommands(client.Plugin):
                 self,
                 ctx: t.CommandI,
                 keyword: str,
-                server_id: str = "0" # 0 is the identifier for a global keyword
+                server_id: str = "0"  # 0 is the identifier for global keywords
             ) -> None:
         """Adds a keyword (optionally, a server-specific keyword)"""
 
@@ -182,10 +184,10 @@ class KeywordCommands(client.Plugin):
 
     @client.command(
         name="keyword remove",
-        options = [
+        options=[
             n.ApplicationCommandOption(
                 name="server_id",
-                type=n.ApplicationOptionType.string,
+                type=n.ApplicationOptionType.STRING,
                 description="The server ID for a server-specific keyword"
                             + ", or 'Gloabl' to select global keywords",
                 required=False,
@@ -193,7 +195,7 @@ class KeywordCommands(client.Plugin):
             ),
             n.ApplicationCommandOption(
                 name="keyword",
-                type=n.ApplicationOptionType.string,
+                type=n.ApplicationOptionType.STRING,
                 description="The keyword you want to remove",
                 required=False,
                 autocomplete=True
@@ -213,8 +215,8 @@ class KeywordCommands(client.Plugin):
 
             if not keyword_options:
                 return await ctx.send(
-                    "You don't have any keywords! Set some up by running the " +
-                    f"{self.add_keyword.mention} command.",
+                    "You don't have any keywords! Set some up by running " +
+                    f"the {self.add_keyword.mention} command.",
                     ephemeral=True
                 )
 
@@ -243,7 +245,8 @@ class KeywordCommands(client.Plugin):
             ) -> None:
         """
         Since keywords can be removed via the command or the dropdown,
-        we need a helper function to deal with the actual removal of the keyword
+        we need a helper function to deal with the actual removal of the
+        keyword
         """
         # Constrain keyword
         keyword.lower()
@@ -251,7 +254,10 @@ class KeywordCommands(client.Plugin):
         # Get a server if it's server-specific
         server = get_guild_from_cache(self.bot, server_id, ctx)
         if not server and server_id != "0":
-            return await ctx.send("Couldn't find a valid guild.", ephemeral=True)
+            return await ctx.send(
+                "Couldn't find a valid guild.",
+                ephemeral=True
+            )
 
         # Update the cache and database
         async with db.Database.acquire() as conn:
@@ -277,10 +283,10 @@ class KeywordCommands(client.Plugin):
 
     @client.command(
         name="keyword clear",
-        options = [
+        options=[
             n.ApplicationCommandOption(
                 name="keyword_type",
-                type=n.ApplicationOptionType.string,
+                type=n.ApplicationOptionType.STRING,
                 description="The type of keywords you want to remove",
                 choices=KEYWORD_TYPE_OPTIONS,
             ),
@@ -301,13 +307,17 @@ class KeywordCommands(client.Plugin):
                 [
                     n.Button(
                         label="Yes",
-                        style=n.ButtonStyle.green,
-                        custom_id=f"KEYWORD_CLEAR {ctx.user.id} 1 {keyword_type}"
+                        style=n.ButtonStyle.GREEN,
+                        custom_id=(
+                            f"KEYWORD_CLEAR {ctx.user.id} 1 {keyword_type}"
+                        )
                     ),
                     n.Button(
                         label="No",
-                        style=n.ButtonStyle.danger,
-                        custom_id=f"KEYWORD_CLEAR {ctx.user.id} 0 {keyword_type}"
+                        style=n.ButtonStyle.DANGER,
+                        custom_id=(
+                            f"KEYWORD_CLEAR {ctx.user.id} 0 {keyword_type}"
+                        )
                     )
                 ]
             )
@@ -351,8 +361,10 @@ class KeywordCommands(client.Plugin):
                 keyword_options.append(
                     n.SelectOption(
                         label=keyword.get_list_identifier(),
-                        value="KEYWORD_REMOVE " + \
-                        f"{ctx.user.id} {str(keyword)} {keyword.server_id}"
+                        value=(
+                            "KEYWORD_REMOVE " +
+                            f"{ctx.user.id} {str(keyword)} {keyword.server_id}"
+                        )
                     )
                 )
 

@@ -1,13 +1,12 @@
 from __future__ import annotations
 
-import typing
+import re
+from datetime import timedelta
 
 import novus as n
 from novus import types as t
 from novus.ext import client
 
-from datetime import timedelta
-import re
 
 def get_guild_from_cache(
             bot: client.Client | None,
@@ -61,6 +60,7 @@ def get_guild_from_cache(
 
     return guild
 
+
 async def get_users_from_cache(
             bot: client.Client | None,
             user_id_values: list[str | int],
@@ -97,7 +97,7 @@ async def get_users_from_cache(
     if guild.members:
         users = [member for member in guild.members if member.id in user_ids]
     else:
-        users = await guild.chunk_members(user_ids=user_ids) # type: ignore
+        users = await guild.chunk_members(user_ids=user_ids)  # type: ignore
 
     user_idents: dict[int, n.GuildMember | int] = {
         user_id: user_id for user_id in user_ids
@@ -107,6 +107,7 @@ async def get_users_from_cache(
             user_idents[user.id] = user
 
     return list(user_idents.values())
+
 
 def get_channel_from_cache(
             bot: client.Client | None,
@@ -132,9 +133,10 @@ def get_channel_from_cache(
     if not bot:
         return None
 
-    channel =  get_object_from_cache(channel_id, bot.cache.channels)
+    channel = get_object_from_cache(channel_id, bot.cache.channels)
     assert not channel or isinstance(channel, n.Channel)
     return channel
+
 
 def get_object_from_cache(
             object_id: str | int,
@@ -170,6 +172,7 @@ def get_object_from_cache(
 
     return object
 
+
 def get_datetime_until(time: str) -> timedelta:
     """
     Parse a duration string. If no duration qualifier is given, the default is
@@ -190,7 +193,8 @@ def get_datetime_until(time: str) -> timedelta:
     if time.isdigit():
         return timedelta(days=int(time))
 
-    # Matches any digit followed by any of s, m, h, d, or y (seconds, month, hours, days, or year)
+    # Matches any digit followed by any of s, m, h, d, or y
+    # (seconds, month, hours, days, or year)
     pattern = r"(?:(?P<length>\d+)(?P<period>[smhdy]) *)"
 
     # If no match is found, the default time is 28 days
@@ -217,6 +221,7 @@ def get_datetime_until(time: str) -> timedelta:
         length = int(length_str)
         builder += timedelta(**{period_map[period[0]]: length})
     return builder
+
 
 def split_action_rows(
             buttons: list[n.Button],

@@ -1,20 +1,19 @@
 from __future__ import annotations
-from enum import IntEnum
-
-from typing import TYPE_CHECKING, ClassVar
 
 from datetime import datetime as dt
+from enum import IntEnum
+from typing import TYPE_CHECKING, ClassVar
 
+import novus as n
 from novus import Embed
 from vfflags import Flags
 
-import novus as n
 if TYPE_CHECKING:
-    from novus import types as t
     from novus.ext import client
 
-from .misc_utils import get_guild_from_cache, get_users_from_cache, \
-                                    get_channel_from_cache
+from .misc_utils import (get_channel_from_cache, get_guild_from_cache,
+                         get_users_from_cache)
+
 
 class Keyword:
     """
@@ -40,18 +39,18 @@ class Keyword:
         self.server_id = server_id
 
     def __eq__(self, other: object) -> bool:
-         return (
-                isinstance(other, Keyword)
-                and
-                self.keyword == other.keyword
-            )
+        return (
+            isinstance(other, Keyword)
+            and
+            self.keyword == other.keyword
+        )
 
     def __lt__(self, other: object) -> bool:
-         return (
-                isinstance(other, Keyword)
-                and
-                self.keyword < other.keyword
-            )
+        return (
+            isinstance(other, Keyword)
+            and
+            self.keyword < other.keyword
+        )
 
     def __hash__(self) -> int:
         return hash(self.keyword)
@@ -60,20 +59,22 @@ class Keyword:
     def from_record(cls, record) -> Keyword:
         try:
             return cls(
-                keyword = record['keyword'],
-                server_id = record['server_id']
+                keyword=record['keyword'],
+                server_id=record['server_id']
             )
         except KeyError:
             raise KeyError("Invalid Keyword record passed to `from_record`.")
 
     def get_list_identifier(self) -> str:
-        return self.keyword + (f" ({self.server_id})" if self.server_id else "")
+        return self.keyword + \
+            (f" ({self.server_id})" if self.server_id else "")
 
     def __repr__(self) -> str:
         return f"Keyword(keyword={self.keyword}, server_id={self.server_id})"
 
     def __str__(self) -> str:
         return self.keyword
+
 
 class FilterEnum(IntEnum):
     """
@@ -89,19 +90,20 @@ class FilterEnum(IntEnum):
     def __str__(self) -> str:
         match self:
             case FilterEnum.text_filter:
-                return f"(Text)"
+                return "(Text)"
 
             case FilterEnum.user_filter:
-                return f"(User)"
+                return "(User)"
 
             case FilterEnum.channel_filter:
-                return f"(Channel)"
+                return "(Channel)"
 
             case FilterEnum.server_filter:
-                return f"(Server)"
+                return "(Server)"
 
             case _:
                 return ""
+
 
 class Filter:
     """
@@ -118,25 +120,25 @@ class Filter:
             ) -> None:
         """Initializes a Filter object"""
         self.filter = filter
-        self.filter_type  = filter_type
+        self.filter_type = filter_type
 
     def __eq__(self, other: object) -> bool:
-         return (
-                isinstance(other, Filter)
-                and
-                self.filter == other.filter
-                and
-                self.filter_type == other.filter_type
-            )
+        return (
+            isinstance(other, Filter)
+            and
+            self.filter == other.filter
+            and
+            self.filter_type == other.filter_type
+        )
 
     def __lt__(self, other: object) -> bool:
-         return (
-                isinstance(other, Filter)
-                and
-                type(self.filter) == type(other.filter)
-                and
-                self.filter < other.filter # type: ignore
-            )
+        return (
+            isinstance(other, Filter)
+            and
+            type(self.filter) is type(other.filter)
+            and
+            self.filter < other.filter  # type: ignore
+        )
 
     def __hash__(self) -> int:
         return self.__repr__().__hash__()
@@ -166,7 +168,7 @@ class Filter:
                 server = get_guild_from_cache(self.bot, self.filter)
                 return self.get_object_identifier(server, md, mention)
 
-            case _: # Text filters
+            case _:  # Text filters
                 return f"{md}{self.filter}{md}"
 
     def get_object_identifier(
@@ -180,8 +182,9 @@ class Filter:
                 return f"{md}{str(object)}{md} ({object.id})"
             else:
                 return f"{object.mention} ({object.id})"
-        else: # Object not in cache
+        else:  # Object not in cache
             return f"{md}{self.filter}{md}"
+
 
 class Settings(Flags):
     """The Settings class keeps track of a user's settings as Flags."""
@@ -195,12 +198,12 @@ class Settings(Flags):
         embed_message: bool
 
     CREATE_FLAGS: ClassVar[dict[str, int]] = {
-        "self_trigger": 1 << 0, # The user triggers their own triggers
-        "quote_trigger": 1 << 1, # Keywords in a "> text" quote are triggered
-        "reply_trigger": 1 << 2, # The user recieves a DM for replies
-        "bot_trigger": 1 << 3, # Bots and webhooks trigger user keywords
-        "edit_trigger": 1 << 4, # Messages that get edited re-trigger
-        "embed_message": 1 << 5, # Messages sent to the user are embedded
+        "self_trigger": 1 << 0,  # The user triggers their own triggers
+        "quote_trigger": 1 << 1,  # Keywords in a "> text" quote are triggered
+        "reply_trigger": 1 << 2,  # The user recieves a DM for replies
+        "bot_trigger": 1 << 3,  # Bots and webhooks trigger user keywords
+        "edit_trigger": 1 << 4,  # Messages that get edited re-trigger
+        "embed_message": 1 << 5,  # Messages sent to the user are embedded
     }
 
     def __str__(self) -> str:
@@ -215,27 +218,28 @@ class Settings(Flags):
     @classmethod
     def default(cls) -> Settings:
         return cls(
-            self_trigger = False,
-            quote_trigger = True,
-            reply_trigger = True,
-            bot_trigger = False,
-            edit_trigger = True,
-            embed_message = True
+            self_trigger=False,
+            quote_trigger=True,
+            reply_trigger=True,
+            bot_trigger=False,
+            edit_trigger=True,
+            embed_message=True
         )
 
     @classmethod
     def from_record(cls, record) -> Settings:
         try:
             return cls(
-                self_trigger = record['self_trigger'],
-                quote_trigger = record['quote_trigger'],
-                reply_trigger = record['reply_trigger'],
-                bot_trigger = record['bot_trigger'],
-                edit_trigger = record['edit_trigger'],
-                embed_message = record['embed_message']
+                self_trigger=record['self_trigger'],
+                quote_trigger=record['quote_trigger'],
+                reply_trigger=record['reply_trigger'],
+                bot_trigger=record['bot_trigger'],
+                edit_trigger=record['edit_trigger'],
+                embed_message=record['embed_message']
             )
         except KeyError:
             raise KeyError("Invalid Settings record passed to `from_record`.")
+
 
 class Stalker:
     """
@@ -273,7 +277,7 @@ class Stalker:
 
     def clear(self):
         self.keywords = {0: set()}
-        self.filters =  {
+        self.filters = {
                     FilterEnum.text_filter: set(),
                     FilterEnum.user_filter: set(),
                     FilterEnum.channel_filter: set(),
@@ -296,20 +300,26 @@ class Stalker:
         embed = Embed(title="Keywords", color=0xFEE75C)
 
         if not self.used_keywords:
-            embed.description = ("You don't have any keywords! " +
-                    f"Set some up by running the {command_mention} command.")
+            embed.description = (
+                "You don't have any keywords! " +
+                f"Set some up by running the {command_mention} command."
+            )
             return embed
 
-        embed.description = (f"You are using " +
-            f"{self.used_keywords}/{self.max_keywords} keywords")
+        embed.description = (
+            "You are using " +
+            f"{self.used_keywords}/{self.max_keywords} keywords"
+        )
 
         # Having a 0 key is guaranteed
         embed.add_field(
             name="__Global Keywords__",
-            value = '- `' + '`\n- `'.join(map(str, sorted(self.keywords[0]))) + "`"
-                    if self.keywords[0] else
-                    ("You don't have any global keywords! " +
-                    f"Set some up by running the {command_mention} command."),
+            value=(
+                '- `' + '`\n- `'.join(map(str, sorted(self.keywords[0]))) + "`"
+                if self.keywords[0] else
+                "You don't have any global keywords! " +
+                f"Set some up by running the {command_mention} command."
+            ),
             inline=False
         )
 
@@ -333,10 +343,12 @@ class Stalker:
 
         embed.add_field(
             name="__Server-Specific Keywords__",
-            value = server_specific_text
-                    if server_specific_text else
-                    ("You don't have any server-specific keywords! " +
-                    f"Set some up by running the {command_mention} command."),
+            value=(
+                server_specific_text
+                if server_specific_text else
+                "You don't have any server-specific keywords! " +
+                f"Set some up by running the {command_mention} command."
+            ),
             inline=False
         )
         return embed
@@ -395,14 +407,18 @@ class Stalker:
 
             embed.add_field(
                 name=f"__{title}__",
-                value= pre + sep.join(
-                                [
-                                    await f.get_list_identifier(guild_id, user_o)
-                                    for f, user_o in filter_list
-                            ]
-                        ) if self.filters[filter_type] else
-                        (f"*You don't have any {title.lower()}! " +
-                        f"Set some up by running the {filter_mention} command.*"),
+                value=(
+                    pre +
+                    sep.join(
+                        [
+                            await f.get_list_identifier(guild_id, user_o)
+                            for f, user_o in filter_list
+                        ]
+                    ) if self.filters[filter_type]
+                    else
+                    f"*You don't have any {title.lower()}! " +
+                    f"Set some up by running the {filter_mention} command.*"
+                ),
                 inline=False
             )
 
@@ -424,17 +440,17 @@ class Stalker:
 
         return "?"
 
-
     def __repr__(self) -> str:
-        return (f"Stalker(" +
-                f"user_id={self.user_id}, "
-                f"channel_id={self.represent_channel()}, "
-                f"keywords={self.keywords}, "
-                f"filters={self.filters}, "
-                f"settings={self.settings}, "
-                f"mute_until={self.mute_until}, "
-                f"opted_out={self.opted_out})"
-            )
+        return (
+            "Stalker(" +
+            f"user_id={self.user_id}, "
+            f"channel_id={self.represent_channel()}, "
+            f"keywords={self.keywords}, "
+            f"filters={self.filters}, "
+            f"settings={self.settings}, "
+            f"mute_until={self.mute_until}, "
+            f"opted_out={self.opted_out})"
+        )
 
     def __str__(self) -> str:
         return self.__repr__()

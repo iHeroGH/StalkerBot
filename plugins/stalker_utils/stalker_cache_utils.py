@@ -16,16 +16,19 @@ log = logging.getLogger("plugins.stalker_utils.stalker_cache_utils")
 global stalker_cache
 stalker_cache: dict[int, Stalker] = {}
 
+
 def clear_cache():
     global stalker_cache
     for _, stalker in stalker_cache.items():
         stalker.clear()
     stalker_cache.clear()
 
+
 def log_cache() -> None:
     """Logs a message of the cache"""
     global stalker_cache
     log.info(f"Cache Requested: {stalker_cache}")
+
 
 async def load_data() -> None:
     """Loads all the data from the database into the cache."""
@@ -101,23 +104,26 @@ async def load_data() -> None:
 
     log.info(f"Caching Complete! {stalker_cache}")
 
+
 def get_stalker(user_id: int) -> Stalker:
     """Creates an empty Stalker object if one is not found for a User ID"""
     global stalker_cache
-    if not user_id in stalker_cache:
+    if user_id not in stalker_cache:
         log.info(f"Creating Stalker {user_id}")
         stalker_cache[user_id] = Stalker(user_id).clear()
 
     return stalker_cache[user_id]
 
+
 def get_all_stalkers() -> list[Stalker]:
     global stalker_cache
     return list(stalker_cache.values())
 
+
 async def cache_filters(
-        filter_rows: list[dict[str, Any]],
-        filter_type: FilterEnum
-    ) -> None:
+            filter_rows: list[dict[str, Any]],
+            filter_type: FilterEnum
+        ) -> None:
     """
     Since filter caching is generally the same each time, we only
     deal with a changing filter_type
@@ -129,6 +135,7 @@ async def cache_filters(
             filter_record['filter'],
             filter_type
         )
+
 
 async def keyword_modify_cache_db(
             is_add: bool,
@@ -229,6 +236,7 @@ async def keyword_modify_cache_db(
             await conn.execute(DB_QUERY, user_id, keyword_text, server_id)
 
     return CACHE_CHECK
+
 
 async def filter_modify_cache_db(
             is_add: bool,
@@ -334,6 +342,7 @@ async def filter_modify_cache_db(
 
     return CACHE_CHECK
 
+
 async def opt_modify_cache_db(
             opting_out: bool,
             user_id: int,
@@ -355,8 +364,8 @@ async def opt_modify_cache_db(
     Returns
     -------
     success : bool
-        A state of sucess for the requested operation. If opting-in, if the user
-        was opted out. If opting out, if the user was opted in.
+        A state of sucess for the requested operation. If opting-in, if the
+        user was opted out. If opting out, if the user was opted in.
     """
     log.info(
         f"Opting for {user_id} to {opting_out} {'with DB' if conn else ''}"
@@ -404,6 +413,7 @@ async def opt_modify_cache_db(
             await conn.execute(DB_QUERY, user_id)
 
     return CACHE_CHECK
+
 
 async def mute_modify_cache_db(
             mute_until: dt | None,
@@ -487,6 +497,7 @@ async def mute_modify_cache_db(
 
     return CACHE_CHECK
 
+
 async def settings_modify_cache_db(
             user_id: int,
             setting: str,
@@ -511,8 +522,8 @@ async def settings_modify_cache_db(
     Returns
     -------
     success : bool
-        A state of sucess for the requested operation. This will be False if the
-        given setting string is not an available setting.
+        A state of sucess for the requested operation. This will be False if
+        the given setting string is not an available setting.
     """
     log.info(
         f"Changing Setting {setting} for {user_id} to {new_value} " +
@@ -562,6 +573,7 @@ async def settings_modify_cache_db(
             )
 
     return CACHE_CHECK
+
 
 async def channel_modify_cache_db(
             channel: n.Channel,
@@ -635,10 +647,12 @@ async def channel_modify_cache_db(
 
     return CACHE_CHECK
 
+
 def count_stalkers() -> int:
     """Returns how many Stalkers there are"""
     global stalker_cache
     return len(stalker_cache)
+
 
 def count_keywords() -> int:
     """Returns how many keywords there are"""

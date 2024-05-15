@@ -4,9 +4,10 @@ from novus.ext.client import Client
 
 from .misc_utils import get_users_from_cache
 from .stalker_cache_utils import get_stalker
-from .stalker_objects import Filter, FilterEnum, Keyword
+from .stalker_objects import Filter, FilterEnum
 
 SHOW_OPTIONS = 25
+
 
 def predictive_choices(
             choices: list[n.ApplicationCommandChoice],
@@ -22,7 +23,8 @@ def predictive_choices(
     fixed_choices = []
     encountered_choices: set[str] = set()
     for choice in choices:
-        if entered in choice.name.lower() and choice.name not in encountered_choices:
+        if entered in choice.name.lower() and \
+                choice.name not in encountered_choices:
             fixed_choices.append(choice)
             encountered_choices.add(choice.name)
 
@@ -30,6 +32,7 @@ def predictive_choices(
         return choices
 
     return fixed_choices
+
 
 async def current_guild_autocomplete(
             bot: Client,
@@ -50,6 +53,7 @@ async def current_guild_autocomplete(
     ]
 
     return choices
+
 
 async def available_guilds_autocomplete(
             bot: Client,
@@ -75,7 +79,9 @@ async def available_guilds_autocomplete(
         fake_filter = Filter(guild_id, FilterEnum.server_filter)
         choices.append(
             n.ApplicationCommandChoice(
-                name=await fake_filter.get_list_identifier(md="", mention=False),
+                name=await fake_filter.get_list_identifier(
+                    md="", mention=False
+                ),
                 value=str(guild_id)
             )
         )
@@ -85,6 +91,7 @@ async def available_guilds_autocomplete(
         entered = str(options["server_id"].value)
 
     return predictive_choices(choices, entered)[:SHOW_OPTIONS]
+
 
 async def filter_autocomplete(
             ctx: t.CommandI,
@@ -103,18 +110,30 @@ async def filter_autocomplete(
     if filter_type == FilterEnum.user_filter:
         users = await get_users_from_cache(
             bot,
-            [filter.filter for filter in stalker.filters[FilterEnum.user_filter]],
+            [
+                filter.filter
+                for filter in stalker.filters[FilterEnum.user_filter]
+            ],
             guild_id
         )
 
         choices = [
             n.ApplicationCommandChoice(
-                name=user.username if isinstance(user, n.GuildMember) else str(user),
-                value=str(user.id) if isinstance(user, n.GuildMember) else str(user)
+                name=(
+                    user.username
+                    if isinstance(user, n.GuildMember) else str(user)
+                ),
+                value=(
+                    str(user.id)
+                    if isinstance(user, n.GuildMember) else str(user)
+                )
             )
             for user in sorted(
                 users,
-                key=lambda x: x.username if isinstance(x, n.GuildMember) else str(x)
+                key=(
+                    lambda x: x.username
+                    if isinstance(x, n.GuildMember) else str(x)
+                )
             )
         ]
     else:
@@ -134,8 +153,9 @@ async def filter_autocomplete(
 
     return predictive_choices(choices, entered)[:SHOW_OPTIONS]
 
+
 async def keyword_autocomplete(
-            bot: Client,
+            _: Client,
             ctx: t.CommandI,
             options: dict[str, n.InteractionOption] | None = None,
         ) -> list[n.ApplicationCommandChoice]:
