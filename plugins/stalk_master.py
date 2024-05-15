@@ -112,6 +112,7 @@ class StalkMaster(client.Plugin):
                 stalker,
                 already_sent=already_sent,
                 message=message,
+                member=await self.get_stalker_member(stalker, guild),
                 guild=guild,
                 channel=channel,
                 is_reply=False,
@@ -168,7 +169,7 @@ class StalkMaster(client.Plugin):
             f"Sending {stalker.user_id} " +
             f"message {message.id} by {message.author.id} " +
             f"{'with an edit ' if before else ''}" +
-            f"{f'for kwd {triggered_keyword} ' if triggered_keyword else ''}" +
+            f"{f'for `{triggered_keyword}` ' if triggered_keyword else ''}" +
             f"{'with embeds ' if triggering_embeds else ''}" +
             f"{'as a reply ' if is_reply else ''}"
         )
@@ -237,6 +238,7 @@ class StalkMaster(client.Plugin):
             message=message,
             guild=guild,
             channel=channel,
+            member=member,
             already_sent=already_sent,
             is_reply=True,
             is_edit=is_edit
@@ -276,10 +278,11 @@ class StalkMaster(client.Plugin):
                 *,
                 already_sent: set[Stalker] = set(),
                 message: n.Message | None = None,
+                member: n.GuildMember | None = None,
                 guild: n.Guild | None = None,
                 channel: n.Channel | None = None,
                 is_reply: bool = False,
-                is_edit: bool = False
+                is_edit: bool = False,
             ) -> bool:
         """
         A master conditional of the cases in which a stalker may be DMed
@@ -334,15 +337,17 @@ class StalkMaster(client.Plugin):
 
         # If both are not given, then it's okay. But if one is given, the other
         # must also be given
-        if not guild and not channel:
+        if not guild and not channel and not member:
             return True
-        assert guild and channel
+        assert guild and channel and member
 
         # TODO: Deal with if we actually wanna pass the full Guild object or
         # if BaseGuild (message.guild) is enough
 
-        if False:  # TODO: Check user's permissions
-            log.info(f"Skipping {stalker.user_id}: No permissions.")
+        if not channel.permissions_for(member).view_channel:
+            log.info(
+                f"Skipping {stalker.user_id}: No permissions for {channel.id}."
+            )
             return False
 
         fake_guild_filter = Filter(guild.id, FilterEnum.server_filter)
