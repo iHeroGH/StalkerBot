@@ -270,7 +270,7 @@ async def filter_modify_cache_db(
         present.
     """
     log.info(
-        f"{'Adding' if is_add else 'Removing'} {user_id}'s filter type " +
+        f"{'Adding' if is_add else 'Removing'} {user_id}'s filter type" +
         f" {filter_type} value {filter_value} " + ("with DB" if conn else "")
     )
 
