@@ -141,12 +141,14 @@ class BotCommands(vbu.Cog, name="Bot Commands"):
     async def list(self, ctx: vbu.Context, user:discord.User=None):
         """Lists all your keywords"""
 
+        target_msg = await ctx.send("Finding your keywords!")
+
         # If the user isn't given, assume it's the author
         user = user or ctx.author
 
         # If the author is the owner, list the user's keywords
         if not (await self.bot.is_owner(ctx.author)) and ctx.author != user:
-            return await ctx.send("You can only view your own keywords.")
+            return await target_msg.edit(content="You can only view your own keywords.")
 
         # Get the data from the database
         async with vbu.Database() as db:
@@ -160,7 +162,7 @@ class BotCommands(vbu.Cog, name="Bot Commands"):
 
         # Check if the user has any keywords
         if not keyword_rows and not server_keyword_rows:
-            return await ctx.send(f"You don't have any keywords. Set some up by running the `{ctx.prefix}addkeyword` command")
+            return await target_msg.edit(content=f"You don't have any keywords. Set some up by running the `{ctx.prefix}addkeyword` command")
 
         # Set up a sendable list of keywords
         keyword_list = [row['keyword'] for row in keyword_rows]
@@ -172,7 +174,7 @@ class BotCommands(vbu.Cog, name="Bot Commands"):
         final_message = f"{total_keywords_message}\n\n__{user.mention}'s Keywords__\n{keywords_string}\n\n__{user.mention}'s Server Keywords__\n{server_keyword_string}"
 
         # Send it
-        await ctx.send(final_message, allowed_mentions=discord.AllowedMentions.none())
+        await target_msg.edit(content=final_message, allowed_mentions=discord.AllowedMentions.none())
 
     def get_server_keywords(self, keyword_rows, turn_to_string=False):
         # Creates a dict of server_id: keyword_list found in DB call
