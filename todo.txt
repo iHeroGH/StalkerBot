@@ -1,7 +1,7 @@
 Migrate Database
-Check member permissions before message send
 Dynamic max keyword count based on donations
-
+Channel-specific keywords
+Special Keywords
 
 adding text filters that dont trigger any keywords
 adding keywords that are already triggered
