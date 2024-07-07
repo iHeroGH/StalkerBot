@@ -180,7 +180,7 @@ class FilterCommands(client.Plugin):
         log.info(f"Attempting to filter server '{_filter}' from {ctx.user.id}")
 
         # The bot needs to be in the server
-        server = get_guild_from_cache(self.bot, _filter, ctx)
+        server = get_guild_from_cache(self.bot, _filter)
         if not server:
             log.info(f"Server '{_filter}' not found.")
             return await ctx.send(

@@ -4,20 +4,15 @@ import re
 from datetime import timedelta
 
 import novus as n
-from novus import types as t
 from novus.ext import client
 
 
 def get_guild_from_cache(
             bot: client.Client | None,
             server_id: str | int,
-            ctx: t.CommandI | t.ComponentI | None = None,
         ) -> n.BaseGuild | None:
     """
     Retrieves a Guild from the bot's cache given its ID
-
-    If "1" is passed as the ID, return the guild in which the command
-    was run
 
     Parameters
     ----------
@@ -46,16 +41,8 @@ def get_guild_from_cache(
         else:
             return None
 
-    # If server_id is 0, it is a global keyword
-    # If server_id is 1, it is the current guild
-    # Otherwise, try to find a guild
     guild = None
-    if server_id == 0:
-        pass
-    elif server_id == 1:
-        if ctx:
-            guild = ctx.guild
-    elif server_id and server_id in bot.cache.guild_ids:
+    if server_id and server_id in bot.cache.guild_ids:
         guild = bot.cache.guilds[server_id]
 
     return guild

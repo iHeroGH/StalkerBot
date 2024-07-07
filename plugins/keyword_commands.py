@@ -115,16 +115,14 @@ class KeywordCommands(client.Plugin):
             n.ApplicationCommandOption(
                 name="server_id",
                 type=n.ApplicationOptionType.STRING,
-                description="The server ID for a server-specific keyword"
-                            + ", or '1' to select the current guild",
+                description="The server ID for a server-specific keyword",
                 required=False,
                 autocomplete=True
             ),
             n.ApplicationCommandOption(
                 name="channel_id",
                 type=n.ApplicationOptionType.STRING,
-                description="The channel ID for a channel-specific keyword"
-                            + ", or '1' to select the current channel",
+                description="The channel ID for a channel-specific keyword",
                 required=False,
                 autocomplete=True
             )
@@ -134,7 +132,7 @@ class KeywordCommands(client.Plugin):
                 self,
                 ctx: t.CommandI,
                 keyword: str,
-                server_id: str = "0",  # 0 is the identifier for glob keywords
+                server_id: str = "0",
                 channel_id: str = "0"
             ) -> None:
         """Adds a keyword (optionally, a server/channel-specific keyword)"""
@@ -167,7 +165,7 @@ class KeywordCommands(client.Plugin):
             )
 
         # Get a server/channel if it's snowlfake-specific
-        server = get_guild_from_cache(self.bot, server_id, ctx)
+        server = get_guild_from_cache(self.bot, server_id)
         if not server and server_id != "0":
             return await ctx.send(
                 "Couldn't find a valid guild.",
@@ -313,7 +311,7 @@ class KeywordCommands(client.Plugin):
             )
 
         # Get a server if it's server-specific
-        server = get_guild_from_cache(self.bot, server_id, ctx)
+        server = get_guild_from_cache(self.bot, server_id)
         if not server and server_id != "0":
             return await ctx.send(
                 "Couldn't find a valid guild.",
