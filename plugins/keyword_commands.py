@@ -120,37 +120,38 @@ class KeywordCommands(client.Plugin):
             ) -> None:
         """Adds a keyword (optionally, a server-specific keyword)"""
 
+        await ctx.defer(ephemeral=True)
+
         # Constrain keyword
         if len(keyword) < MIN_INPUT_LENGTH:
             return await ctx.send(
                 "Keywords must be at least " +
-                f"{MIN_INPUT_LENGTH} characters long.", ephemeral=True
+                f"{MIN_INPUT_LENGTH} characters long.",
             )
         if len(keyword) > MAX_INPUT_LENGTH:
             return await ctx.send(
                 "Keywords cannot exceed " +
-                f"{MAX_INPUT_LENGTH} characters long.", ephemeral=True
+                f"{MAX_INPUT_LENGTH} characters long.",
             )
         if has_blacklisted(keyword):
-            return await ctx.send(get_blacklisted_error(), ephemeral=True)
+            return await ctx.send(get_blacklisted_error(),)
         keyword = keyword.lower()
 
         log.info(f"Attempting to add keyword '{keyword}' to {ctx.user.id}")
 
         # Constrain keyword count
         stalker = get_stalker(ctx.user.id)
-        max_keywords = stalker.max_keywords
+        max_keywords = await stalker.max_keywords
         if stalker.used_keywords >= max_keywords:
             return await ctx.send(
                 f"You cannot add more than {max_keywords} keywords",
-                ephemeral=True
             )
 
         # Get a server if it's server-specific
         server = get_guild_from_cache(self.bot, server_id, ctx)
         if not server and server_id != "0":
             return await ctx.send(
-                "Couldn't find a valid guild.", ephemeral=True
+                "Couldn't find a valid guild.",
             )
 
         # Update the cache and database
@@ -172,14 +173,13 @@ class KeywordCommands(client.Plugin):
         if not success:
             return await ctx.send(
                 "Ran into some trouble adding that keyword, " +
-                "it may already be in your list.", ephemeral=True
+                "it may already be in your list."
             )
 
         # Send a confirmation message
         await ctx.send(
             f"Added **{keyword}**"
-            + (f" to **{server.name}** ({server.id})!" if server else "!"),
-            ephemeral=True
+            + (f" to **{server.name}** ({server.id})!" if server else "!")
         )
 
     @client.command(
@@ -205,13 +205,13 @@ class KeywordCommands(client.Plugin):
     async def remove_keyword(
                 self,
                 ctx: t.CommandI,
-                server_id: str | None = None,
+                server_id: str = "",
                 keyword: str | None = None
             ) -> None:
         """Removes a keyword (optionally, a server-specific keyword)"""
 
-        if server_id is None or keyword is None:
-            keyword_options = self.get_keyword_dropdown(ctx)
+        if keyword is None:
+            keyword_options = self.get_keyword_dropdown(ctx, server_id)
 
             if not keyword_options:
                 return await ctx.send(
@@ -235,7 +235,7 @@ class KeywordCommands(client.Plugin):
 
         log.info("Removing keyword via command")
 
-        await self.remove_keyword_helper(ctx, server_id, keyword)
+        await self.remove_keyword_helper(ctx, server_id or "0", keyword)
 
     async def remove_keyword_helper(
                 self,
@@ -333,12 +333,12 @@ class KeywordCommands(client.Plugin):
     @client.command(name="keyword list")
     async def list_keywords(self, ctx: t.CommandI) -> None:
         """Lists a user's keywords"""
+        await ctx.defer(ephemeral=True)
 
         stalker = get_stalker(ctx.user.id)
 
         await ctx.send(
-            embeds=[stalker.format_keywords(self.bot)],
-            ephemeral=True
+            embeds=[await stalker.format_keywords(self.bot)]
         )
 
     def keyword_type_name(self, keyword_type: str):
@@ -351,13 +351,19 @@ class KeywordCommands(client.Plugin):
 
         return keyword_type_map[keyword_type.lower()]
 
-    def get_keyword_dropdown(self, ctx: t.CommandI) -> list[n.SelectOption]:
+    def get_keyword_dropdown(
+                self,
+                ctx: t.CommandI,
+                server_id: str
+            ) -> list[n.SelectOption]:
 
         stalker = get_stalker(ctx.user.id)
 
         keyword_options: list[n.SelectOption] = []
         for keyword_set in stalker.keywords.values():
             for keyword in keyword_set:
+                if server_id and str(keyword.server_id) != server_id:
+                    continue
                 keyword_options.append(
                     n.SelectOption(
                         label=keyword.get_list_identifier(),

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from datetime import datetime as dt
 from enum import IntEnum
 from typing import TYPE_CHECKING, ClassVar
@@ -11,8 +12,12 @@ from vfflags import Flags
 if TYPE_CHECKING:
     from novus.ext import client
 
+from plugins.stalker_utils.upgrade_chat_manager import UpgradeChatManager as uc
+
 from .misc_utils import (get_channel_from_cache, get_guild_from_cache,
                          get_users_from_cache)
+
+log = logging.getLogger("plugins.stalker_utils.stalker_objects")
 
 
 class Keyword:
@@ -289,7 +294,7 @@ class Stalker:
 
         return self
 
-    def format_keywords(self, bot: client.Client) -> Embed:
+    async def format_keywords(self, bot: client.Client) -> Embed:
         """Returns a formatted Embed listing a user's keywords"""
 
         add_command = bot.get_command("keyword add")
@@ -308,7 +313,7 @@ class Stalker:
 
         embed.description = (
             "You are using " +
-            f"{self.used_keywords}/{self.max_keywords} keywords"
+            f"{self.used_keywords}/{await self.max_keywords} keywords"
         )
 
         # Having a 0 key is guaranteed
@@ -429,8 +434,17 @@ class Stalker:
         return sum([len(i) for i in self.keywords.values()])
 
     @property
-    def max_keywords(self) -> int:
-        return self.MAX_KEYWORDS
+    async def max_keywords(self) -> int:
+
+        additional_keywords: int = uc.get_orders(self.user_id)
+        override = {
+            342529068907888643: 5,
+            204439680727384064: 1,
+            322542134546661388: 94,
+            141231597155385344: 95
+        }
+
+        return self.MAX_KEYWORDS + additional_keywords + override[self.user_id]
 
     def represent_channel(self) -> str:
         if isinstance(self.dm_channel, int):

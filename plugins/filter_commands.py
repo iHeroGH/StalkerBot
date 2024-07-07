@@ -503,6 +503,7 @@ class FilterCommands(client.Plugin):
     @client.command(name="filter list")
     async def list_filters(self, ctx: t.CommandI) -> None:
         """Lists a user's filters"""
+        await ctx.defer(ephemeral=True)
 
         stalker = get_stalker(ctx.user.id)
 
@@ -511,8 +512,7 @@ class FilterCommands(client.Plugin):
             guild_id = ctx.guild.id
 
         await ctx.send(
-            embeds=[await stalker.format_filters(self.bot, guild_id)],
-            ephemeral=True
+            embeds=[await stalker.format_filters(self.bot, guild_id)]
         )
 
     def filter_type_name(self, filter_type: str) -> str:

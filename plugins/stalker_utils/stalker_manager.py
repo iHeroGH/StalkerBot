@@ -5,16 +5,24 @@ from novus import types as t
 from novus.ext import client
 
 from .stalker_cache_utils import load_data, log_cache
+from .upgrade_chat_manager import UpgradeChatManager as ucm
 
-log = logging.getLogger("plugins.stalker_utils.stalker_cache_manager")
+log = logging.getLogger("plugins.stalker_utils.stalker_manager")
 
 
-class StalkerCacheManager(client.Plugin):
+class StalkerManager(client.Plugin):
 
     @client.event.ready
     async def on_ready(self) -> None:
-        """Loads all the data from the database into the cache."""
+        """
+        Loads all the data from the database into the cache
+        and prepares UpgradeChat.
+        """
         await load_data()
+        ucm._initialize_client(
+            self.bot.config.upgradeChat["client_id"],
+            self.bot.config.upgradeChat["client_secret"]
+        )
 
     @client.command(
         name="load",

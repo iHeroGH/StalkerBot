@@ -21,11 +21,12 @@ class ModerationCommands(client.Plugin):
     )
     async def admin_keywords(self, ctx: t.CommandI, target: n.User) -> None:
         """Lists another user's keywords"""
+        await ctx.defer(ephemeral=True)
+
         stalker = get_stalker(target.id)
 
         await ctx.send(
-            embeds=[stalker.format_keywords(self.bot)],
-            ephemeral=True
+            embeds=[await stalker.format_keywords(self.bot)]
         )
 
     @client.command(
@@ -42,6 +43,8 @@ class ModerationCommands(client.Plugin):
     )
     async def admin_filters(self, ctx: t.CommandI, target: n.User) -> None:
         """Lists another user's filters"""
+        await ctx.defer(ephemeral=True)
+
         stalker = get_stalker(target.id)
 
         guild_id = None
@@ -49,6 +52,27 @@ class ModerationCommands(client.Plugin):
             guild_id = ctx.guild.id
 
         await ctx.send(
-            embeds=[await stalker.format_filters(self.bot, guild_id)],
-            ephemeral=True
+            embeds=[await stalker.format_filters(self.bot, guild_id)]
+        )
+
+    @client.command(
+        name="admin max",
+        options=[
+            n.ApplicationCommandOption(
+                name="target",
+                type=n.ApplicationOptionType.USER,
+                description="The user whose max keywords you want to access"
+            ),
+        ],
+        guild_ids=[649715200890765342],  # 208895639164026880],
+        default_member_permissions=n.Permissions(manage_guild=True)
+    )
+    async def admin_max(self, ctx: t.CommandI, target: n.User) -> None:
+        """Calculates another user's max keywords"""
+        await ctx.defer(ephemeral=True)
+
+        stalker = get_stalker(target.id)
+
+        await ctx.send(
+            f"That user has access to {await stalker.max_keywords} keywords"
         )
