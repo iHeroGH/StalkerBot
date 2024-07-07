@@ -32,6 +32,12 @@ def log_cache() -> None:
     log.info(f"Cache Requested: {stalker_cache}")
 
 
+def log_cache_size() -> None:
+    """Logs a message of the size of the cache"""
+    global stalker_cache
+    log.info(f"Cache Size Requested: {len(stalker_cache)} Stalkers!")
+
+
 async def load_data() -> None:
     """Loads all the data from the database into the cache."""
     global stalker_cache
@@ -104,7 +110,7 @@ async def load_data() -> None:
 
         stalker.opted_out = True
 
-    log.info(f"Caching Complete! {stalker_cache}")
+    log_cache_size()
 
 
 def get_stalker(user_id: int) -> Stalker:
