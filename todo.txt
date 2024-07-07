@@ -1,5 +1,4 @@
 Migrate Database
-Dynamic max keyword count based on donations
 Channel-specific keywords
 Special Keywords
 
