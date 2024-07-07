@@ -10,7 +10,8 @@ from .stalker_utils.stalker_cache_utils import channel_modify_cache_db, \
                                             get_all_stalkers, \
                                             get_stalker
 from .stalker_utils.input_sanitizer import BLACKLISTED_CHARACTERS
-from .stalker_utils.stalker_objects import Filter, FilterEnum, Keyword, Stalker
+from .stalker_utils.stalker_objects import Filter, FilterEnum, \
+                                        Keyword, KeywordEnum, Stalker
 
 log = logging.getLogger("plugins.stalk_master")
 
@@ -129,14 +130,16 @@ class StalkMaster(client.Plugin):
                         stalker,
                         keyword,
                         decoded_embeds=decoded_embeds,
-                        guild=guild
+                        guild=guild,
+                        channel=channel
                     )
 
                     if self.is_triggering_keyword(
                         stalker,
                         keyword,
                         message=message,
-                        guild=guild
+                        guild=guild,
+                        channel=channel
                     ) or triggering_embeds:
                         await self.send_trigger(
                             stalker,
@@ -374,7 +377,8 @@ class StalkMaster(client.Plugin):
                 keyword: Keyword,
                 *,
                 message: n.Message,
-                guild: n.Guild
+                guild: n.Guild,
+                channel: n.Channel
             ) -> bool:
         """
         A master conditional of the cases in which a keyword may trigger a DM
@@ -384,7 +388,8 @@ class StalkMaster(client.Plugin):
             stalker,
             keyword,
             content=message.content,
-            guild=guild
+            guild=guild,
+            channel=channel
         )
 
     def get_triggering_embeds(
@@ -393,7 +398,8 @@ class StalkMaster(client.Plugin):
                 keyword: Keyword,
                 *,
                 decoded_embeds: dict[n.Embed, str],
-                guild: n.Guild
+                guild: n.Guild,
+                channel: n.Channel
             ) -> list[n.Embed]:
         """
         Returns a list of embeds that successfully trigger keywords
@@ -405,7 +411,8 @@ class StalkMaster(client.Plugin):
                 stalker,
                 keyword,
                 content=embed_content,
-                guild=guild
+                guild=guild,
+                channel=channel
             ):
                 triggering.append(embed)
 
@@ -417,13 +424,22 @@ class StalkMaster(client.Plugin):
                 keyword: Keyword,
                 *,
                 content: str,
-                guild: n.Guild
+                guild: n.Guild,
+                channel: n.Channel
             ) -> bool:
         """
         Checks if a string of content can be triggered without bypassing
         quotes or filters
         """
-        if keyword.server_id and keyword.server_id != guild.id:
+        if keyword.keyword_type == KeywordEnum.server_specific and \
+                keyword.server_id != guild.id:
+            log.info(
+                f"Skipping {stalker.user_id} for {keyword}: Server-Specific."
+            )
+            return False
+
+        if keyword.keyword_type == KeywordEnum.channel_specific and \
+                keyword.channel_id != channel.id:
             log.info(
                 f"Skipping {stalker.user_id} for {keyword}: Server-Specific."
             )
