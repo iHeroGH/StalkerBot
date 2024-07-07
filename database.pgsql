@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS server_keywords(
     PRIMARY KEY (user_id, keyword, server_id)
 );
 
+-- Channel-Specific keywords
 CREATE TABLE IF NOT EXISTS channel_keywords(
     user_id BIGINT NOT NULL,
     keyword TEXT NOT NULL,
