@@ -1,5 +1,4 @@
 Migrate Database
-Channel-specific keywords
 Special Keywords
 
 adding text filters that dont trigger any keywords
