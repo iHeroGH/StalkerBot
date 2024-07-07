@@ -4,7 +4,7 @@ from novus.ext.client import Client
 
 from .misc_utils import get_users_from_cache
 from .stalker_cache_utils import get_stalker
-from .stalker_objects import Filter, FilterEnum
+from .stalker_objects import Filter, FilterEnum, KeywordEnum
 
 SHOW_OPTIONS = 25
 
@@ -55,6 +55,27 @@ async def current_guild_autocomplete(
     return choices
 
 
+async def current_channel_autocomplete(
+            bot: Client,
+            ctx: t.CommandI
+        ) -> list[n.ApplicationCommandChoice]:
+    """Retrieves an option for the current channel"""
+    Filter.bot = bot
+
+    if not ctx.channel:
+        return []
+
+    fake_filter = Filter(ctx.channel.id, FilterEnum.channel_filter)
+    choices = [
+        n.ApplicationCommandChoice(
+            name=await fake_filter.get_list_identifier(md="", mention=False),
+            value=str(ctx.channel.id)
+        )
+    ]
+
+    return choices
+
+
 async def available_guilds_autocomplete(
             bot: Client,
             ctx: t.CommandI,
@@ -70,9 +91,11 @@ async def available_guilds_autocomplete(
 
     choices = [
         n.ApplicationCommandChoice(name="Global", value="0")
-    ] if stalker.keywords[0] else []
+    ] if stalker.keywords[KeywordEnum.glob] else []
 
-    for guild_id in stalker.keywords:
+    for keyword in stalker.keywords[KeywordEnum.server_specific]:
+        guild_id = keyword.server_id
+
         if not guild_id:
             continue
 
@@ -82,13 +105,51 @@ async def available_guilds_autocomplete(
                 name=await fake_filter.get_list_identifier(
                     md="", mention=False
                 ),
-                value=str(guild_id)
+                value=str(guild_id) + " s"
             )
         )
 
     entered = ""
     if options and "server_id" in options:
         entered = str(options["server_id"].value)
+
+    return predictive_choices(choices, entered)[:SHOW_OPTIONS]
+
+
+async def available_channels_autocomplete(
+            bot: Client,
+            ctx: t.CommandI,
+            options: dict[str, n.InteractionOption] | None = None
+        ) -> list[n.ApplicationCommandChoice]:
+    """Retrieves an option for the channels the user has keywords in"""
+    Filter.bot = bot
+
+    if not ctx.guild:
+        return []
+
+    stalker = get_stalker(ctx.user.id)
+
+    choices = []
+
+    for keyword in stalker.keywords[KeywordEnum.channel_specific]:
+        channel_id = keyword.channel_id
+
+        if not channel_id:
+            continue
+
+        fake_filter = Filter(channel_id, FilterEnum.channel_filter)
+        choices.append(
+            n.ApplicationCommandChoice(
+                name=await fake_filter.get_list_identifier(
+                    md="", mention=False
+                ),
+                value=str(channel_id) + " c"
+            )
+        )
+
+    entered = ""
+    if options and "channel_id" in options:
+        entered = str(options["channel_id"].value)
 
     return predictive_choices(choices, entered)[:SHOW_OPTIONS]
 
@@ -155,7 +216,7 @@ async def filter_autocomplete(
 
 
 async def keyword_autocomplete(
-            _: Client,
+            __: Client,
             ctx: t.CommandI,
             options: dict[str, n.InteractionOption] | None = None,
         ) -> list[n.ApplicationCommandChoice]:
@@ -163,19 +224,20 @@ async def keyword_autocomplete(
 
     stalker = get_stalker(ctx.user.id)
 
-    # If it's 0: we only display global keywords
-    # If it's a server ID: we only display that server's keywords
-    chosen_guild: int = 0
-    if options and "server_id" in options:
-        entered = options["server_id"].value
+    snowflake = ""
+    if options and "snowflake" in options:
+        entered_snowflake = options['snowflake'].value
+        assert isinstance(entered_snowflake, str)
+        snowflake, _ = entered_snowflake.split(" ")
 
-        if isinstance(entered, str) and entered.isdigit():
-            entered = int(entered)
-
-        if isinstance(entered, int) and not isinstance(entered, bool):
-            chosen_guild = entered
-
-    visible_keywords = [keyword for keyword in stalker.keywords[chosen_guild]]
+    visible_keywords = [
+        keyword
+        for keyword_set in stalker.keywords.values()
+        for keyword in keyword_set
+        if str(keyword.server_id) == snowflake or
+        str(keyword.channel_id) == snowflake or
+        not snowflake
+    ]
 
     choices = [
         n.ApplicationCommandChoice(
@@ -223,7 +285,11 @@ KEYWORD_TYPE_OPTIONS: list[n.ApplicationCommandChoice] = [
         value="s"
     ),
     n.ApplicationCommandChoice(
-        name="Both",
+        name="Channel-Specific",
+        value="c"
+    ),
+    n.ApplicationCommandChoice(
+        name="All",
         value="*"
     )
 ]

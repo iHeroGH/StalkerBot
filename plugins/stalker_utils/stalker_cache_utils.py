@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import defaultdict
 import logging
 from typing import TYPE_CHECKING, Any
 from datetime import datetime as dt
@@ -10,7 +11,8 @@ if TYPE_CHECKING:
 
 from novus.ext import database as db
 
-from .stalker_objects import Stalker, Filter, FilterEnum, Keyword, Settings
+from .stalker_objects import Stalker, Filter, FilterEnum, \
+                            Keyword, KeywordEnum, Settings
 
 log = logging.getLogger("plugins.stalker_utils.stalker_cache_utils")
 global stalker_cache
@@ -43,7 +45,9 @@ async def load_data() -> None:
 
         settings_rows = await conn.fetch("SELECT * FROM user_settings")
 
-        keyword_rows = await conn.fetch("SELECT * FROM keywords")
+        global_keyword_rows = await conn.fetch("SELECT * FROM keywords")
+        server_keyword_rows = await conn.fetch("SELECT * FROM server_keywords")
+        ch_keyword_rows = await conn.fetch("SELECT * FROM channel_keywords")
 
         text_filter_rows = await conn.fetch("SELECT * FROM text_filters")
         user_filter_rows = await conn.fetch("SELECT * FROM user_filters")
@@ -70,14 +74,12 @@ async def load_data() -> None:
         chosen_settings = Settings.from_record(settings_record)
         stalker.settings = chosen_settings
 
-    log.info("Caching Keywords.")
-    for keyword_record in keyword_rows:
-        await keyword_modify_cache_db(
-            True,
-            keyword_record['user_id'],
-            keyword_record['keyword'],
-            keyword_record['server_id']
-        )
+    log.info("Caching Global Keywords.")
+    await cache_keywords(global_keyword_rows, KeywordEnum.glob)
+    log.info("Caching Server Keywords.")
+    await cache_keywords(server_keyword_rows, KeywordEnum.server_specific)
+    log.info("Caching Channel Keywords.")
+    await cache_keywords(ch_keyword_rows, KeywordEnum.channel_specific)
 
     log.info("Caching Text Filters.")
     await cache_filters(text_filter_rows, FilterEnum.text_filter)
@@ -120,6 +122,25 @@ def get_all_stalkers() -> list[Stalker]:
     return list(stalker_cache.values())
 
 
+async def cache_keywords(
+            keyword_rows: list[dict[str, Any]],
+            keyword_type: KeywordEnum
+        ) -> None:
+    """
+    Cache each type of keyword
+    """
+    for keyword_record in keyword_rows:
+        keyword_record = defaultdict(int, keyword_record)
+        await keyword_modify_cache_db(
+            True,
+            keyword_record['user_id'],
+            keyword_record['keyword'],  # type: ignore
+            keyword_type,
+            keyword_record['server_id'],
+            keyword_record['channel_id']
+        )
+
+
 async def cache_filters(
             filter_rows: list[dict[str, Any]],
             filter_type: FilterEnum
@@ -141,7 +162,9 @@ async def keyword_modify_cache_db(
             is_add: bool,
             user_id: int,
             keyword_text: str,
+            keyword_type: KeywordEnum,
             server_id: int,
+            channel_id: int,
             conn: Connection | None = None,
         ) -> bool:
     """
@@ -151,13 +174,14 @@ async def keyword_modify_cache_db(
     ----------
     is_add : bool
         Whether we are adding or removing from the cache/db
-    user_id : int
-        The user_id of the Stalker to update
     keyword_text : str
-        The keyword to add/remove
+        The literal text of the keyword
+    keyword_type : KeywordEnum
+        The type of the keyword
     server_id : int
-        The server_id for a server-specific keyword (or 0 for global)
-        The server_id should be validated beforehand
+        The optional server ID for a server-specific keyword
+    channel_id : int
+        The optional channel ID for a channel-specific keyword
     conn : Connection | None
         An optional DB connection. If given, a query will be run to add the
         given data to the database in addition to the cache
@@ -170,17 +194,43 @@ async def keyword_modify_cache_db(
         present.
     """
     log.info(
-        f"{'Adding' if is_add else 'Removing'} {user_id}'s keyword" +
-        f" {keyword_text} in {server_id} " + ("with DB" if conn else "")
+        f"{'Adding' if is_add else 'Removing'} {user_id}'s keyword type" +
+        f" {keyword_type} value {keyword_text} " +
+        f"in server {server_id} / channel {channel_id} " +
+        ("with DB" if conn else "")
     )
 
     # Make sure we have a Stalker object in cache and create a keyword
     stalker = get_stalker(user_id)
-    keyword = Keyword.from_record(
-        {'keyword': keyword_text, 'server_id': server_id}
-    )
-    if server_id not in stalker.keywords:
-        stalker.keywords[server_id] = set()
+    keyword = Keyword(keyword_text, keyword_type, server_id, channel_id)
+
+    if keyword_type not in stalker.filters:
+        stalker.keywords[keyword_type] = set()
+
+    match keyword_type:
+        case KeywordEnum.glob:
+            return await global_keyword_delegate(
+                stalker, is_add, user_id, keyword, conn
+            )
+        case KeywordEnum.server_specific | KeywordEnum.channel_specific:
+            if server_id and channel_id:
+                raise ValueError("Both a server and channel ID were given.")
+
+            return await snowflake_keyword_delegate(
+                stalker, is_add, user_id, server_id or channel_id,
+                keyword, keyword_type, conn
+            )
+        case _:
+            raise ValueError("Unknown keyword type trying to be added.")
+
+
+async def global_keyword_delegate(
+            stalker: Stalker,
+            is_add: bool,
+            user_id: int,
+            keyword: Keyword,
+            conn: Connection | None = None
+        ) -> bool:
 
     # DB_QUERY[0] is what to use for remove
     # DB_QUERY[1] is what to use for add
@@ -192,8 +242,6 @@ async def keyword_modify_cache_db(
             user_id = $1
         AND
             keyword = $2
-        AND
-            server_id = $3
         """,
 
         """
@@ -201,8 +249,76 @@ async def keyword_modify_cache_db(
             keywords
             (
                 user_id,
+                keyword
+            )
+        VALUES
+            (
+                $1,
+                $2
+            )
+        """
+    ][int(is_add)]
+
+    # CACHE_OPERATION[0] is what to use for remove
+    # CACHE_OPERATION[1] is what to use for add
+    CACHE_CHECK, CACHE_OPERATION = [
+        (
+            keyword in stalker.keywords[KeywordEnum.glob],
+            stalker.keywords[KeywordEnum.glob].remove
+        ),
+        (
+            keyword not in stalker.keywords[KeywordEnum.glob],
+            stalker.keywords[KeywordEnum.glob].add
+        ),
+    ][int(is_add)]
+
+    # Perfrom the operation
+    if CACHE_CHECK:
+        CACHE_OPERATION(keyword)
+
+        # If a database connection was given, add it to the db as well
+        if conn:
+            await conn.execute(DB_QUERY, user_id, keyword.keyword)
+
+    return CACHE_CHECK
+
+
+async def snowflake_keyword_delegate(
+            stalker: Stalker,
+            is_add: bool,
+            user_id: int,
+            snowflake: int,
+            keyword: Keyword,
+            keyword_type: KeywordEnum,
+            conn: Connection | None = None
+        ) -> bool:
+
+    SNOWFLAKE_TABLE, SNOWFLAKE_TYPE = {
+        KeywordEnum.server_specific: ("server_keywords", "server_id"),
+        KeywordEnum.channel_specific: ("channel_keywords", "channel_id"),
+    }[keyword_type]
+
+    # DB_QUERY[0] is what to use for remove
+    # DB_QUERY[1] is what to use for add
+    DB_QUERY = [
+        """
+        DELETE FROM
+            {}
+        WHERE
+            user_id = $1
+        AND
+            keyword = $2
+        AND
+            {} = $3
+        """,
+
+        """
+        INSERT INTO
+            {}
+            (
+                user_id,
                 keyword,
-                server_id
+                {}
             )
         VALUES
             (
@@ -217,13 +333,12 @@ async def keyword_modify_cache_db(
     # CACHE_OPERATION[1] is what to use for add
     CACHE_CHECK, CACHE_OPERATION = [
         (
-            keyword in stalker.keywords[server_id],
-            stalker.keywords[server_id].remove
+            keyword in stalker.keywords[keyword_type],
+            stalker.keywords[keyword_type].remove
         ),
         (
-            keyword not in stalker.keywords[server_id] and
-            keyword not in stalker.keywords[0],
-            stalker.keywords[server_id].add
+            keyword not in stalker.keywords[keyword_type],
+            stalker.keywords[keyword_type].add
         ),
     ][int(is_add)]
 
@@ -233,7 +348,12 @@ async def keyword_modify_cache_db(
 
         # If a database connection was given, add it to the db as well
         if conn:
-            await conn.execute(DB_QUERY, user_id, keyword_text, server_id)
+            await conn.execute(
+                DB_QUERY.format(SNOWFLAKE_TABLE, SNOWFLAKE_TYPE),
+                user_id,
+                keyword.keyword,
+                snowflake
+            )
 
     return CACHE_CHECK
 

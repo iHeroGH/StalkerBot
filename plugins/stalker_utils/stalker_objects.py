@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import defaultdict
 import logging
 from datetime import datetime as dt
 from enum import IntEnum
@@ -20,28 +21,80 @@ from .misc_utils import (get_channel_from_cache, get_guild_from_cache,
 log = logging.getLogger("plugins.stalker_utils.stalker_objects")
 
 
+class KeywordEnum(IntEnum):
+    """
+    An Enum class to keep track of the different types of keywords.
+    """
+
+    glob = 1
+    server_specific = 2
+    channel_specific = 3
+
+    def __str__(self) -> str:
+        match self:
+            case KeywordEnum.glob:
+                return "(Global)"
+
+            case KeywordEnum.server_specific:
+                return "(Server-Specific)"
+
+            case KeywordEnum.channel_specific:
+                return "(Channel-Specific)"
+
+            case _:
+                return ""
+
+
 class Keyword:
     """
-    The Keyword class keeps track of a user's keywords. It also stores
-    a Keywords server_id, if it is a server-specific keyword. If the server_id
-    is 0, then it is a global keyword.
+    The Keyword class keeps track of a user's keywords and its type (via the
+    KeywordEnum class)
 
     Attributes
     ----------
     keyword : str
         The keyword text itself
-    server_id : int
-        The ID of the server for this Keyword (default 0, global)
+    keyword_type : KeywordEnum, default=KeywordEnum.global
+        The type of the keyword. Global by default.
+    server_id : int, default=0
+        The ID of the server for this Keyword. 0 if none is provided
+    channel_id : int, default=0
+        The ID of the channel for this Keyword. 0 if none is provided
     """
 
     def __init__(
                 self,
                 keyword: str,
-                server_id: int = 0
+                keyword_type: KeywordEnum = KeywordEnum.glob,
+                server_id: int = 0,
+                channel_id: int = 0
             ) -> None:
-        """Initializes a Keyword object (default global)"""
+        """Initializes a Keyword object"""
+        if not Keyword.validate_keyword(keyword_type, server_id, channel_id):
+            raise ValueError(
+                "The provided parameters do not create a valid Keyword " +
+                f"({keyword} {keyword_type} {server_id} {channel_id})"
+            )
+
         self.keyword = keyword
+        self.keyword_type = keyword_type
         self.server_id = server_id
+        self.channel_id = channel_id
+
+    @staticmethod
+    def validate_keyword(
+                keyword_type: KeywordEnum,
+                server_id: int,
+                channel_id: int
+            ) -> bool:
+
+        match keyword_type:
+            case KeywordEnum.glob:
+                return not (server_id or channel_id)
+            case KeywordEnum.server_specific:
+                return bool(server_id and not channel_id)
+            case KeywordEnum.channel_specific:
+                return bool(not server_id and channel_id)
 
     def __eq__(self, other: object) -> bool:
         return (
@@ -71,8 +124,13 @@ class Keyword:
             raise KeyError("Invalid Keyword record passed to `from_record`.")
 
     def get_list_identifier(self) -> str:
-        return self.keyword + \
-            (f" ({self.server_id})" if self.server_id else "")
+        return self.keyword + (
+                f" ({str(self.keyword_type)} - {self.server_id})"
+                if self.keyword_type == KeywordEnum.server_specific else ""
+            ) + (
+                f" ({str(self.keyword_type)} - {self.channel_id})"
+                if self.keyword_type == KeywordEnum.channel_specific else ""
+            )
 
     def __repr__(self) -> str:
         return f"Keyword(keyword={self.keyword}, server_id={self.server_id})"
@@ -259,7 +317,11 @@ class Stalker:
     def __init__(
                 self,
                 user_id: int,
-                keywords: dict[int, set[Keyword]] = {0: set()},
+                keywords: dict[KeywordEnum, set[Keyword]] = {
+                    KeywordEnum.glob: set(),
+                    KeywordEnum.server_specific: set(),
+                    KeywordEnum.channel_specific: set()
+                },
                 filters: dict[FilterEnum, set[Filter]] = {
                     FilterEnum.text_filter: set(),
                     FilterEnum.user_filter: set(),
@@ -273,7 +335,7 @@ class Stalker:
             ) -> None:
         """Initializes a Stalker object"""
         self.user_id: int = user_id
-        self.keywords: dict[int, set[Keyword]] = keywords
+        self.keywords: dict[KeywordEnum, set[Keyword]] = keywords
         self.filters: dict[FilterEnum, set[Filter]] = filters
         self.settings: Settings = settings
         self.mute_until: dt | None = mute_until
@@ -281,7 +343,11 @@ class Stalker:
         self.dm_channel = dm_channel
 
     def clear(self):
-        self.keywords = {0: set()}
+        self.keywords = {
+                    KeywordEnum.glob: set(),
+                    KeywordEnum.server_specific: set(),
+                    KeywordEnum.channel_specific: set()
+                }
         self.filters = {
                     FilterEnum.text_filter: set(),
                     FilterEnum.user_filter: set(),
@@ -320,31 +386,50 @@ class Stalker:
         embed.add_field(
             name="__Global Keywords__",
             value=(
-                '- `' + '`\n- `'.join(map(str, sorted(self.keywords[0]))) + "`"
-                if self.keywords[0] else
+                '- `' +
+                '`\n- `'.join(
+                    map(str, sorted(self.keywords[KeywordEnum.glob]))
+                ) + "`"
+                if self.keywords[KeywordEnum.glob] else
                 "You don't have any global keywords! " +
                 f"Set some up by running the {command_mention} command."
             ),
             inline=False
         )
 
+        server_keyword_map: dict[int, set[Keyword]] = defaultdict(set)
         server_specific_text = ""
-        for server_id, keywords in self.keywords.items():
-            # Skip the global keywords
-            if not server_id:
-                continue
+        for keyword in self.keywords[KeywordEnum.server_specific]:
+            server_keyword_map[keyword.server_id].add(keyword)
 
-            if keywords:
-                # If we can't find the guild in cache, let the user know
-                server = get_guild_from_cache(bot, server_id)
-                server_specific_text += (
-                    f"**{server.name}** ({server.id})" if server else
-                    f"**{server_id}** *(StalkerBot may not be in this server)*"
-                ) + "\n"
+        for server_id, keyword in server_keyword_map.items():
+            # If we can't find the guild in cache, let the user know
+            server = get_guild_from_cache(bot, server_id)
+            server_specific_text += (
+                f"**{server.name}** ({server.id})" if server else
+                f"**{server_id}** *(StalkerBot may not be in this server)*"
+            ) + "\n"
 
-                server_specific_text += '- `' + '`\n- `'.join(
-                    map(str, sorted(keywords))
-                ) + "`\n"
+            server_specific_text += '- `' + '`\n- `'.join(
+                map(str, sorted(server_keyword_map[server_id]))
+            ) + "`\n"
+
+        channel_keyword_map: dict[int, set[Keyword]] = defaultdict(set)
+        channel_specific_text = ""
+        for keyword in self.keywords[KeywordEnum.channel_specific]:
+            channel_keyword_map[keyword.channel_id].add(keyword)
+
+        for channel_id, keyword in channel_keyword_map.items():
+            # If we can't find the guild in cache, let the user know
+            channel = get_channel_from_cache(bot, channel_id)
+            channel_specific_text += (
+                f"**{channel.name}** ({channel.id})" if channel else
+                f"**{channel_id}** *(StalkerBot may not be in this channel)*"
+            ) + "\n"
+
+            channel_specific_text += '- `' + '`\n- `'.join(
+                map(str, sorted(channel_keyword_map[channel_id]))
+            ) + "`\n"
 
         embed.add_field(
             name="__Server-Specific Keywords__",
@@ -356,6 +441,18 @@ class Stalker:
             ),
             inline=False
         )
+
+        embed.add_field(
+            name="__Channel-Specific Keywords__",
+            value=(
+                channel_specific_text
+                if channel_specific_text else
+                "You don't have any channel-specific keywords! " +
+                f"Set some up by running the {command_mention} command."
+            ),
+            inline=False
+        )
+
         return embed
 
     async def format_filters(

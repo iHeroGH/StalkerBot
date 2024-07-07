@@ -9,16 +9,19 @@ from novus.ext import database as db
 
 from .stalker_utils.autocomplete import (KEYWORD_TYPE_OPTIONS,
                                          available_guilds_autocomplete,
+                                         available_channels_autocomplete,
                                          current_guild_autocomplete,
+                                         current_channel_autocomplete,
                                          keyword_autocomplete)
 from .stalker_utils.input_sanitizer import (MAX_INPUT_LENGTH, MIN_INPUT_LENGTH,
                                             get_blacklisted_error,
                                             has_blacklisted)
-from .stalker_utils.misc_utils import get_guild_from_cache
+from .stalker_utils.misc_utils import (get_channel_from_cache,
+                                       get_guild_from_cache)
 from .stalker_utils.stalker_cache_utils import (channel_modify_cache_db,
                                                 get_stalker,
                                                 keyword_modify_cache_db)
-
+from .stalker_utils.stalker_objects import KeywordEnum
 log = logging.getLogger("plugins.keyword_commands")
 
 
@@ -55,16 +58,23 @@ class KeywordCommands(client.Plugin):
         async with db.Database.acquire() as conn:
             for keyword in keywords:
 
-                if keyword_type == "g" and keyword.server_id:
+                if keyword_type == "g" and not \
+                        keyword.keyword_type == KeywordEnum.glob:
                     continue
-                if keyword_type == "s" and not keyword.server_id:
+                if keyword_type == "s" and not \
+                        keyword.keyword_type == KeywordEnum.server_specific:
+                    continue
+                if keyword_type == "c" and not \
+                        keyword.keyword_type == KeywordEnum.channel_specific:
                     continue
 
                 await keyword_modify_cache_db(
                     False,
                     ctx.user.id,
                     keyword.keyword,
+                    keyword.keyword_type,
                     keyword.server_id,
+                    keyword.channel_id,
                     conn
                 )
 
@@ -80,10 +90,10 @@ class KeywordCommands(client.Plugin):
 
         log.info("Keyword removal dropdown option clicked.")
 
-        _, required_id, keyword, server_id = ctx.data.values[0].value.split(
+        _, req_id, kw, server_id, channel_id = ctx.data.values[0].value.split(
             " "
         )
-        if int(required_id) != ctx.user.id:
+        if int(req_id) != ctx.user.id:
             return await ctx.send(
                 "You can't interact with this button, run " +
                 f"{self.remove_keyword.mention} to get buttons you can press",
@@ -92,7 +102,7 @@ class KeywordCommands(client.Plugin):
 
         log.info("Removing keyword via dropdown")
 
-        await self.remove_keyword_helper(ctx, server_id, keyword)
+        await self.remove_keyword_helper(ctx, server_id, channel_id, kw)
 
     @client.command(
         name="keyword add",
@@ -109,6 +119,14 @@ class KeywordCommands(client.Plugin):
                             + ", or '1' to select the current guild",
                 required=False,
                 autocomplete=True
+            ),
+            n.ApplicationCommandOption(
+                name="channel_id",
+                type=n.ApplicationOptionType.STRING,
+                description="The channel ID for a channel-specific keyword"
+                            + ", or '1' to select the current channel",
+                required=False,
+                autocomplete=True
             )
         ]
     )
@@ -116,9 +134,10 @@ class KeywordCommands(client.Plugin):
                 self,
                 ctx: t.CommandI,
                 keyword: str,
-                server_id: str = "0"  # 0 is the identifier for global keywords
+                server_id: str = "0",  # 0 is the identifier for glob keywords
+                channel_id: str = "0"
             ) -> None:
-        """Adds a keyword (optionally, a server-specific keyword)"""
+        """Adds a keyword (optionally, a server/channel-specific keyword)"""
 
         await ctx.defer(ephemeral=True)
 
@@ -147,12 +166,30 @@ class KeywordCommands(client.Plugin):
                 f"You cannot add more than {max_keywords} keywords",
             )
 
-        # Get a server if it's server-specific
+        # Get a server/channel if it's snowlfake-specific
         server = get_guild_from_cache(self.bot, server_id, ctx)
         if not server and server_id != "0":
             return await ctx.send(
                 "Couldn't find a valid guild.",
             )
+
+        channel = get_channel_from_cache(self.bot, channel_id)
+        if not channel and channel_id != "0":
+            return await ctx.send(
+                "Couldn't find a valid channel.",
+            )
+
+        if channel and server:
+            return await ctx.send(
+                "You can only have either a server-specific or " +
+                "channel-specific keyword, not both."
+            )
+
+        keyword_type = KeywordEnum.glob
+        if server:
+            keyword_type = KeywordEnum.server_specific
+        if channel:
+            keyword_type = KeywordEnum.channel_specific
 
         # Update the cache and database
         async with db.Database.acquire() as conn:
@@ -160,7 +197,9 @@ class KeywordCommands(client.Plugin):
                 True,
                 ctx.user.id,
                 keyword,
+                keyword_type,
                 server.id if server else 0,
+                channel.id if channel else 0,
                 conn
             )
 
@@ -179,17 +218,18 @@ class KeywordCommands(client.Plugin):
         # Send a confirmation message
         await ctx.send(
             f"Added **{keyword}**"
-            + (f" to **{server.name}** ({server.id})!" if server else "!")
+            + (f" to **{server.name}** ({server.id})" if server else "")
+            + (f" to **{channel.name}** ({channel.id})" if channel else "")
+            + "!"
         )
 
     @client.command(
         name="keyword remove",
         options=[
             n.ApplicationCommandOption(
-                name="server_id",
+                name="snowflake",
                 type=n.ApplicationOptionType.STRING,
-                description="The server ID for a server-specific keyword"
-                            + ", or 'Gloabl' to select global keywords",
+                description="The server ID or channel ID for a keyword",
                 required=False,
                 autocomplete=True
             ),
@@ -205,13 +245,26 @@ class KeywordCommands(client.Plugin):
     async def remove_keyword(
                 self,
                 ctx: t.CommandI,
-                server_id: str = "",
+                snowflake: str = "",
                 keyword: str | None = None
             ) -> None:
-        """Removes a keyword (optionally, a server-specific keyword)"""
+        """Removes a keyword (optionally, a server/channel-specific keyword)"""
+
+        server_id = "0"
+        channel_id = "0"
+        if snowflake:
+            snowflake_id, snowflake_type = snowflake.split(" ")
+
+            if snowflake_type == "s":
+                server_id = snowflake_id
+
+            if snowflake_type == "c":
+                channel_id = snowflake_id
 
         if keyword is None:
-            keyword_options = self.get_keyword_dropdown(ctx, server_id)
+            keyword_options = self.get_keyword_dropdown(
+                ctx, server_id, channel_id
+            )
 
             if not keyword_options:
                 return await ctx.send(
@@ -235,12 +288,13 @@ class KeywordCommands(client.Plugin):
 
         log.info("Removing keyword via command")
 
-        await self.remove_keyword_helper(ctx, server_id or "0", keyword)
+        await self.remove_keyword_helper(ctx, server_id, channel_id, keyword)
 
     async def remove_keyword_helper(
                 self,
                 ctx: t.CommandI | t.ComponentI,
                 server_id: str,
+                channel_id: str,
                 keyword: str
             ) -> None:
         """
@@ -251,6 +305,13 @@ class KeywordCommands(client.Plugin):
         # Constrain keyword
         keyword.lower()
 
+        # Ensure we're only getting one type of keyword
+        if server_id != "0" and channel_id != "0":
+            return await ctx.send(
+                "You've somehow chosen both a server " +
+                "and channel specific keyword."
+            )
+
         # Get a server if it's server-specific
         server = get_guild_from_cache(self.bot, server_id, ctx)
         if not server and server_id != "0":
@@ -259,13 +320,29 @@ class KeywordCommands(client.Plugin):
                 ephemeral=True
             )
 
+        # Get a channel if it's channel-specific
+        channel = get_channel_from_cache(self.bot, channel_id)
+        if not channel and channel_id != "0":
+            return await ctx.send(
+                "Couldn't find a valid channel.",
+                ephemeral=True
+            )
+
+        keyword_type = KeywordEnum.glob
+        if server:
+            keyword_type = KeywordEnum.server_specific
+        if channel:
+            keyword_type = KeywordEnum.channel_specific
+
         # Update the cache and database
         async with db.Database.acquire() as conn:
             success = await keyword_modify_cache_db(
                 False,
                 ctx.user.id,
                 keyword,
+                keyword_type,
                 server.id if server else 0,
+                channel.id if channel else 0,
                 conn
             )
         if not success:
@@ -296,7 +373,7 @@ class KeywordCommands(client.Plugin):
         """Clears all keywords of a specified type"""
 
         # Ensure a correct type was chosen
-        if keyword_type not in ["g", "s", "*"]:
+        if keyword_type not in ["g", "s", "c", "*"]:
             return await ctx.send(
                 "Make sure to select an option from the autocomplete.",
                 ephemeral=True
@@ -346,6 +423,7 @@ class KeywordCommands(client.Plugin):
         keyword_type_map = {
             'g': "global",
             's': "server-specific",
+            'c': "channel-specific",
             '*': "all"
         }
 
@@ -354,7 +432,8 @@ class KeywordCommands(client.Plugin):
     def get_keyword_dropdown(
                 self,
                 ctx: t.CommandI,
-                server_id: str
+                server_id: str,
+                channel_id: str
             ) -> list[n.SelectOption]:
 
         stalker = get_stalker(ctx.user.id)
@@ -362,14 +441,17 @@ class KeywordCommands(client.Plugin):
         keyword_options: list[n.SelectOption] = []
         for keyword_set in stalker.keywords.values():
             for keyword in keyword_set:
-                if server_id and str(keyword.server_id) != server_id:
+                if server_id != "0" and str(keyword.server_id) != server_id:
+                    continue
+                if channel_id != "0" and str(keyword.channel_id) != channel_id:
                     continue
                 keyword_options.append(
                     n.SelectOption(
                         label=keyword.get_list_identifier(),
                         value=(
                             "KEYWORD_REMOVE " +
-                            f"{ctx.user.id} {str(keyword)} {keyword.server_id}"
+                            f"{ctx.user.id} {str(keyword)} " +
+                            f"{keyword.server_id} {keyword.channel_id}"
                         )
                     )
                 )
@@ -377,12 +459,20 @@ class KeywordCommands(client.Plugin):
         return keyword_options
 
     @add_keyword.autocomplete
-    async def keyword_current_guild_autocomplete(
+    async def keyword_currents_autocomplete(
                 self,
-                ctx: t.CommandI
+                ctx: t.CommandI,
+                options: dict[str, n.InteractionOption]
             ) -> list[n.ApplicationCommandChoice]:
-        """Retrieves autocomplete option for the current guild"""
-        return await current_guild_autocomplete(self.bot, ctx)
+        """Retrieves autocomplete option for the current guild/channel"""
+        if "server_id" in options and options["server_id"].focused:
+            return await current_guild_autocomplete(
+                self.bot, ctx
+            )
+        else:  # Channel-Specific
+            return await current_channel_autocomplete(
+                self.bot, ctx
+            )
 
     @remove_keyword.autocomplete
     async def remove_keywords_autocomplete(
@@ -399,7 +489,11 @@ class KeywordCommands(client.Plugin):
         Otherwise the user is selecting the keywords field, the keywords for
         that server are shown
         """
-        if "server_id" in options and options["server_id"].focused:
-            return await available_guilds_autocomplete(self.bot, ctx, options)
+        if "snowflake" in options and options["snowflake"].focused:
+            return (
+                await available_guilds_autocomplete(self.bot, ctx, options)
+                +
+                await available_channels_autocomplete(self.bot, ctx, options)
+            )
 
         return await keyword_autocomplete(self.bot, ctx, options)

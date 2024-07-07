@@ -16,15 +16,28 @@ CREATE TABLE IF NOT EXISTS user_settings(
 );
 
 -- The keywords table keeps track of all users and their keywords
--- If server_id is 0, then it is a global keyword
--- Otherwise, it is a server-specific keyword
--- The same user cannot have the same keyword multiple times in the same server
 CREATE TABLE IF NOT EXISTS keywords(
     user_id BIGINT NOT NULL,
     keyword TEXT NOT NULL,
-    server_id BIGINT NOT NULL default 0,
+
+    PRIMARY KEY (user_id, keyword)
+);
+
+-- Server-Specific keywords
+CREATE TABLE IF NOT EXISTS server_keywords(
+    user_id BIGINT NOT NULL,
+    keyword TEXT NOT NULL,
+    server_id BIGINT NOT NULL,
 
     PRIMARY KEY (user_id, keyword, server_id)
+);
+
+CREATE TABLE IF NOT EXISTS channel_keywords(
+    user_id BIGINT NOT NULL,
+    keyword TEXT NOT NULL,
+    channel_id BIGINT NOT NULL,
+
+    PRIMARY KEY (user_id, keyword, channel_id)
 );
 
 -- Filters all follow the general format of the user_id and the filter
