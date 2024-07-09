@@ -1,6 +1,5 @@
 import logging
 import re
-import traceback
 from datetime import datetime
 
 import novus as n
@@ -119,11 +118,13 @@ class StalkMaster(client.Plugin):
                 is_reply=False,
                 is_edit=before is not None
             ):
+                log.info("Skipping untriggerable stalker.")
                 continue
 
             # TODO: If a webhook sent the message, the webhook author will
             # not be in the guild
 
+            log.info("Continuing with triggerable stalker")
             for keyword_set in stalker.keywords.values():
                 for keyword in keyword_set:
                     triggering_embeds = self.get_triggering_embeds(
@@ -271,10 +272,7 @@ class StalkMaster(client.Plugin):
                         channel, stalker.user_id, conn
                     )
         except Exception:
-            log.error(
-                "Something went wrong getting stalker member: " +
-                f"{traceback.format_exc()}"
-            )
+            log.info("Something went wrong getting stalker member")
             return None
 
         return member
