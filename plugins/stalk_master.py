@@ -342,11 +342,13 @@ class StalkMaster(client.Plugin):
 
         # If both are not given, then it's okay. But if one is given, the other
         # must also be given
-        if not guild and not channel and not member:
+        if not guild and not channel:
             return True
-        assert guild
-        assert channel
-        assert member
+        assert guild and channel
+
+        # Member is likely not in this guild
+        if not member:
+            return False
 
         # TODO: Deal with if we actually wanna pass the full Guild object or
         # if BaseGuild (message.guild) is enough
