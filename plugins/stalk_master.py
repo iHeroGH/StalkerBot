@@ -1,17 +1,17 @@
 import logging
 import re
+import traceback
 from datetime import datetime
 
 import novus as n
 from novus.ext import client
 from novus.ext import database as db
 
-from .stalker_utils.stalker_cache_utils import channel_modify_cache_db, \
-                                            get_all_stalkers, \
-                                            get_stalker
 from .stalker_utils.input_sanitizer import BLACKLISTED_CHARACTERS
-from .stalker_utils.stalker_objects import Filter, FilterEnum, \
-                                        Keyword, KeywordEnum, Stalker
+from .stalker_utils.stalker_cache_utils import (channel_modify_cache_db,
+                                                get_all_stalkers, get_stalker)
+from .stalker_utils.stalker_objects import (Filter, FilterEnum, Keyword,
+                                            KeywordEnum, Stalker)
 
 log = logging.getLogger("plugins.stalk_master")
 
@@ -257,6 +257,7 @@ class StalkMaster(client.Plugin):
             ) -> n.GuildMember | None:
         """Retrieves a member object via the API"""
         try:
+            log.info(f"Getting member {stalker.user_id} from guild {guild.id}")
             member = (
                 guild.get_member(stalker.user_id) or
                 await guild.fetch_member(stalker.user_id)
@@ -269,8 +270,11 @@ class StalkMaster(client.Plugin):
                     await channel_modify_cache_db(
                         channel, stalker.user_id, conn
                     )
-        except Exception as e:
-            log.error(f"Something went wrong getting stalker member: {e}")
+        except Exception:
+            log.error(
+                "Something went wrong getting stalker member: " +
+                f"{traceback.format_exc()}"
+            )
             return None
 
         return member
