@@ -91,7 +91,7 @@ class KeywordCommands(client.Plugin):
         log.info("Keyword removal dropdown option clicked.")
 
         _, req_id, kw, server_id, channel_id = ctx.data.values[0].value.split(
-            " "
+            "`"
         )
         if int(req_id) != ctx.user.id:
             return await ctx.send(
@@ -447,9 +447,9 @@ class KeywordCommands(client.Plugin):
                     n.SelectOption(
                         label=keyword.get_list_identifier(),
                         value=(
-                            "KEYWORD_REMOVE " +
-                            f"{ctx.user.id} {str(keyword)} " +
-                            f"{keyword.server_id} {keyword.channel_id}"
+                            "KEYWORD_REMOVE`" +
+                            f"{ctx.user.id}`{str(keyword)}`" +
+                            f"{keyword.server_id}`{keyword.channel_id}"
                         )
                     )
                 )
