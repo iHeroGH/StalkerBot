@@ -118,7 +118,6 @@ class StalkMaster(client.Plugin):
                 is_reply=False,
                 is_edit=before is not None
             ):
-                log.info("Skipping untriggerable stalker.")
                 continue
 
             # TODO: If a webhook sent the message, the webhook author will
@@ -258,7 +257,6 @@ class StalkMaster(client.Plugin):
             ) -> n.GuildMember | None:
         """Retrieves a member object via the API"""
         try:
-            log.info(f"Getting member {stalker.user_id} from guild {guild.id}")
             member = (
                 guild.get_member(stalker.user_id) or None
                 # await guild.fetch_member(stalker.user_id)
@@ -272,7 +270,6 @@ class StalkMaster(client.Plugin):
                         channel, stalker.user_id, conn
                     )
         except Exception:
-            log.info("Something went wrong getting stalker member")
             return None
 
         return member
