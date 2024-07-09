@@ -260,8 +260,8 @@ class StalkMaster(client.Plugin):
         try:
             log.info(f"Getting member {stalker.user_id} from guild {guild.id}")
             member = (
-                guild.get_member(stalker.user_id) or
-                await guild.fetch_member(stalker.user_id)
+                guild.get_member(stalker.user_id) or None
+                # await guild.fetch_member(stalker.user_id)
             )
             assert member
             if not stalker.dm_channel:
