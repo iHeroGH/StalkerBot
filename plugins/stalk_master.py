@@ -6,7 +6,6 @@ import novus as n
 from novus.ext import client
 from novus.ext import database as db
 
-from .stalker_utils.input_sanitizer import BLACKLISTED_CHARACTERS
 from .stalker_utils.stalker_cache_utils import (channel_modify_cache_db,
                                                 get_all_stalkers, get_stalker)
 from .stalker_utils.stalker_objects import (Filter, FilterEnum, Keyword,
@@ -134,10 +133,10 @@ class StalkMaster(client.Plugin):
                         channel=channel
                     )
 
-                    if self.is_triggering_keyword(
+                    if self.is_triggering(
                         stalker,
                         keyword,
-                        message=message,
+                        content=message.content,
                         guild=guild,
                         channel=channel
                     ) or triggering_embeds:
@@ -374,27 +373,6 @@ class StalkMaster(client.Plugin):
 
         return True
 
-    def is_triggering_keyword(
-                self,
-                stalker: Stalker,
-                keyword: Keyword,
-                *,
-                message: n.Message,
-                guild: n.Guild,
-                channel: n.Channel
-            ) -> bool:
-        """
-        A master conditional of the cases in which a keyword may trigger a DM
-        """
-
-        return self.is_triggering(
-            stalker,
-            keyword,
-            content=message.content,
-            guild=guild,
-            channel=channel
-        )
-
     def get_triggering_embeds(
                 self,
                 stalker: Stalker,
@@ -611,7 +589,7 @@ class StalkMaster(client.Plugin):
                 decoded += self.decode_dict_part(part)
 
             else:
-                decoded += str(part) + BLACKLISTED_CHARACTERS[0]
+                decoded += str(part) + "`"
 
         return decoded
 
@@ -623,7 +601,7 @@ class StalkMaster(client.Plugin):
         decoded = ""
         for key in ["name", "value", "url", "icon_url"]:
             if key in dict_part:
-                decoded += dict_part[key] + BLACKLISTED_CHARACTERS[0]
+                decoded += dict_part[key] + "`"
 
         return decoded
 
