@@ -41,6 +41,18 @@ CREATE TABLE IF NOT EXISTS channel_keywords(
     PRIMARY KEY (user_id, keyword, channel_id)
 );
 
+-- Special keywords
+CREATE TABLE IF NOT EXISTS special_keywords(
+    user_id BIGINT NOT NULL,
+    whitelist keyword_type[],
+    blacklist keyword_type[]
+)
+CREATE TYPE keyword_type(
+    keyword TEXT,
+    is_exact BOOLEAN
+)
+
+
 -- Filters all follow the general format of the user_id and the filter
 CREATE TABLE IF NOT EXISTS text_filters(
     user_id BIGINT NOT NULL,
