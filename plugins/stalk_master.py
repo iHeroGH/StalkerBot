@@ -291,46 +291,46 @@ class StalkMaster(client.Plugin):
         """
 
         if stalker.opted_out:
-            log.info(f"Skipping {stalker.user_id}: Opted out.")
+            log.debug(f"Skipping {stalker.user_id}: Opted out.")
             return False
 
         if already_sent and stalker in already_sent:
-            log.info(f"Skipping {stalker.user_id}: Already sent.")
+            log.debug(f"Skipping {stalker.user_id}: Already sent.")
             return False
 
         if stalker.mute_until and datetime.utcnow() <= stalker.mute_until:
-            log.info(f"Skipping {stalker.user_id}: Muted.")
+            log.debug(f"Skipping {stalker.user_id}: Muted.")
             return False
 
         if not stalker.settings.reply_trigger and is_reply:
-            log.info(f"Skipping {stalker.user_id}: Uninterested in replies.")
+            log.debug(f"Skipping {stalker.user_id}: Uninterested in replies.")
             return False
 
         if not stalker.settings.edit_trigger and is_edit:
-            log.info(f"Skipping {stalker.user_id}: Uninterested in edits.")
+            log.debug(f"Skipping {stalker.user_id}: Uninterested in edits.")
             return False
 
         if not message:
-            log.info(f"Continuing with {stalker.user_id}")
+            log.debug(f"Continuing with {stalker.user_id}")
             return True
 
         if not stalker.settings.bot_trigger and message.author.bot:
-            log.info(f"Skipping {stalker.user_id}: Uninterested in bots.")
+            log.debug(f"Skipping {stalker.user_id}: Uninterested in bots.")
             return False
 
         if not stalker.settings.bot_trigger and \
                 message.author.discriminator == "0000":
-            log.info(f"Skipping {stalker.user_id}: Uninterested in webhooks.")
+            log.debug(f"Skipping {stalker.user_id}: Uninterested in webhooks.")
             return False
 
         if not stalker.settings.self_trigger and \
                 message.author.id == stalker.user_id:
-            log.info(f"Skipping {stalker.user_id}: Uninterested in self.")
+            log.debug(f"Skipping {stalker.user_id}: Uninterested in self.")
             return False
 
         fake_user_filter = Filter(message.author.id, FilterEnum.user_filter)
         if fake_user_filter in stalker.filters[FilterEnum.user_filter]:
-            log.info(
+            log.debug(
                 f"Skipping {stalker.user_id}: " +
                 f"Uninterested in author {message.author.id}."
             )
@@ -350,14 +350,14 @@ class StalkMaster(client.Plugin):
         # if BaseGuild (message.guild) is enough
 
         if not channel.permissions_for(member).view_channel:
-            log.info(
+            log.debug(
                 f"Skipping {stalker.user_id}: No permissions for {channel.id}."
             )
             return False
 
         fake_guild_filter = Filter(guild.id, FilterEnum.server_filter)
         if fake_guild_filter in stalker.filters[FilterEnum.server_filter]:
-            log.info(
+            log.debug(
                 f"Skipping {stalker.user_id}: " +
                 f"Uninterested in guild {guild.id}."
             )
@@ -365,7 +365,7 @@ class StalkMaster(client.Plugin):
 
         fake_channel_filter = Filter(channel.id, FilterEnum.channel_filter)
         if fake_channel_filter in stalker.filters[FilterEnum.channel_filter]:
-            log.info(
+            log.debug(
                 f"Skipping {stalker.user_id}: " +
                 f"Uninterested in channel {channel.id}."
             )
