@@ -42,15 +42,16 @@ CREATE TABLE IF NOT EXISTS channel_keywords(
 );
 
 -- Special keywords
-CREATE TABLE IF NOT EXISTS special_keywords(
-    user_id BIGINT NOT NULL,
-    whitelist keyword_type[],
-    blacklist keyword_type[]
-)
-CREATE TYPE keyword_type(
-    keyword TEXT,
-    is_exact BOOLEAN
-)
+-- CREATE TABLE IF NOT EXISTS special_keywords(
+--     user_id BIGINT NOT NULL,
+--     whitelist keyword_type[],
+--     blacklist keyword_type[]
+-- );
+
+-- CREATE TYPE keyword_type(
+--     keyword TEXT,
+--     is_exact BOOLEAN
+-- );
 
 
 -- Filters all follow the general format of the user_id and the filter
@@ -95,3 +96,13 @@ CREATE TABLE IF NOT EXISTS temp_mute(
 CREATE TABLE IF NOT EXISTS user_opt_out(
     user_id BIGINT PRIMARY KEY NOT NULL
 );
+
+-- Migration
+-- INSERT INTO user_settings_new (user_id, self_trigger, quote_trigger, reply_trigger, bot_trigger, edit_trigger, embed_message) SELECT user_id, owntrigger, quotetrigger, replymessage, bottrigger, editmessage, embedmessage FROM user_settings;
+-- INSERT INTO keywords_new (user_id, keyword) SELECT userID, keyword FROM keywords;
+-- INSERT INTO server_keywords (user_id, keyword, server_id) SELECT userID, keyword, serverid FROM serverkeywords;
+-- INSERT INTO text_filters SELECT * FROM textfilters;
+-- INSERT INTO channel_filters SELECT * FROM channelfilters;
+-- INSERT INTO user_filters SELECT * FROM userfilters;
+-- INSERT INTO server_filters SELECT * FROM serverfilters;
+-- INSERT INTO temp_mute SELECT * FROM tempmute;

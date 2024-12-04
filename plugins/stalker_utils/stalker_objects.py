@@ -21,6 +21,9 @@ from .misc_utils import (get_channel_from_cache, get_guild_from_cache,
 log = logging.getLogger("plugins.stalker_utils.stalker_objects")
 
 
+SpecialKeyword = tuple[str, bool]
+
+
 class KeywordEnum(IntEnum):
     """
     An Enum class to keep track of the different types of keywords.
@@ -29,6 +32,7 @@ class KeywordEnum(IntEnum):
     glob = 1
     server_specific = 2
     channel_specific = 3
+    special = 4
 
     def __str__(self) -> str:
         match self:
@@ -40,6 +44,9 @@ class KeywordEnum(IntEnum):
 
             case KeywordEnum.channel_specific:
                 return "(Channel-Specific)"
+
+            case KeywordEnum.special:
+                return "(Special)"
 
             case _:
                 return ""
@@ -60,6 +67,12 @@ class Keyword:
         The ID of the server for this Keyword. 0 if none is provided
     channel_id : int, default=0
         The ID of the channel for this Keyword. 0 if none is provided
+    whitelist : list[SpecialKeyword] | None, default=None
+        Each word from whitelist must be present in the content, the bool
+        denotes whether the word must be exactly matched or not
+    blacklist : list[SpecialKeyword] | None, default=None
+        None of the words from blacklist can be present in the content, the
+        bool denotes whether the word must be exactly matched or not
     """
 
     def __init__(
@@ -67,34 +80,67 @@ class Keyword:
                 keyword: str,
                 keyword_type: KeywordEnum = KeywordEnum.glob,
                 server_id: int = 0,
-                channel_id: int = 0
+                channel_id: int = 0,
+                whitelist: list[SpecialKeyword] | None = None,
+                blacklist: list[SpecialKeyword] | None = None
             ) -> None:
         """Initializes a Keyword object"""
-        if not Keyword.validate_keyword(keyword_type, server_id, channel_id):
+        if not Keyword.validate_keyword(
+                    keyword_type,
+                    keyword,
+                    server_id,
+                    channel_id,
+                    whitelist,
+                    blacklist
+                ):
             raise ValueError(
                 "The provided parameters do not create a valid Keyword " +
-                f"({keyword} {keyword_type} {server_id} {channel_id})"
+                f"({keyword} {keyword_type} {server_id} {channel_id} " +
+                f"{whitelist} {blacklist})"
             )
 
         self.keyword = keyword
         self.keyword_type = keyword_type
         self.server_id = server_id
         self.channel_id = channel_id
+        self.whitelist = whitelist
+        self.blacklist = blacklist
 
     @staticmethod
     def validate_keyword(
                 keyword_type: KeywordEnum,
+                keyword: str,
                 server_id: int,
-                channel_id: int
+                channel_id: int,
+                whitelist: list[SpecialKeyword] | None,
+                blacklist: list[SpecialKeyword] | None
             ) -> bool:
 
         match keyword_type:
             case KeywordEnum.glob:
-                return not (server_id or channel_id)
+                # Only keyword is given
+                return bool(keyword) and not (
+                    server_id or channel_id or
+                    whitelist is not None or blacklist is not None
+                )
             case KeywordEnum.server_specific:
-                return bool(server_id and not channel_id)
+                # Keyword and server ID are given
+                return bool(
+                    keyword and server_id and not channel_id and
+                    whitelist is None and blacklist is None
+                )
             case KeywordEnum.channel_specific:
-                return bool(not server_id and channel_id)
+                # Keyword and channel ID are given
+                return bool(
+                    keyword and not server_id and channel_id and
+                    whitelist is None and blacklist is None
+                )
+            case KeywordEnum.special:
+                # Nothing given except whitelist and blacklist
+                return bool(
+                    not keyword and
+                    whitelist is not None and blacklist is not None
+                )
 
     def __eq__(self, other: object) -> bool:
         return (
@@ -111,7 +157,14 @@ class Keyword:
         )
 
     def __hash__(self) -> int:
-        return hash(self.keyword)
+        return hash((
+            self.keyword,
+            self.keyword_type,
+            self.server_id,
+            self.channel_id,
+            tuple(self.whitelist) if self.whitelist is not None else None,
+            tuple(self.blacklist) if self.blacklist is not None else None
+        ))
 
     @classmethod
     def from_record(cls, record) -> Keyword:
@@ -133,10 +186,22 @@ class Keyword:
             )
 
     def __repr__(self) -> str:
-        return f"Keyword(keyword={self.keyword}, server_id={self.server_id})"
+        return (
+            f"Keyword("
+            f"{self.keyword=}, "
+            f"{self.keyword_type=}, "
+            f"{self.server_id=}, "
+            f"{self.channel_id=}, "
+            f"{self.whitelist=}, "
+            f"{self.blacklist=})"
+        )
 
     def __str__(self) -> str:
-        return self.keyword
+        if self.keyword_type == KeywordEnum.special:
+            assert self.whitelist is not None and self.blacklist is not None
+            return str(self.whitelist) + " " + str(self.blacklist)
+        else:
+            return self.keyword
 
 
 class FilterEnum(IntEnum):
