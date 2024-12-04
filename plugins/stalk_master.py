@@ -122,7 +122,7 @@ class StalkMaster(client.Plugin):
             # TODO: If a webhook sent the message, the webhook author will
             # not be in the guild
 
-            log.info("Continuing with triggerable stalker")
+            log.debug("Continuing with triggerable stalker")
             for keyword_set in stalker.keywords.values():
                 for keyword in keyword_set:
                     triggering_embeds = self.get_triggering_embeds(
