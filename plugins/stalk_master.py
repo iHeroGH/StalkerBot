@@ -227,7 +227,7 @@ class StalkMaster(client.Plugin):
             ) -> bool:
         """Deal with a message that replies to another message"""
 
-        log.info(f"Analyzing reply {reply.id} for message {message.id}")
+        log.debug(f"Analyzing reply {reply.id} for message {message.id}")
 
         stalker = get_stalker(reply.author.id)
         member = await self.get_stalker_member(stalker, guild)
@@ -418,15 +418,15 @@ class StalkMaster(client.Plugin):
         """
         if keyword.keyword_type == KeywordEnum.server_specific and \
                 keyword.server_id != guild.id:
-            log.info(
+            log.debug(
                 f"Skipping {stalker.user_id} for {keyword}: Server-Specific."
             )
             return False
 
         if keyword.keyword_type == KeywordEnum.channel_specific and \
                 keyword.channel_id != channel.id:
-            log.info(
-                f"Skipping {stalker.user_id} for {keyword}: Server-Specific."
+            log.debug(
+                f"Skipping {stalker.user_id} for {keyword}: Channel-Specific."
             )
             return False
 
@@ -449,7 +449,7 @@ class StalkMaster(client.Plugin):
 
         if keyword.keyword not in content.lower():
             if len(original_content) != len(content):
-                log.info(
+                log.debug(
                     f"Skipping {stalker.user_id} with keyword {keyword}: " +
                     "Text Filter/Quotes."
                 )
