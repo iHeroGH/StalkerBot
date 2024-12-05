@@ -777,7 +777,13 @@ async def channel_modify_cache_db(
 def count_stalkers() -> int:
     """Returns how many Stalkers there are"""
     global stalker_cache
-    return len(stalker_cache)
+    stalker_count = 0
+
+    for _, stalker in stalker_cache.items():
+        if stalker.used_keywords > 0 or any(stalker.filters.values()):
+            stalker_count += 1
+
+    return stalker_count
 
 
 def count_keywords() -> int:
@@ -786,8 +792,7 @@ def count_keywords() -> int:
     keyword_count = 0
 
     for _, stalker in stalker_cache.items():
-        for _, keyword_set in stalker.keywords.items():
-            keyword_count += len(keyword_set)
+        keyword_count += stalker.used_keywords
 
     return keyword_count
 
@@ -798,7 +803,8 @@ def count_filters() -> int:
     filter_count = 0
 
     for _, stalker in stalker_cache.items():
-        for _, filter_set in stalker.filters.items():
-            filter_count += len(filter_set)
+        filter_count += sum(
+            len(filters) for filters in stalker.filters.values()
+        )
 
     return filter_count
