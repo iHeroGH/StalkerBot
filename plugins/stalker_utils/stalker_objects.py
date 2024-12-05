@@ -602,11 +602,14 @@ class Stalker:
         override = {
             342529068907888643: 5,
             204439680727384064: 1,
-            322542134546661388: 94,
+            322542134546661388: 50,
             141231597155385344: 95
         }
 
-        return self.MAX_KEYWORDS + additional_keywords + override[self.user_id]
+        return (
+            self.MAX_KEYWORDS + additional_keywords +
+            override.get(self.user_id, 0)
+        )
 
     def represent_channel(self) -> str:
         if isinstance(self.dm_channel, int):
