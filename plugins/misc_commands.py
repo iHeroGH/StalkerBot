@@ -142,19 +142,19 @@ class MiscCommands(client.Plugin):
         )
 
         stats_embed.add_field(
-            name="Guild Count",
+            name="Guilds",
             value=str(len(self.bot.guilds))
         )
         stats_embed.add_field(
-            name="User Count",
+            name="Users",
             value=str(count_stalkers())
         )
         stats_embed.add_field(
-            name="Keyword Count",
+            name="Keywords",
             value=str(count_keywords()), inline=False
         )
         stats_embed.add_field(
-            name="Filter Count",
+            name="Filters",
             value=str(count_filters())
         )
 
