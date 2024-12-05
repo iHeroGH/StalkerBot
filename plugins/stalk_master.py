@@ -268,7 +268,11 @@ class StalkMaster(client.Plugin):
                     await channel_modify_cache_db(
                         channel, stalker.user_id, conn
                     )
-        except Exception:
+        except Exception:  # Member probably does not exist
+            # log.error(
+            #     "Something went wrong retrieving a Stalker " +
+            #     f"({stalker.user_id}) for guild {guild.id}"
+            # )
             return None
 
         return member
