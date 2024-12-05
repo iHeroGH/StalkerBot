@@ -26,7 +26,7 @@ class StalkerManager(client.Plugin):
 
     @client.command(
         name="load",
-        guild_ids=[649715200890765342],  # 208895639164026880],
+        guild_ids=[649715200890765342, 208895639164026880],
         default_member_permissions=n.Permissions(manage_guild=True)
     )
     async def load_data(
@@ -39,7 +39,7 @@ class StalkerManager(client.Plugin):
 
     @client.command(
         name="log_cache",
-        guild_ids=[649715200890765342],  # 208895639164026880],
+        guild_ids=[649715200890765342, 208895639164026880],
         default_member_permissions=n.Permissions(manage_guild=True)
     )
     async def log_cache(
@@ -52,7 +52,7 @@ class StalkerManager(client.Plugin):
 
     @client.command(
         name="log_cache_size",
-        guild_ids=[649715200890765342],  # 208895639164026880],
+        guild_ids=[649715200890765342, 208895639164026880],
         default_member_permissions=n.Permissions(manage_guild=True)
     )
     async def log_cache_size(

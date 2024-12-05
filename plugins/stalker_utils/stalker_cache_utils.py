@@ -790,3 +790,15 @@ def count_keywords() -> int:
             keyword_count += len(keyword_set)
 
     return keyword_count
+
+
+def count_filters() -> int:
+    """Returns how many filters there are"""
+    global stalker_cache
+    filter_count = 0
+
+    for _, stalker in stalker_cache.items():
+        for _, filter_set in stalker.filters.items():
+            filter_count += len(filter_set)
+
+    return filter_count

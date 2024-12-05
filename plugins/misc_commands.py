@@ -6,7 +6,8 @@ from novus import types as t
 from novus.ext import client
 
 from .stalker_utils.misc_utils import split_action_rows
-from .stalker_utils.stalker_cache_utils import count_keywords, count_stalkers
+from .stalker_utils.stalker_cache_utils import count_keywords, \
+                                    count_stalkers, count_filters
 
 
 class MiscCommands(client.Plugin):
@@ -116,7 +117,7 @@ class MiscCommands(client.Plugin):
 
     @client.command(
         name="stats",
-        guild_ids=[649715200890765342],  # 208895639164026880],
+        guild_ids=[649715200890765342, 208895639164026880],
         default_member_permissions=n.Permissions(manage_guild=True)
     )
     async def stats(self, ctx: t.CommandI) -> None:
@@ -150,7 +151,11 @@ class MiscCommands(client.Plugin):
         )
         stats_embed.add_field(
             name="Keyword Count",
-            value=str(count_keywords())
+            value=str(count_keywords()), inline=False
+        )
+        stats_embed.add_field(
+            name="Filter Count",
+            value=str(count_filters()), inline=False
         )
 
         await ctx.send(embeds=[stats_embed])

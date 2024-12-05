@@ -16,7 +16,7 @@ class ModerationCommands(client.Plugin):
                 description="The user whose keywords you want to access"
             ),
         ],
-        guild_ids=[649715200890765342],  # 208895639164026880],
+        guild_ids=[649715200890765342, 208895639164026880],
         default_member_permissions=n.Permissions(manage_guild=True)
     )
     async def admin_keywords(self, ctx: t.CommandI, target: n.User) -> None:
@@ -38,7 +38,7 @@ class ModerationCommands(client.Plugin):
                 description="The user whose filters you want to access"
             ),
         ],
-        guild_ids=[649715200890765342],  # 208895639164026880],
+        guild_ids=[649715200890765342, 208895639164026880],
         default_member_permissions=n.Permissions(manage_guild=True)
     )
     async def admin_filters(self, ctx: t.CommandI, target: n.User) -> None:
@@ -64,7 +64,7 @@ class ModerationCommands(client.Plugin):
                 description="The user whose max keywords you want to access"
             ),
         ],
-        guild_ids=[649715200890765342],  # 208895639164026880],
+        guild_ids=[649715200890765342, 208895639164026880],
         default_member_permissions=n.Permissions(manage_guild=True)
     )
     async def admin_max(self, ctx: t.CommandI, target: n.User) -> None:
