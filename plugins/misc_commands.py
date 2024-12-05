@@ -155,7 +155,7 @@ class MiscCommands(client.Plugin):
         )
         stats_embed.add_field(
             name="Filter Count",
-            value=str(count_filters()), inline=False
+            value=str(count_filters())
         )
 
         await ctx.send(embeds=[stats_embed])
