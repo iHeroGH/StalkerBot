@@ -151,7 +151,7 @@ class MiscCommands(client.Plugin):
         )
         stats_embed.add_field(
             name="Keywords",
-            value=str(count_keywords()), inline=False
+            value=str(count_keywords())
         )
         stats_embed.add_field(
             name="Filters",
