@@ -1,4 +1,1 @@
 Special Keywords
-
-adding text filters that dont trigger any keywords
-adding keywords that are already triggered
