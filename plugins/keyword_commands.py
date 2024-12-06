@@ -151,7 +151,7 @@ class KeywordCommands(client.Plugin):
                 f"{MAX_INPUT_LENGTH} characters long.",
             )
         if has_blacklisted(keyword):
-            return await ctx.send(get_blacklisted_error(),)
+            return await ctx.send(get_blacklisted_error())
         keyword = keyword.lower()
 
         log.info(f"Attempting to add keyword '{keyword}' to {ctx.user.id}")
