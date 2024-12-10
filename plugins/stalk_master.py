@@ -168,7 +168,7 @@ class StalkMaster(client.Plugin):
         """
 
         log.info(
-            f"Sending {stalker.user_id} " +
+            f"Attempting to send to {stalker.user_id} " +
             f"message {message.id} by {message.author.id} " +
             f"{'with an edit ' if before else ''}" +
             f"{f'for `{triggered_keyword}` ' if triggered_keyword else ''}" +
@@ -200,20 +200,29 @@ class StalkMaster(client.Plugin):
 
         message_payload['embeds'] += triggering_embeds[:9]
 
+        where_to: n.Channel | n.GuildMember | None
         if stalker.dm_channel:
             if isinstance(stalker.dm_channel, int):
                 stalker.dm_channel = n.Channel.partial(
                     self.bot.state, stalker.dm_channel
                 )
-            await stalker.dm_channel.send(**message_payload)
+            where_to = stalker.dm_channel
         else:
-            member = await self.get_stalker_member(stalker, guild)
-            if member:
-                await member.send(**message_payload)
-            else:
-                log.info(
+            where_to = await self.get_stalker_member(stalker, guild)
+
+        if not where_to:
+            log.info(
                     f"A DM channel could not be created for {stalker.user_id}"
                 )
+            return
+
+        try:
+            await where_to.send(**message_payload)
+            log.info(f"Sent message {message.id} to {stalker.user_id}!")
+        except n.errors.Forbidden:
+            log.info(
+                f"Stalker {stalker.user_id} has probably blocked StalkerBot."
+            )
 
     async def acknowledge_reply(
                 self,
