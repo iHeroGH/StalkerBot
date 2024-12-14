@@ -65,13 +65,6 @@ async def load_data() -> None:
         user_opt_out_rows = await conn.fetch("SELECT * FROM user_opt_out")
 
     # Add it to the cache
-    log.info("Caching Stalker Channels.")
-    for channel_record in channel_rows:
-        user_id = channel_record['user_id']
-        stalker = get_stalker(user_id)
-
-        stalker.dm_channel = channel_record['channel_id']
-
     log.info("Caching Settings.")
     for settings_record in settings_rows:
         user_id = settings_record['user_id']
@@ -110,17 +103,39 @@ async def load_data() -> None:
 
         stalker.opted_out = True
 
+    log.info("Caching Stalker Channels.")
+    for channel_record in channel_rows:
+        user_id = channel_record['user_id']
+        stalker = get_stalker(user_id, False)
+
+        stalker.dm_channel = channel_record['channel_id']
+
     log_cache_size()
 
 
-def get_stalker(user_id: int) -> Stalker:
-    """Creates an empty Stalker object if one is not found for a User ID"""
-    global stalker_cache
-    if user_id not in stalker_cache:
-        log.info(f"Creating Stalker {user_id}")
-        stalker_cache[user_id] = Stalker(user_id).clear()
+def get_stalker(user_id: int, cache_new: bool = True) -> Stalker:
+    """
+    Creates an empty Stalker object if one is not found for a User ID
 
-    return stalker_cache[user_id]
+    Parameters
+    ----------
+    user_id : int
+        The numerical user ID for the stalker to find
+    cache_new : bool
+        Whether or not to cache the stalker if they are not already in the
+    """
+    global stalker_cache
+
+    if user_id in stalker_cache:
+        log.debug(f"Found Stalker {user_id}")
+        return stalker_cache[user_id]
+
+    stalker = Stalker(user_id).clear()
+    if cache_new:
+        log.info(f"Creating Stalker {user_id}")
+        stalker_cache[user_id] = stalker
+
+    return stalker
 
 
 def get_all_stalkers() -> list[Stalker]:
