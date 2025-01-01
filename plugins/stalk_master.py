@@ -241,6 +241,9 @@ class StalkMaster(client.Plugin):
         stalker = get_stalker(reply.author.id)
         member = await self.get_stalker_member(stalker, guild)
 
+        if not stalker.used_keywords:
+            return False
+
         if not member:
             return False
 

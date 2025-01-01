@@ -348,7 +348,7 @@ class Settings(Flags):
         return cls(
             self_trigger=False,
             quote_trigger=True,
-            reply_trigger=True,
+            reply_trigger=False,
             bot_trigger=False,
             edit_trigger=True,
             embed_message=True

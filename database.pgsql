@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS user_settings(
     user_id BIGINT PRIMARY KEY NOT NULL,
     self_trigger BOOLEAN default False,
     quote_trigger BOOLEAN default True,
-    reply_trigger BOOLEAN default True,
+    reply_trigger BOOLEAN default False,
     bot_trigger BOOLEAN default False,
     edit_trigger BOOLEAN default True,
     embed_message BOOLEAN default True
