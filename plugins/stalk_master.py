@@ -125,28 +125,37 @@ class StalkMaster(client.Plugin):
             log.debug("Continuing with triggerable stalker")
             for keyword_set in stalker.keywords.values():
                 for keyword in keyword_set:
-                    triggering_embeds = self.get_triggering_embeds(
+                    stalker_can = self.is_triggerable_stalker(
+                        stalker,
+                        already_sent=already_sent
+                    )
+
+                    if not stalker_can:
+                        break
+
+                    embeds_are = self.get_triggering_embeds(
                         stalker,
                         keyword,
                         decoded_embeds=decoded_embeds,
                         guild=guild,
                         channel=channel
                     )
-
-                    if self.is_triggering(
+                    kw_is = self.is_triggering(
                         stalker,
                         keyword,
                         content=message.content,
                         guild=guild,
                         channel=channel
-                    ) or triggering_embeds:
+                    )
+
+                    if kw_is or embeds_are:
                         await self.send_trigger(
                             stalker,
                             message=message,
                             guild=guild,
                             before=before,
                             triggered_keyword=keyword.keyword,
-                            triggering_embeds=triggering_embeds,
+                            triggering_embeds=embeds_are,
                             is_reply=False
                         )
                         already_sent.add(stalker)
