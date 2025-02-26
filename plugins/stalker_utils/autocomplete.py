@@ -234,9 +234,9 @@ async def keyword_autocomplete(
         keyword
         for keyword_set in stalker.keywords.values()
         for keyword in keyword_set
-        if str(keyword.server_id) == snowflake or
-        str(keyword.channel_id) == snowflake or
-        not snowflake
+        if (keyword.server_id and str(keyword.server_id) == snowflake) or
+        (keyword.channel_id and str(keyword.channel_id) == snowflake) or
+        (not snowflake and not (keyword.channel_id or keyword.server_id))
     ]
 
     choices = [
